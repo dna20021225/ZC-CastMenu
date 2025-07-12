@@ -1,0 +1,7 @@
+{
+  "name": "zc-castmenu",
+  "framework": "nextjs",
+  "git": {
+    "deploymentEnabled": true
+  }
+}
