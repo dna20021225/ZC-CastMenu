@@ -4,7 +4,7 @@ import { forwardRef, HTMLAttributes } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { clsx } from 'clsx';
-import { Home, Menu, DollarSign, Coffee, Settings } from 'lucide-react';
+import { Home, DollarSign, Coffee, Settings } from 'lucide-react';
 
 interface NavigationProps extends HTMLAttributes<HTMLElement> {
   variant?: 'bottom' | 'side';

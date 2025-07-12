@@ -1,6 +1,6 @@
 // API関連の型定義
 
-import { Cast, CastPhoto, CastStats, Badge, CastBadge } from './database';
+import { Cast, CastPhoto, CastStats, Badge } from './database';
 
 // APIレスポンスの基本型
 export interface ApiResponse<T = unknown> {

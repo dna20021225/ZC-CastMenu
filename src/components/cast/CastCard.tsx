@@ -6,7 +6,7 @@ import { clsx } from 'clsx';
 import { CastDetail } from '@/types';
 import { Badge } from '@/components/ui/Badge';
 
-interface CastCardProps extends HTMLAttributes<HTMLDivElement> {
+interface CastCardProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onClick'> {
   cast: CastDetail;
   size?: 'sm' | 'md' | 'lg';
   onClick?: (cast: CastDetail) => void;

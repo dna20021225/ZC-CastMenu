@@ -1,7 +1,8 @@
 // UI関連の型定義
 
 import { ReactNode } from 'react';
-import { CastDetail, Badge } from './database';
+import { Badge } from './database';
+import { CastDetail } from './api';
 
 // グリッドレイアウト
 export interface GridConfig {
