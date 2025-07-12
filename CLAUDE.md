@@ -16,11 +16,11 @@ ZC-CastMenuは、TypeScriptとTailwind CSS v4を使用したApp Routerアーキ�
 
 1. **日付の取得**
    ```bash
-   date +%Y-%m-%d
+   date +"%Y-%m-%d %H:%M:%S"
    ```
 
 2. **開発日記の作成**
-   - `開発日記/YYYY-MM-DD_タイトル.md` を作成
+   - `開発日記/YYYY-MM-DD HH:MM:SS_タイトル.md` を作成
    - テンプレートに従って内容を記載
    - 作業内容、技術的決定事項、課題と解決策を具体的に記録
 

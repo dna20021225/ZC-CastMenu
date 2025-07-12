@@ -14,8 +14,9 @@ const logger = createAPILogger('cast-detail-api');
 // キャスト詳細取得 (GET /api/casts/[id])
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
+  const params = await context.params;
   try {
     logger.info('キャスト詳細取得開始', { castId: params.id });
 
@@ -92,8 +93,9 @@ export async function GET(
 // キャスト更新 (PUT /api/casts/[id])
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
+  const params = await context.params;
   try {
     logger.info('キャスト更新開始', { castId: params.id });
 
@@ -276,8 +278,9 @@ export async function PUT(
 // キャスト削除 (DELETE /api/casts/[id])
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
+  const params = await context.params;
   try {
     logger.info('キャスト削除開始', { castId: params.id });
 
