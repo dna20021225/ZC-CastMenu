@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClientLogger } from "@/lib/logger";
+import ImageUploader from "@/components/ImageUploader";
 import type { Cast, UpdateCastInput } from "@/types";
 
 const logger = createClientLogger();
@@ -189,16 +190,11 @@ export default function EditCastPage({ params }: { params: { id: string } }) {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">
-            プロフィール画像URL
-          </label>
-          <input
-            type="text"
-            name="profile_image"
+          <ImageUploader
+            label="プロフィール画像"
             value={formData.profile_image}
-            onChange={handleChange}
-            placeholder="/images/casts/example.jpg"
-            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-pink-500 focus:border-pink-500"
+            onChange={(url) => setFormData(prev => ({ ...prev, profile_image: url }))}
+            onRemove={() => setFormData(prev => ({ ...prev, profile_image: "" }))}
           />
         </div>
 
