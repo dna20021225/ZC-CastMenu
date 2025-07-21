@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { query, transaction } from '@/lib/database';
 import { createAPILogger } from '@/lib/logger/server';
+import { handleApiError, asyncHandler, ValidationError } from '@/lib/error-handler';
+import { validateRequest, createCastSchema, castSearchParamsSchema } from '@/lib/validation';
 import { 
   ApiResponse, 
   CastDetail, 
@@ -14,12 +16,13 @@ import { Cast, CastPhoto, CastStats, Badge } from '@/types/database';
 const logger = createAPILogger('casts-api');
 
 // キャスト一覧取得 (GET /api/casts)
-export async function GET(request: NextRequest) {
-  try {
+export const GET = asyncHandler(async (request: NextRequest) => {
     logger.info('キャスト一覧取得開始');
     
     const { searchParams } = new URL(request.url);
-    const params: CastSearchParams = {
+    
+    // クエリパラメータのバリデーション
+    const rawParams = {
       search: searchParams.get('search') || undefined,
       badges: searchParams.get('badges')?.split(',') || undefined,
       age_min: searchParams.get('age_min') ? parseInt(searchParams.get('age_min')!) : undefined,
@@ -31,6 +34,13 @@ export async function GET(request: NextRequest) {
       sort_by: (searchParams.get('sort_by') as CastSearchParams['sort_by']) || 'created_at',
       sort_order: (searchParams.get('sort_order') as CastSearchParams['sort_order']) || 'desc'
     };
+
+    const validation = validateRequest(castSearchParamsSchema, rawParams);
+    if (!validation.success) {
+      throw new ValidationError('検索パラメータが無効です', validation.errors);
+    }
+    
+    const params = validation.data;
 
     // WHERE句の構築
     const conditions: string[] = ['c.is_active = true'];
@@ -171,85 +181,59 @@ export async function GET(request: NextRequest) {
       success: true,
       data: response
     } as ApiResponse<CastListResponse>);
-
-  } catch (error) {
-    logger.error('キャスト一覧取得エラー', error instanceof Error ? error : new Error(String(error)));
-    return NextResponse.json({
-      success: false,
-      error: 'キャスト一覧の取得に失敗しました'
-    } as ApiResponse, { status: 500 });
-  }
-}
+});
 
 // キャスト作成 (POST /api/casts)
-export async function POST(request: NextRequest) {
-  try {
+export const POST = asyncHandler(async (request: NextRequest) => {
     logger.info('キャスト作成開始');
     
-    const body = await request.json() as {
-      cast: CastFormData;
-      stats: CastStatsFormData;
-      photos?: string[];
-      badges?: string[];
-    };
+    const body = await request.json();
 
-    if (!body.cast || !body.stats) {
-      return NextResponse.json({
-        success: false,
-        error: 'キャスト情報と能力値は必須です'
-      } as ApiResponse, { status: 400 });
+    // リクエストボディのバリデーション
+    const validation = validateRequest(createCastSchema, body);
+    if (!validation.success) {
+      throw new ValidationError('入力データが無効です', validation.errors);
     }
+    
+    const validatedData = validation.data;
 
     const result = await transaction(async (client) => {
       // キャスト基本情報を作成
       const castResult = await client.query(`
-        INSERT INTO casts (name, age, height, hobby, description, avatar_url, is_active)
+        INSERT INTO casts (name, age, height, blood_type, description, profile_image, is_active)
         VALUES ($1, $2, $3, $4, $5, $6, true)
         RETURNING *
       `, [
-        body.cast.name,
-        body.cast.age,
-        body.cast.height,
-        body.cast.hobby,
-        body.cast.description,
-        body.cast.avatar_url || null
+        validatedData.name,
+        validatedData.age,
+        validatedData.height,
+        validatedData.blood_type,
+        validatedData.description || null,
+        validatedData.profile_image || null
       ]);
 
       const newCast = castResult.rows[0] as Cast;
 
       // 能力値を作成
       await client.query(`
-        INSERT INTO cast_stats (cast_id, looks, talk, alcohol_tolerance, intelligence, energy, custom_stat, custom_stat_name)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        INSERT INTO cast_stats (cast_id, looks, talk, drinking, intelligence, tension, special)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
       `, [
         newCast.id,
-        body.stats.looks,
-        body.stats.talk,
-        body.stats.alcohol_tolerance,
-        body.stats.intelligence,
-        body.stats.energy,
-        body.stats.custom_stat || null,
-        body.stats.custom_stat_name || null
+        validatedData.stats.looks,
+        validatedData.stats.talk,
+        validatedData.stats.drinking,
+        validatedData.stats.intelligence,
+        validatedData.stats.tension,
+        validatedData.stats.special
       ]);
 
-      // 写真を追加
-      if (body.photos && body.photos.length > 0) {
-        for (let i = 0; i < body.photos.length; i++) {
-          await client.query(`
-            INSERT INTO cast_photos (cast_id, photo_url, is_main, order_index)
-            VALUES ($1, $2, $3, $4)
-          `, [newCast.id, body.photos[i], i === 0, i]);
-        }
-      }
-
-      // バッジを付与
-      if (body.badges && body.badges.length > 0) {
-        for (const badgeId of body.badges) {
-          await client.query(`
-            INSERT INTO cast_badges (cast_id, badge_id, assigned_by)
-            VALUES ($1, $2, $3)
-          `, [newCast.id, badgeId, 'system']); // TODO: 実際のユーザーIDに変更
-        }
+      // プロフィール画像があれば写真として追加
+      if (validatedData.profile_image) {
+        await client.query(`
+          INSERT INTO cast_photos (cast_id, photo_url, is_main, order_index)
+          VALUES ($1, $2, true, 0)
+        `, [newCast.id, validatedData.profile_image]);
       }
 
       return newCast;
@@ -262,12 +246,4 @@ export async function POST(request: NextRequest) {
       data: result,
       message: 'キャストが正常に作成されました'
     } as ApiResponse<Cast>, { status: 201 });
-
-  } catch (error) {
-    logger.error('キャスト作成エラー', error instanceof Error ? error : new Error(String(error)));
-    return NextResponse.json({
-      success: false,
-      error: 'キャストの作成に失敗しました'
-    } as ApiResponse, { status: 500 });
-  }
-}
+});

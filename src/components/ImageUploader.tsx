@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import Image from "next/image";
 import { Upload, X, Loader2 } from "lucide-react";
 import { createClientLogger } from "@/lib/logger";
+import { handleClientError } from "@/lib/error-handler";
 
 const logger = createClientLogger();
 
@@ -50,8 +51,9 @@ export default function ImageUploader({
       logger.info("画像アップロード成功", { url: data.data.url });
       onChange(data.data.url);
     } catch (error) {
+      const errorMessage = handleClientError(error, "画像アップロード");
       logger.error("画像アップロードエラー", error);
-      alert(error instanceof Error ? error.message : "画像のアップロードに失敗しました");
+      alert(errorMessage);
     } finally {
       setIsUploading(false);
     }
