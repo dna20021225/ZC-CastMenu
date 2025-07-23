@@ -1,0 +1,20 @@
+react-dom.development.js:29895 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+index.tsx:935  Uncaught Error: The edge runtime does not support Node.js 'crypto' module.
+Learn More: https://nextjs.org/docs/messages/node-module-in-edge-runtime
+    at <unknown> (webpack-internal:///(middleware)/./node_modules/next/dist/esm/server/web/globals.js:34)
+    at Object.get (webpack-internal:///(middleware)/./node_modules/next/dist/esm/server/web/globals.js:34:19)
+    at eval (webpack-internal:///(middleware)/./node_modules/pg/lib/crypto/utils-webcrypto.js:24:32)
+    at (middleware)/node_modules/pg/lib/crypto/utils-webcrypto.js (file:///home/haruki/ZC-CastMenu/.next/server/src/middleware.js:1173:1)
+    at __webpack_require__ (/home/haruki/ZC-CastMenu/.next/server/edge-runtime-webpack.js:37:33)
+    at fn (/home/haruki/ZC-CastMenu/.next/server/edge-runtime-webpack.js:285:21)
+    at eval (webpack-internal:///(middleware)/./node_modules/pg/lib/crypto/utils.js:8:20)
+    at (middleware)/node_modules/pg/lib/crypto/utils.js (file:///home/haruki/ZC-CastMenu/.next/server/src/middleware.js:1184:1)
+    at __webpack_require__ (/home/haruki/ZC-CastMenu/.next/server/edge-runtime-webpack.js:37:33)
+    at fn (/home/haruki/ZC-CastMenu/.next/server/edge-runtime-webpack.js:285:21)
+    at eval (webpack-internal:///(middleware)/./node_modules/pg/lib/crypto/sasl.js:3:16)
+websocket.ts:27 [HMR] connected
+[NEW] Explain Console errors by using Copilot in Edge: click
+         
+         to explain an error. 
+        Learn more
+        Don't show again

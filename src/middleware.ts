@@ -1,18 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { getToken } from "next-auth/jwt";
 
 export async function middleware(request: NextRequest) {
   // 管理画面のパスの場合のみ認証チェック
   if (request.nextUrl.pathname.startsWith("/admin")) {
-    // ログインページは除外
-    if (request.nextUrl.pathname === "/admin/login") {
+    // ログインページとAPIルートは除外
+    if (request.nextUrl.pathname === "/admin/login" || 
+        request.nextUrl.pathname.startsWith("/api/auth/")) {
       return NextResponse.next();
     }
 
-    // 認証チェック
-    const session = await auth();
+    // JWT トークンから認証チェック（Edge Runtime対応）
+    const token = await getToken({ 
+      req: request,
+      secret: process.env.NEXTAUTH_SECRET
+    });
     
-    if (!session?.user) {
+    if (!token) {
       const loginUrl = new URL("/admin/login", request.url);
       return NextResponse.redirect(loginUrl);
     }
