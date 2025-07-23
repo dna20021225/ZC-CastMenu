@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { createClientLogger } from "@/lib/logger";
+import { createClientLogger } from "@/lib/logger/client";
 
 const logger = createClientLogger();
 

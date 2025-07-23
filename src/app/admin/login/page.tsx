@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { createClientLogger } from "@/lib/logger";
+import { createClientLogger } from "@/lib/logger/client";
 
 const logger = createClientLogger();
 

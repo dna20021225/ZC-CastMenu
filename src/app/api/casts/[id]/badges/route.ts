@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/db";
 import { createAPILogger } from "@/lib/logger";
 
-const logger = createAPILogger("cast-badges-api");
+// Logger initialization moved
 
 // バッジを付与
 export async function POST(
@@ -32,11 +32,11 @@ export async function POST(
       [castId, badge_id]
     );
 
-    logger.info("バッジ付与", { castId, badgeId: badge_id });
+    console.info("バッジ付与", { castId, badgeId: badge_id });
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    logger.error("バッジ付与エラー", error);
+    console.error("バッジ付与エラー", error);
     return NextResponse.json(
       { error: "バッジの付与に失敗しました" },
       { status: 500 }

@@ -1,7 +1,14 @@
 import { Pool } from 'pg';
-import { createAPILogger } from './logger';
 
-const logger = createAPILogger('database');
+// 動的インポートでロガーを取得
+let logger: any = console;
+if (typeof window === 'undefined') {
+  import('./logger').then(({ createAPILogger }) => {
+    logger = createAPILogger('database');
+  }).catch(() => {
+    logger = console;
+  });
+}
 
 // 接続プールを作成
 const pool = new Pool({

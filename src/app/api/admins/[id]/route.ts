@@ -3,7 +3,7 @@ import { query } from '@/lib/database';
 import { createAPILogger } from '@/lib/logger/server';
 import bcrypt from 'bcryptjs';
 
-const logger = createAPILogger('admin-api');
+// Logger initialization moved
 
 // 管理者詳細取得
 export async function GET(
@@ -11,7 +11,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    logger.info('管理者詳細取得開始', { id: params.id });
+    console.info('管理者詳細取得開始', { id: params.id });
 
     const result = await query(
       'SELECT id, username, email, is_active, created_at, last_login FROM admins WHERE id = $1',
@@ -25,14 +25,14 @@ export async function GET(
       }, { status: 404 });
     }
 
-    logger.info('管理者詳細取得完了', { id: params.id });
+    console.info('管理者詳細取得完了', { id: params.id });
 
     return NextResponse.json({
       success: true,
       data: result.rows[0],
     });
   } catch (error) {
-    logger.error('管理者詳細取得エラー', error instanceof Error ? error : new Error(String(error)));
+    console.error('管理者詳細取得エラー', error instanceof Error ? error : new Error(String(error)));
     return NextResponse.json({
       success: false,
       error: '管理者情報の取得に失敗しました',
@@ -46,7 +46,7 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    logger.info('管理者更新開始', { id: params.id });
+    console.info('管理者更新開始', { id: params.id });
 
     const body = await request.json();
     const { username, email, password } = body;
@@ -85,14 +85,14 @@ export async function PUT(
       );
     }
 
-    logger.info('管理者更新完了', { id: params.id });
+    console.info('管理者更新完了', { id: params.id });
 
     return NextResponse.json({
       success: true,
       message: '管理者情報が更新されました',
     });
   } catch (error) {
-    logger.error('管理者更新エラー', error instanceof Error ? error : new Error(String(error)));
+    console.error('管理者更新エラー', error instanceof Error ? error : new Error(String(error)));
     return NextResponse.json({
       success: false,
       error: '管理者情報の更新に失敗しました',
@@ -106,7 +106,7 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    logger.info('管理者削除開始', { id: params.id });
+    console.info('管理者削除開始', { id: params.id });
 
     // 管理者が1人だけの場合は削除不可
     const countResult = await query('SELECT COUNT(*) as count FROM admins WHERE is_active = true');
@@ -131,14 +131,14 @@ export async function DELETE(
       }, { status: 404 });
     }
 
-    logger.info('管理者削除完了', { id: params.id, username: result.rows[0].username });
+    console.info('管理者削除完了', { id: params.id, username: result.rows[0].username });
 
     return NextResponse.json({
       success: true,
       message: '管理者が削除されました',
     });
   } catch (error) {
-    logger.error('管理者削除エラー', error instanceof Error ? error : new Error(String(error)));
+    console.error('管理者削除エラー', error instanceof Error ? error : new Error(String(error)));
     return NextResponse.json({
       success: false,
       error: '管理者の削除に失敗しました',
@@ -152,7 +152,7 @@ export async function PATCH(
   { params }: { params: { id: string } }
 ) {
   try {
-    logger.info('管理者ステータス更新開始', { id: params.id });
+    console.info('管理者ステータス更新開始', { id: params.id });
 
     const body = await request.json();
     const { is_active } = body;
@@ -182,14 +182,14 @@ export async function PATCH(
       [is_active, params.id]
     );
 
-    logger.info('管理者ステータス更新完了', { id: params.id, is_active });
+    console.info('管理者ステータス更新完了', { id: params.id, is_active });
 
     return NextResponse.json({
       success: true,
       message: 'ステータスが更新されました',
     });
   } catch (error) {
-    logger.error('管理者ステータス更新エラー', error instanceof Error ? error : new Error(String(error)));
+    console.error('管理者ステータス更新エラー', error instanceof Error ? error : new Error(String(error)));
     return NextResponse.json({
       success: false,
       error: 'ステータスの更新に失敗しました',

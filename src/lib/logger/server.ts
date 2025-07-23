@@ -1,6 +1,4 @@
 import { Logger, LogLevel, ConsoleTransport, LogTransport, LogEntry, JSONFormatter } from '../logger';
-import fs from 'fs/promises';
-import path from 'path';
 
 export class FileTransport implements LogTransport {
   private filePath: string;
@@ -20,7 +18,13 @@ export class FileTransport implements LogTransport {
   }
 
   async log(entry: LogEntry): Promise<void> {
+    if (typeof window !== 'undefined') {
+      console.warn('FileTransport is not available in browser environment');
+      return;
+    }
+    
     try {
+      const fs = await import('fs/promises');
       const logLine = this.formatter.format(entry) + '\n';
       
       await this.ensureDirectory();
@@ -33,6 +37,8 @@ export class FileTransport implements LogTransport {
   }
 
   private async ensureDirectory(): Promise<void> {
+    const path = await import('path');
+    const fs = await import('fs/promises');
     const dir = path.dirname(this.filePath);
     try {
       await fs.access(dir);
@@ -43,6 +49,8 @@ export class FileTransport implements LogTransport {
 
   private async rotateIfNeeded(): Promise<void> {
     try {
+      const path = await import('path');
+      const fs = await import('fs/promises');
       const stats = await fs.stat(this.filePath);
       
       if (stats.size >= this.maxFileSize) {
@@ -65,6 +73,8 @@ export class FileTransport implements LogTransport {
 
   private async cleanOldFiles(): Promise<void> {
     try {
+      const path = await import('path');
+      const fs = await import('fs/promises');
       const dir = path.dirname(this.filePath);
       const basename = path.basename(this.filePath, path.extname(this.filePath));
       const files = await fs.readdir(dir);

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { createClientLogger } from "@/lib/logger";
+import { createClientLogger } from "@/lib/logger/client";
 import type { Cast, Badge } from "@/types";
 
 const logger = createClientLogger();

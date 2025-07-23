@@ -3,25 +3,25 @@ import { query } from '@/lib/database';
 import { createAPILogger } from '@/lib/logger/server';
 import bcrypt from 'bcryptjs';
 
-const logger = createAPILogger('admins-api');
+// Logger initialization moved
 
 // 管理者一覧取得
 export async function GET() {
   try {
-    logger.info('管理者一覧取得開始');
+    console.info('管理者一覧取得開始');
 
     const result = await query(
       'SELECT id, username, email, is_active, created_at, last_login FROM admins ORDER BY created_at DESC'
     );
 
-    logger.info('管理者一覧取得完了', { count: result.rows.length });
+    console.info('管理者一覧取得完了', { count: result.rows.length });
 
     return NextResponse.json({
       success: true,
       data: result.rows,
     });
   } catch (error) {
-    logger.error('管理者一覧取得エラー', error instanceof Error ? error : new Error(String(error)));
+    console.error('管理者一覧取得エラー', error instanceof Error ? error : new Error(String(error)));
     return NextResponse.json({
       success: false,
       error: '管理者一覧の取得に失敗しました',
@@ -32,7 +32,7 @@ export async function GET() {
 // 管理者作成
 export async function POST(request: NextRequest) {
   try {
-    logger.info('管理者作成開始');
+    console.info('管理者作成開始');
 
     const body = await request.json();
     const { username, email, password } = body;
@@ -66,7 +66,7 @@ export async function POST(request: NextRequest) {
       [username, email, hashedPassword]
     );
 
-    logger.info('管理者作成完了', { id: result.rows[0].id, username });
+    console.info('管理者作成完了', { id: result.rows[0].id, username });
 
     return NextResponse.json({
       success: true,
@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
       message: '管理者が正常に作成されました',
     }, { status: 201 });
   } catch (error) {
-    logger.error('管理者作成エラー', error instanceof Error ? error : new Error(String(error)));
+    console.error('管理者作成エラー', error instanceof Error ? error : new Error(String(error)));
     return NextResponse.json({
       success: false,
       error: '管理者の作成に失敗しました',

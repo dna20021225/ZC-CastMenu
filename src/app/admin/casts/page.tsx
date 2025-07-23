@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { createClientLogger } from "@/lib/logger";
+import { createClientLogger } from "@/lib/logger/client";
 import type { Cast } from "@/types";
 
 const logger = createClientLogger();

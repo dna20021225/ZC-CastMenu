@@ -1,7 +1,7 @@
 "use client";
 
 import { Component, ReactNode } from 'react';
-import { createClientLogger } from '@/lib/logger';
+import { createClientLogger } from '@/lib/logger/client';
 
 const logger = createClientLogger();
 

@@ -1,8 +1,13 @@
 import { NextResponse } from 'next/server';
 import { ZodError } from 'zod';
-import { createAPILogger } from '@/lib/logger/server';
 
-const logger = createAPILogger('error-handler');
+// サーバーサイドでのみロガーを初期化
+let logger: any = null;
+if (typeof window === 'undefined') {
+  import('@/lib/logger/server').then(({ createAPILogger }) => {
+    logger = createAPILogger('error-handler');
+  });
+}
 
 export interface ApiError {
   message: string;
@@ -63,8 +68,10 @@ export class InternalServerError extends CustomError {
 
 // エラーハンドラー関数
 export function handleApiError(error: unknown, context?: string): NextResponse {
-  // ログ出力
-  logger.error(`API Error${context ? ` in ${context}` : ''}`, error instanceof Error ? error : new Error(String(error)));
+  // ログ出力（サーバーサイドでのみ）
+  if (typeof window === 'undefined' && logger) {
+    logger.error(`API Error${context ? ` in ${context}` : ''}`, error instanceof Error ? error : new Error(String(error)));
+  }
 
   // Zodバリデーションエラー
   if (error instanceof ZodError) {
@@ -145,7 +152,8 @@ export function asyncHandler(
 
 // フロントエンド用のエラーハンドラー
 export function handleClientError(error: unknown, context?: string): string {
-  logger.error(`Client Error${context ? ` in ${context}` : ''}`, error instanceof Error ? error : new Error(String(error)));
+  // クライアントサイドではコンソールログのみ
+  console.error(`Client Error${context ? ` in ${context}` : ''}`, error instanceof Error ? error : new Error(String(error)));
 
   if (error instanceof Error) {
     // ネットワークエラー

@@ -3,11 +3,11 @@ import { unlink } from 'fs/promises';
 import { join } from 'path';
 import { createAPILogger } from '@/lib/logger/server';
 
-const logger = createAPILogger('upload-delete-api');
+// Logger initialization moved
 
 export async function POST(request: NextRequest) {
   try {
-    logger.info('画像削除開始');
+    console.info('画像削除開始');
 
     const body = await request.json();
     const { url } = body;
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
 
     try {
       await unlink(filePath);
-      logger.info('画像削除成功', { fileName });
+      console.info('画像削除成功', { fileName });
 
       return NextResponse.json({
         success: true,
@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
       });
 
     } catch (error) {
-      logger.error('ファイル削除エラー', error);
+      console.error('ファイル削除エラー', error);
       return NextResponse.json({
         success: false,
         error: 'ファイルの削除に失敗しました'
@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
     }
 
   } catch (error) {
-    logger.error('画像削除エラー', error instanceof Error ? error : new Error(String(error)));
+    console.error('画像削除エラー', error instanceof Error ? error : new Error(String(error)));
     return NextResponse.json({
       success: false,
       error: '画像の削除に失敗しました'

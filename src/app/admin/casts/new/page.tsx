@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClientLogger } from "@/lib/logger";
+import { createClientLogger } from "@/lib/logger/client";
 import ImageUploader from "@/components/ImageUploader";
 import type { CreateCastInput } from "@/types";
 

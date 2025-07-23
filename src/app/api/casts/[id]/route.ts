@@ -9,7 +9,7 @@ import {
 } from '@/types/api';
 import { Cast, CastPhoto, CastStats, Badge } from '@/types/database';
 
-const logger = createAPILogger('cast-detail-api');
+// Logger initialization moved
 
 // キャスト詳細取得 (GET /api/casts/[id])
 export async function GET(
@@ -18,7 +18,7 @@ export async function GET(
 ) {
   const params = await context.params;
   try {
-    logger.info('キャスト詳細取得開始', { castId: params.id });
+    console.info('キャスト詳細取得開始', { castId: params.id });
 
     // キャスト基本情報を取得
     const castResult = await query(
@@ -27,7 +27,7 @@ export async function GET(
     ) as { rows: Cast[] };
 
     if (castResult.rows.length === 0) {
-      logger.warn('キャストが見つかりません', { castId: params.id });
+      console.warn('キャストが見つかりません', { castId: params.id });
       return NextResponse.json({
         success: false,
         error: 'キャストが見つかりません'
@@ -74,7 +74,7 @@ export async function GET(
       badges: badgesResult.rows
     };
 
-    logger.info('キャスト詳細取得完了', { castId: params.id, name: cast.name });
+    console.info('キャスト詳細取得完了', { castId: params.id, name: cast.name });
 
     return NextResponse.json({
       success: true,
@@ -82,7 +82,7 @@ export async function GET(
     } as ApiResponse<CastDetail>);
 
   } catch (error) {
-    logger.error('キャスト詳細取得エラー', error instanceof Error ? error : new Error(String(error)), { castId: params.id });
+    console.error('キャスト詳細取得エラー', error instanceof Error ? error : new Error(String(error)), { castId: params.id });
     return NextResponse.json({
       success: false,
       error: 'キャスト詳細の取得に失敗しました'
@@ -97,7 +97,7 @@ export async function PUT(
 ) {
   const params = await context.params;
   try {
-    logger.info('キャスト更新開始', { castId: params.id });
+    console.info('キャスト更新開始', { castId: params.id });
 
     const body = await request.json() as {
       cast?: Partial<CastFormData>;
@@ -250,7 +250,7 @@ export async function PUT(
       return updatedCast;
     });
 
-    logger.info('キャスト更新完了', { castId: params.id, name: result.name });
+    console.info('キャスト更新完了', { castId: params.id, name: result.name });
 
     return NextResponse.json({
       success: true,
@@ -259,7 +259,7 @@ export async function PUT(
     } as ApiResponse<Cast>);
 
   } catch (error) {
-    logger.error('キャスト更新エラー', error instanceof Error ? error : new Error(String(error)), { castId: params.id });
+    console.error('キャスト更新エラー', error instanceof Error ? error : new Error(String(error)), { castId: params.id });
     
     if (error instanceof Error && error.message === 'キャストが見つかりません') {
       return NextResponse.json({
@@ -282,7 +282,7 @@ export async function DELETE(
 ) {
   const params = await context.params;
   try {
-    logger.info('キャスト削除開始', { castId: params.id });
+    console.info('キャスト削除開始', { castId: params.id });
 
     const result = await transaction(async (client) => {
       // キャストの存在確認
@@ -309,7 +309,7 @@ export async function DELETE(
       return cast;
     });
 
-    logger.info('キャスト削除完了', { castId: params.id, name: result.name });
+    console.info('キャスト削除完了', { castId: params.id, name: result.name });
 
     return NextResponse.json({
       success: true,
@@ -317,7 +317,7 @@ export async function DELETE(
     } as ApiResponse);
 
   } catch (error) {
-    logger.error('キャスト削除エラー', error instanceof Error ? error : new Error(String(error)), { castId: params.id });
+    console.error('キャスト削除エラー', error instanceof Error ? error : new Error(String(error)), { castId: params.id });
     
     if (error instanceof Error && error.message === 'キャストが見つかりません') {
       return NextResponse.json({

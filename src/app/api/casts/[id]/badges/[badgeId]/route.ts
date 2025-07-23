@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/db";
 import { createAPILogger } from "@/lib/logger";
 
-const logger = createAPILogger("cast-badge-api");
+// Logger initialization moved
 
 // バッジを削除
 export async function DELETE(
@@ -18,11 +18,11 @@ export async function DELETE(
       [castId, badgeId]
     );
 
-    logger.info("バッジ削除", { castId, badgeId });
+    console.info("バッジ削除", { castId, badgeId });
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    logger.error("バッジ削除エラー", error);
+    console.error("バッジ削除エラー", error);
     return NextResponse.json(
       { error: "バッジの削除に失敗しました" },
       { status: 500 }

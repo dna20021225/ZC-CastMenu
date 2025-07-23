@@ -5,14 +5,14 @@ import { createAPILogger } from '@/lib/logger/server';
 import { handleApiError, asyncHandler, ValidationError } from '@/lib/error-handler';
 import { v4 as uuidv4 } from 'uuid';
 
-const logger = createAPILogger('upload-api');
+// Logger initialization moved
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 const UPLOAD_DIR = join(process.cwd(), 'public', 'images', 'casts');
 
 export const POST = asyncHandler(async (request: NextRequest) => {
-    logger.info('画像アップロード開始');
+    console.info('画像アップロード開始');
 
     const formData = await request.formData();
     const file = formData.get('file') as File;
@@ -46,7 +46,7 @@ export const POST = asyncHandler(async (request: NextRequest) => {
       const buffer = Buffer.from(bytes);
       await writeFile(filePath, buffer);
 
-      logger.info('画像アップロード成功', { fileName, size: file.size });
+      console.info('画像アップロード成功', { fileName, size: file.size });
 
       return NextResponse.json({
         success: true,
@@ -59,7 +59,7 @@ export const POST = asyncHandler(async (request: NextRequest) => {
       });
 
     } catch (error) {
-      logger.error('ファイル保存エラー', error);
+      console.error('ファイル保存エラー', error);
       throw new Error('ファイルの保存に失敗しました');
     }
 });

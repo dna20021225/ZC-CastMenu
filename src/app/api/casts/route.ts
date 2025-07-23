@@ -13,11 +13,11 @@ import {
 } from '@/types/api';
 import { Cast, CastPhoto, CastStats, Badge } from '@/types/database';
 
-const logger = createAPILogger('casts-api');
+// Logger initialization moved
 
 // キャスト一覧取得 (GET /api/casts)
 export const GET = asyncHandler(async (request: NextRequest) => {
-    logger.info('キャスト一覧取得開始');
+    console.info('キャスト一覧取得開始');
     
     const { searchParams } = new URL(request.url);
     
@@ -109,7 +109,7 @@ export const GET = asyncHandler(async (request: NextRequest) => {
       ${paginationClause}
     `;
 
-    logger.debug('キャスト一覧クエリ実行', { query: castsQuery, params: queryParams });
+    console.debug('キャスト一覧クエリ実行', { query: castsQuery, params: queryParams });
     
     const castsResult = await query(castsQuery, queryParams) as { rows: Cast[] };
     const casts = castsResult.rows;
@@ -175,7 +175,7 @@ export const GET = asyncHandler(async (request: NextRequest) => {
       limit: params.limit || 20
     };
 
-    logger.info('キャスト一覧取得完了', { total, page: params.page, limit: params.limit });
+    console.info('キャスト一覧取得完了', { total, page: params.page, limit: params.limit });
 
     return NextResponse.json({
       success: true,
@@ -185,7 +185,7 @@ export const GET = asyncHandler(async (request: NextRequest) => {
 
 // キャスト作成 (POST /api/casts)
 export const POST = asyncHandler(async (request: NextRequest) => {
-    logger.info('キャスト作成開始');
+    console.info('キャスト作成開始');
     
     const body = await request.json();
 
@@ -239,7 +239,7 @@ export const POST = asyncHandler(async (request: NextRequest) => {
       return newCast;
     });
 
-    logger.info('キャスト作成完了', { castId: result.id, name: result.name });
+    console.info('キャスト作成完了', { castId: result.id, name: result.name });
 
     return NextResponse.json({
       success: true,

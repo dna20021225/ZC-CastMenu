@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import Image from "next/image";
 import { Upload, X, Loader2 } from "lucide-react";
-import { createClientLogger } from "@/lib/logger";
+import { createClientLogger } from "@/lib/logger/client";
 import { handleClientError } from "@/lib/error-handler";
 
 const logger = createClientLogger();

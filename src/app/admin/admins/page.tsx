@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { createClientLogger } from "@/lib/logger";
+import { createClientLogger } from "@/lib/logger/client";
 import { UserPlus, Edit, Trash2 } from "lucide-react";
 
 const logger = createClientLogger();
