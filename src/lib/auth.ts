@@ -1,52 +1,33 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import bcrypt from "bcryptjs";
-import { query } from "@/lib/db";
 
 export const { auth, handlers, signIn, signOut } = NextAuth({
   providers: [
     CredentialsProvider({
       name: "credentials",
       credentials: {
-        email: { label: "メールアドレス", type: "email" },
+        username: { label: "ユーザー名", type: "text" },
         password: { label: "パスワード", type: "password" }
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
+        if (!credentials?.username || !credentials?.password) {
           return null;
         }
 
-        const email = credentials.email as string;
+        const username = credentials.username as string;
         const password = credentials.password as string;
 
-        try {
-          const result = await query(
-            "SELECT * FROM admins WHERE email = $1 AND is_active = true",
-            [email]
-          );
-
-          const admin = result.rows[0];
-
-          if (!admin) {
-            return null;
-          }
-
-          const isPasswordValid = await bcrypt.compare(password, admin.password_hash);
-
-          if (!isPasswordValid) {
-            return null;
-          }
-
+        // 固定の管理者認証
+        if (username === "admin" && password === "password1234") {
           return {
-            id: admin.id.toString(),
-            email: admin.email,
-            name: admin.name,
-            role: admin.role
+            id: "1",
+            email: "admin@zc-castmenu.com",
+            name: "管理者",
+            role: "admin"
           };
-        } catch (error) {
-          console.error("認証エラー:", error);
-          return null;
         }
+
+        return null;
       }
     })
   ],

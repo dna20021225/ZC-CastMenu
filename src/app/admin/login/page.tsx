@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 
 export default function AdminLoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -18,16 +18,16 @@ export default function AdminLoginPage() {
 
     try {
       const result = await signIn("credentials", {
-        email,
+        username,
         password,
         redirect: false,
       });
 
       if (result?.error) {
-        setError("メールアドレスまたはパスワードが正しくありません");
-        console.warn("ログイン失敗", { email });
+        setError("ユーザー名またはパスワードが正しくありません");
+        console.warn("ログイン失敗", { username });
       } else {
-        console.info("ログイン成功", { email });
+        console.info("ログイン成功", { username });
         router.push("/admin");
       }
     } catch (error) {
@@ -49,18 +49,19 @@ export default function AdminLoginPage() {
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm space-y-4">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                メールアドレス
+              <label htmlFor="username" className="block text-sm font-medium text-gray-700">
+                ユーザー名
               </label>
               <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
+                id="username"
+                name="username"
+                type="text"
+                autoComplete="username"
                 required
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-pink-500 focus:border-pink-500"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="admin"
               />
             </div>
             <div>
@@ -76,6 +77,7 @@ export default function AdminLoginPage() {
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-pink-500 focus:border-pink-500"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                placeholder="password1234"
               />
             </div>
           </div>
