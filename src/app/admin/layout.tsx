@@ -1,5 +1,4 @@
 import { auth } from "@/lib/auth";
-import { redirect } from "next/navigation";
 import Link from "next/link";
 import { SessionProvider } from "@/components/SessionProvider";
 
@@ -9,10 +8,6 @@ export default async function AdminLayout({
   children: React.ReactNode;
 }) {
   const session = await auth();
-
-  if (!session) {
-    redirect("/admin/login");
-  }
 
   return (
     <SessionProvider>
@@ -40,7 +35,7 @@ export default async function AdminLayout({
                 </div>
               </div>
               <div className="flex items-center">
-                <span className="text-gray-700 text-sm mr-4">{session.user.name}</span>
+                <span className="text-gray-700 text-sm mr-4">{session?.user?.name || 'ユーザー'}</span>
                 <form action="/api/auth/signout" method="POST">
                   <button className="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 text-sm">
                     ログアウト
