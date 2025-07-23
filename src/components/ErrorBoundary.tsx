@@ -3,7 +3,7 @@
 import { Component, ReactNode } from 'react';
 import { createClientLogger } from '@/lib/logger/client';
 
-const logger = createClientLogger();
+
 
 interface Props {
   children: ReactNode;
@@ -27,7 +27,7 @@ export default class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: any) {
-    logger.error('Error Boundary caught error', error, { errorInfo });
+    console.error('Error Boundary caught error', error, { errorInfo });
     this.setState({ errorInfo: errorInfo.componentStack });
   }
 

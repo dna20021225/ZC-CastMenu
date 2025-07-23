@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClientLogger } from "@/lib/logger/client";
+
 import ImageUploader from "@/components/ImageUploader";
 import type { CreateCastInput } from "@/types";
 
-const logger = createClientLogger();
+
 
 export default function NewCastPage() {
   const router = useRouter();
@@ -69,10 +69,10 @@ export default function NewCastPage() {
       if (!response.ok) throw new Error("登録に失敗しました");
 
       const data = await response.json();
-      logger.info("キャスト登録成功", { id: data.id });
+      console.info("キャスト登録成功", { id: data.id });
       router.push("/admin/casts");
     } catch (error) {
-      logger.error("キャスト登録エラー", error);
+      console.error("キャスト登録エラー", error);
       alert("登録に失敗しました");
     } finally {
       setLoading(false);

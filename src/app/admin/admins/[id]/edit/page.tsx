@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { createClientLogger } from "@/lib/logger/client";
 
-const logger = createClientLogger();
+
+
 
 interface Admin {
   id: string;
@@ -42,7 +42,7 @@ export default function EditAdminPage({ params }: { params: { id: string } }) {
         confirmPassword: "",
       });
     } catch (error) {
-      logger.error("管理者情報取得エラー", error);
+      console.error("管理者情報取得エラー", error);
       alert("管理者情報の取得に失敗しました");
       router.push("/admin/admins");
     } finally {
@@ -97,10 +97,10 @@ export default function EditAdminPage({ params }: { params: { id: string } }) {
         throw new Error(data.error || "更新に失敗しました");
       }
 
-      logger.info("管理者更新成功", { id: params.id, username: formData.username });
+      console.info("管理者更新成功", { id: params.id, username: formData.username });
       router.push("/admin/admins");
     } catch (error) {
-      logger.error("管理者更新エラー", error);
+      console.error("管理者更新エラー", error);
       alert(error instanceof Error ? error.message : "更新に失敗しました");
     } finally {
       setSaving(false);

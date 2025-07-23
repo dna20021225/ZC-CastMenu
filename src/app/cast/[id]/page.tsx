@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui';
 import { createClientLogger } from '@/lib/logger/client';
 import { CastDetail, ApiResponse } from '@/types/api';
 
-const logger = createClientLogger();
+
 
 export default function CastDetailPage() {
   const params = useParams();
@@ -27,7 +27,7 @@ export default function CastDetailPage() {
         setLoading(true);
         setError(null);
 
-        logger.info('キャスト詳細取得開始', { castId });
+        console.info('キャスト詳細取得開始', { castId });
 
         const response = await fetch(`/api/casts/${castId}`);
         const result: ApiResponse<CastDetail> = await response.json();
@@ -41,7 +41,7 @@ export default function CastDetailPage() {
         }
 
         setCast(result.data);
-        logger.info('キャスト詳細取得完了', { 
+        console.info('キャスト詳細取得完了', { 
           castId, 
           name: result.data.name,
           photosCount: result.data.photos.length,
@@ -51,7 +51,7 @@ export default function CastDetailPage() {
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'キャスト詳細の取得に失敗しました';
         setError(errorMessage);
-        logger.error('キャスト詳細取得エラー', err instanceof Error ? err : new Error(String(err)), { castId });
+        console.error('キャスト詳細取得エラー', err instanceof Error ? err : new Error(String(err)), { castId });
       } finally {
         setLoading(false);
       }

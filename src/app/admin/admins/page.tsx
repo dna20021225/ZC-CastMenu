@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { createClientLogger } from "@/lib/logger/client";
+
 import { UserPlus, Edit, Trash2 } from "lucide-react";
 
-const logger = createClientLogger();
+
 
 interface Admin {
   id: string;
@@ -32,7 +32,7 @@ export default function AdminsPage() {
       const data = await response.json();
       setAdmins(data.data);
     } catch (error) {
-      logger.error("管理者一覧取得エラー", error);
+      console.error("管理者一覧取得エラー", error);
       alert("管理者一覧の取得に失敗しました");
     } finally {
       setLoading(false);
@@ -49,10 +49,10 @@ export default function AdminsPage() {
 
       if (!response.ok) throw new Error("削除に失敗しました");
 
-      logger.info("管理者削除成功", { id, username });
+      console.info("管理者削除成功", { id, username });
       fetchAdmins();
     } catch (error) {
-      logger.error("管理者削除エラー", error);
+      console.error("管理者削除エラー", error);
       alert("削除に失敗しました");
     }
   };
@@ -69,10 +69,10 @@ export default function AdminsPage() {
 
       if (!response.ok) throw new Error("ステータス更新に失敗しました");
 
-      logger.info("管理者ステータス更新成功", { id, is_active: !currentStatus });
+      console.info("管理者ステータス更新成功", { id, is_active: !currentStatus });
       fetchAdmins();
     } catch (error) {
-      logger.error("管理者ステータス更新エラー", error);
+      console.error("管理者ステータス更新エラー", error);
       alert("ステータス更新に失敗しました");
     }
   };

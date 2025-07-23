@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClientLogger } from "@/lib/logger/client";
 
-const logger = createClientLogger();
+
+
 
 export default function NewAdminPage() {
   const router = useRouter();
@@ -57,10 +57,10 @@ export default function NewAdminPage() {
         throw new Error(data.error || "登録に失敗しました");
       }
 
-      logger.info("管理者登録成功", { username: formData.username });
+      console.info("管理者登録成功", { username: formData.username });
       router.push("/admin/admins");
     } catch (error) {
-      logger.error("管理者登録エラー", error);
+      console.error("管理者登録エラー", error);
       alert(error instanceof Error ? error.message : "登録に失敗しました");
     } finally {
       setLoading(false);

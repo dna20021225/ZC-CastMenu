@@ -54,7 +54,7 @@ export class RemoteTransport implements LogTransport {
   private batchSize: number;
   private batchInterval: number;
   private queue: LogEntry[] = [];
-  private timer: NodeJS.Timeout | null = null;
+  private timer: number | null = null;
 
   constructor(options: {
     endpoint: string;
@@ -74,13 +74,13 @@ export class RemoteTransport implements LogTransport {
     if (this.queue.length >= this.batchSize) {
       await this.flush();
     } else if (!this.timer) {
-      this.timer = setTimeout(() => this.flush(), this.batchInterval);
+      this.timer = window.setTimeout(() => this.flush(), this.batchInterval);
     }
   }
 
   private async flush(): Promise<void> {
     if (this.timer) {
-      clearTimeout(this.timer);
+      window.clearTimeout(this.timer);
       this.timer = null;
     }
 
@@ -116,7 +116,7 @@ export class RemoteTransport implements LogTransport {
 
   async destroy(): Promise<void> {
     if (this.timer) {
-      clearTimeout(this.timer);
+      window.clearTimeout(this.timer);
     }
     await this.flush();
   }

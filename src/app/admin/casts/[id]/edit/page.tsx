@@ -2,11 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { createClientLogger } from "@/lib/logger/client";
+
 import ImageUploader from "@/components/ImageUploader";
 import type { Cast, UpdateCastInput } from "@/types";
 
-const logger = createClientLogger();
+
 
 export default function EditCastPage({ params }: { params: { id: string } }) {
   const router = useRouter();
@@ -57,7 +57,7 @@ export default function EditCastPage({ params }: { params: { id: string } }) {
         },
       });
     } catch (error) {
-      logger.error("キャスト取得エラー", error);
+      console.error("キャスト取得エラー", error);
       alert("キャストの取得に失敗しました");
       router.push("/admin/casts");
     } finally {
@@ -105,10 +105,10 @@ export default function EditCastPage({ params }: { params: { id: string } }) {
 
       if (!response.ok) throw new Error("更新に失敗しました");
 
-      logger.info("キャスト更新成功", { id: params.id });
+      console.info("キャスト更新成功", { id: params.id });
       router.push("/admin/casts");
     } catch (error) {
-      logger.error("キャスト更新エラー", error);
+      console.error("キャスト更新エラー", error);
       alert("更新に失敗しました");
     } finally {
       setSaving(false);

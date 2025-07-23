@@ -3,9 +3,9 @@
 import { useState, useRef } from "react";
 import Image from "next/image";
 import { Upload, X, Loader2, Star } from "lucide-react";
-import { createClientLogger } from "@/lib/logger/client";
 
-const logger = createClientLogger();
+
+
 
 interface UploadedImage {
   url: string;
@@ -65,10 +65,10 @@ export default function MultiImageUploader({
         });
       }
 
-      logger.info("複数画像アップロード成功", { count: uploadedImages.length });
+      console.info("複数画像アップロード成功", { count: uploadedImages.length });
       onChange([...value, ...uploadedImages]);
     } catch (error) {
-      logger.error("画像アップロードエラー", error);
+      console.error("画像アップロードエラー", error);
       alert(error instanceof Error ? error.message : "画像のアップロードに失敗しました");
     } finally {
       setIsUploading(false);

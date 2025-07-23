@@ -3,9 +3,6 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { createClientLogger } from "@/lib/logger/client";
-
-const logger = createClientLogger();
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -28,13 +25,13 @@ export default function AdminLoginPage() {
 
       if (result?.error) {
         setError("メールアドレスまたはパスワードが正しくありません");
-        logger.warn("ログイン失敗", { email });
+        console.warn("ログイン失敗", { email });
       } else {
-        logger.info("ログイン成功", { email });
+        console.info("ログイン成功", { email });
         router.push("/admin");
       }
     } catch (error) {
-      logger.error("ログインエラー", error);
+      console.error("ログインエラー", error);
       setError("ログイン中にエラーが発生しました");
     } finally {
       setIsLoading(false);

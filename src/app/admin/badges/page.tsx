@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { createClientLogger } from "@/lib/logger/client";
+
 import type { Cast, Badge } from "@/types";
 
-const logger = createClientLogger();
+
 
 export default function AdminBadgesPage() {
   const [casts, setCasts] = useState<Cast[]>([]);
@@ -24,7 +24,7 @@ export default function AdminBadgesPage() {
       const data = await response.json();
       setCasts(data.casts);
     } catch (error) {
-      logger.error("キャスト取得エラー", error);
+      console.error("キャスト取得エラー", error);
     }
   };
 
@@ -35,7 +35,7 @@ export default function AdminBadgesPage() {
       const data = await response.json();
       setBadges(data);
     } catch (error) {
-      logger.error("バッジ取得エラー", error);
+      console.error("バッジ取得エラー", error);
     }
   };
 
@@ -56,11 +56,11 @@ export default function AdminBadgesPage() {
 
       if (!response.ok) throw new Error("バッジの付与に失敗しました");
 
-      logger.info("バッジ付与成功", { castId: selectedCastId, badgeId: selectedBadgeId });
+      console.info("バッジ付与成功", { castId: selectedCastId, badgeId: selectedBadgeId });
       alert("バッジを付与しました");
       fetchCasts();
     } catch (error) {
-      logger.error("バッジ付与エラー", error);
+      console.error("バッジ付与エラー", error);
       alert("バッジの付与に失敗しました");
     }
   };
@@ -75,10 +75,10 @@ export default function AdminBadgesPage() {
 
       if (!response.ok) throw new Error("バッジの削除に失敗しました");
 
-      logger.info("バッジ削除成功", { castId, badgeId });
+      console.info("バッジ削除成功", { castId, badgeId });
       fetchCasts();
     } catch (error) {
-      logger.error("バッジ削除エラー", error);
+      console.error("バッジ削除エラー", error);
       alert("バッジの削除に失敗しました");
     }
   };

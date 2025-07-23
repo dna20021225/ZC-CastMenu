@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { createClientLogger } from "@/lib/logger/client";
+
 import type { Cast } from "@/types";
 
-const logger = createClientLogger();
+
 
 export default function AdminCastsPage() {
   const [casts, setCasts] = useState<Cast[]>([]);
@@ -23,7 +23,7 @@ export default function AdminCastsPage() {
       const data = await response.json();
       setCasts(data.casts);
     } catch (error) {
-      logger.error("キャスト取得エラー", error);
+      console.error("キャスト取得エラー", error);
       setError("キャストの取得に失敗しました");
     } finally {
       setLoading(false);
@@ -40,10 +40,10 @@ export default function AdminCastsPage() {
 
       if (!response.ok) throw new Error("削除に失敗しました");
 
-      logger.info("キャスト削除成功", { id });
+      console.info("キャスト削除成功", { id });
       fetchCasts();
     } catch (error) {
-      logger.error("キャスト削除エラー", error);
+      console.error("キャスト削除エラー", error);
       alert("削除に失敗しました");
     }
   };
