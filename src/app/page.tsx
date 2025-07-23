@@ -22,35 +22,12 @@ export default function Home() {
 
   const fetchCasts = async () => {
     try {
-      // 一時的にテストデータを使用
-      const testCasts: Cast[] = [
-        {
-          id: '1',
-          name: 'テストキャスト1',
-          age: 22,
-          height: 165,
-          description: 'システムが正常に復旧しました。データベース接続のテスト中です。'
-        },
-        {
-          id: '2',
-          name: 'テストキャスト2',
-          age: 24,
-          height: 158,
-          description: 'キャスト一覧機能が正常に動作しています。'
-        }
-      ];
-      
-      // 実際のAPIを試行（失敗した場合はテストデータを使用）
-      try {
-        const response = await fetch('/api/casts');
-        if (response.ok) {
-          const data = await response.json();
-          setCasts(data.data?.casts || []);
-        } else {
-          setCasts(testCasts);
-        }
-      } catch {
-        setCasts(testCasts);
+      const response = await fetch('/api/casts');
+      if (response.ok) {
+        const data = await response.json();
+        setCasts(data.data?.casts || []);
+      } else {
+        throw new Error('キャストデータの取得に失敗しました');
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'エラーが発生しました');
