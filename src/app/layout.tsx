@@ -1,17 +1,8 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import { Navigation } from "@/components/layout/Navigation";
-import ErrorBoundary from "@/components/ErrorBoundary";
-import { ToastProvider } from "@/components/Toast";
+import { Inter } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const inter = Inter({
   subsets: ["latin"],
 });
 
@@ -47,16 +38,11 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-50 min-h-screen`}
+        className={`${inter.className} antialiased bg-gray-50 min-h-screen`}
       >
-        <ErrorBoundary>
-          <ToastProvider>
-            <main className="pb-16">
-              {children}
-            </main>
-            <Navigation />
-          </ToastProvider>
-        </ErrorBoundary>
+        <main className="pb-16">
+          {children}
+        </main>
       </body>
     </html>
   );

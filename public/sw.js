@@ -6,8 +6,7 @@ const DYNAMIC_CACHE_NAME = 'zc-castmenu-dynamic-v1';
 const STATIC_ASSETS = [
   '/',
   '/manifest.json',
-  '/offline',
-  // アイコンやその他の静的リソース
+  '/offline'
 ];
 
 // API エンドポイント（オフライン時の処理）
@@ -192,8 +191,8 @@ self.addEventListener('push', (event) => {
   
   const options = {
     body: event.data ? event.data.text() : 'ZC-CastMenuから通知があります',
-    icon: '/icons/icon-192x192.png',
-    badge: '/icons/icon-72x72.png',
+    icon: '/next.svg',
+    badge: '/next.svg',
     vibrate: [100, 50, 100],
     data: {
       dateOfArrival: Date.now(),

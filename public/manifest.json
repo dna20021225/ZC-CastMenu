@@ -1,0 +1,10 @@
+{
+  "name": "ZC-CastMenu",
+  "short_name": "CastMenu",
+  "description": "キャスト一覧とプロフィール表示システム",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ec4899",
+  "orientation": "portrait"
+}

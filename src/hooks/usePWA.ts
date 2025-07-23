@@ -130,8 +130,8 @@ export function usePWA() {
     if ('serviceWorker' in navigator && Notification.permission === 'granted') {
       navigator.serviceWorker.ready.then((registration) => {
         registration.showNotification(title, {
-          icon: '/icons/icon-192x192.png',
-          badge: '/icons/icon-72x72.png',
+          icon: '/next.svg',
+          badge: '/next.svg',
           ...options,
         });
       });
