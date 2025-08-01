@@ -77,38 +77,38 @@ export default function AdminsPage() {
     }
   };
 
-  if (loading) return <div className="text-center p-4">読み込み中...</div>;
+  if (loading) return <div className="text-center p-4"><div className="loading-spinner mx-auto"></div></div>;
 
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">管理者管理</h1>
+        <h1 className="text-3xl font-bold" style={{ color: 'var(--primary-500)' }}>管理者管理</h1>
         <button
           onClick={() => router.push("/admin/admins/new")}
-          className="flex items-center px-4 py-2 bg-pink-600 text-white rounded-md hover:bg-pink-700 transition-colors"
+          className="btn-primary"
         >
           <UserPlus className="w-5 h-5 mr-2" />
           新規管理者追加
         </button>
       </div>
 
-      <div className="bg-white shadow overflow-hidden rounded-lg">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+      <div className="cast-card overflow-hidden">
+        <table className="min-w-full divide-y" style={{ borderColor: 'var(--border)' }}>
+          <thead style={{ backgroundColor: 'var(--surface-variant)' }}>
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--secondary)' }}>
                 ユーザー名
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--secondary)' }}>
                 メールアドレス
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--secondary)' }}>
                 ステータス
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--secondary)' }}>
                 最終ログイン
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--secondary)' }}>
                 登録日
               </th>
               <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -116,14 +116,14 @@ export default function AdminsPage() {
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody style={{ backgroundColor: 'var(--surface)' }} className="divide-y">
             {admins.map((admin) => (
               <tr key={admin.id}>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-medium text-gray-900">{admin.username}</div>
+                  <div className="text-sm font-medium" style={{ color: 'var(--foreground)' }}>{admin.username}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-500">{admin.email}</div>
+                  <div className="text-sm" style={{ color: 'var(--secondary)' }}>{admin.email}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <button
@@ -137,24 +137,24 @@ export default function AdminsPage() {
                     {admin.is_active ? "有効" : "無効"}
                   </button>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <td className="px-6 py-4 whitespace-nowrap text-sm" style={{ color: 'var(--secondary)' }}>
                   {admin.last_login
                     ? new Date(admin.last_login).toLocaleString("ja-JP")
                     : "未ログイン"}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <td className="px-6 py-4 whitespace-nowrap text-sm" style={{ color: 'var(--secondary)' }}>
                   {new Date(admin.created_at).toLocaleDateString("ja-JP")}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <button
                     onClick={() => router.push(`/admin/admins/${admin.id}/edit`)}
-                    className="text-blue-600 hover:text-blue-900 mr-4"
+                    className="text-primary hover:text-primary/80 mr-4"
                   >
                     <Edit className="w-5 h-5" />
                   </button>
                   <button
                     onClick={() => handleDelete(admin.id, admin.username)}
-                    className="text-red-600 hover:text-red-900"
+                    style={{ color: 'var(--error)' }} className="hover:text-red-700"
                   >
                     <Trash2 className="w-5 h-5" />
                   </button>

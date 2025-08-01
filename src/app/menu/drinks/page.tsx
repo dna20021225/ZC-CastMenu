@@ -8,8 +8,6 @@ import {
   Sparkles, 
   Heart,
   Star,
-  User,
-  Smartphone,
   Info
 } from 'lucide-react';
 
@@ -397,25 +395,6 @@ export default function DrinksPage() {
         </div>
       </main>
 
-      {/* ナビゲーション */}
-      <nav className="nav-primary">
-        <div className="tablet-layout">
-          <div className="flex items-center justify-around">
-            <Link href="/" className="nav-item">
-              <User className="h-5 w-5" />
-              <span>キャスト</span>
-            </Link>
-            <Link href="/menu/pricing" className="nav-item">
-              <Smartphone className="h-5 w-5" />
-              <span>料金</span>
-            </Link>
-            <Link href="/menu/drinks" className="nav-item active">
-              <Coffee className="h-5 w-5" />
-              <span>ドリンク</span>
-            </Link>
-          </div>
-        </div>
-      </nav>
     </div>
   );
 }

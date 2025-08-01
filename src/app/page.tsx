@@ -185,25 +185,6 @@ export default function Home() {
         )}
       </main>
 
-      {/* ナビゲーション（フッター固定） */}
-      <nav className="nav-primary">
-        <div className="tablet-layout">
-          <div className="flex items-center justify-around">
-            <Link href="/" className="nav-item active">
-              <User className="h-5 w-5" />
-              <span>キャスト</span>
-            </Link>
-            <Link href="/menu/pricing" className="nav-item">
-              <Smartphone className="h-5 w-5" />
-              <span>料金</span>
-            </Link>
-            <Link href="/menu/drinks" className="nav-item">
-              <Smartphone className="h-5 w-5" />
-              <span>ドリンク</span>
-            </Link>
-          </div>
-        </div>
-      </nav>
     </div>
   );
 }

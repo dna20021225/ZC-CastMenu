@@ -80,13 +80,17 @@ export default function NewCastPage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto">
-      <h1 className="text-3xl font-bold text-gray-900 mb-6">キャスト新規登録</h1>
+    <div className="max-w-2xl mx-auto tablet-layout">
+      <h1 className="text-3xl font-bold mb-6" style={{ color: 'var(--primary-500)' }}>キャスト新規登録</h1>
 
-      <form onSubmit={handleSubmit} className="space-y-6 bg-white shadow px-6 py-8 rounded-lg">
+      <form onSubmit={handleSubmit} className="space-y-6 px-6 py-8 rounded-lg" style={{ 
+        backgroundColor: 'var(--surface)',
+        boxShadow: 'var(--shadow-medium)',
+        borderRadius: 'var(--border-radius)'
+      }}>
         <div>
-          <label className="block text-sm font-medium text-gray-700">
-            名前 <span className="text-red-500">*</span>
+          <label className="block text-sm font-medium" style={{ color: 'var(--foreground)' }}>
+            名前 <span style={{ color: 'var(--error)' }}>*</span>
           </label>
           <input
             type="text"
@@ -94,14 +98,20 @@ export default function NewCastPage() {
             required
             value={formData.name}
             onChange={handleChange}
-            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-pink-500 focus:border-pink-500"
+            className="mt-1 block w-full rounded-md shadow-sm px-3 py-2"
+            style={{
+              backgroundColor: 'var(--surface)',
+              border: '1px solid var(--border)',
+              color: 'var(--foreground)',
+              borderRadius: 'var(--border-radius)'
+            }}
           />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              年齢 <span className="text-red-500">*</span>
+            <label className="block text-sm font-medium" style={{ color: 'var(--foreground)' }}>
+              年齢 <span style={{ color: 'var(--error)' }}>*</span>
             </label>
             <input
               type="number"
@@ -111,13 +121,19 @@ export default function NewCastPage() {
               max="99"
               value={formData.age}
               onChange={handleChange}
-              className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-pink-500 focus:border-pink-500"
+              className="mt-1 block w-full rounded-md shadow-sm px-3 py-2"
+              style={{
+                backgroundColor: 'var(--surface)',
+                border: '1px solid var(--border)',
+                color: 'var(--foreground)',
+                borderRadius: 'var(--border-radius)'
+              }}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              身長 (cm) <span className="text-red-500">*</span>
+            <label className="block text-sm font-medium" style={{ color: 'var(--foreground)' }}>
+              身長 (cm) <span style={{ color: 'var(--error)' }}>*</span>
             </label>
             <input
               type="number"
@@ -127,21 +143,33 @@ export default function NewCastPage() {
               max="200"
               value={formData.height}
               onChange={handleChange}
-              className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-pink-500 focus:border-pink-500"
+              className="mt-1 block w-full rounded-md shadow-sm px-3 py-2"
+              style={{
+                backgroundColor: 'var(--surface)',
+                border: '1px solid var(--border)',
+                color: 'var(--foreground)',
+                borderRadius: 'var(--border-radius)'
+              }}
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">
-            血液型 <span className="text-red-500">*</span>
+          <label className="block text-sm font-medium" style={{ color: 'var(--foreground)' }}>
+            血液型 <span style={{ color: 'var(--error)' }}>*</span>
           </label>
           <select
             name="blood_type"
             required
             value={formData.blood_type}
             onChange={handleChange}
-            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-pink-500 focus:border-pink-500"
+            className="mt-1 block w-full rounded-md shadow-sm px-3 py-2"
+            style={{
+              backgroundColor: 'var(--surface)',
+              border: '1px solid var(--border)',
+              color: 'var(--foreground)',
+              borderRadius: 'var(--border-radius)'
+            }}
           >
             <option value="A">A型</option>
             <option value="B">B型</option>
@@ -160,7 +188,7 @@ export default function NewCastPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">
+          <label className="block text-sm font-medium" style={{ color: 'var(--foreground)' }}>
             自己紹介
           </label>
           <textarea
@@ -168,16 +196,22 @@ export default function NewCastPage() {
             rows={4}
             value={formData.description}
             onChange={handleChange}
-            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-pink-500 focus:border-pink-500"
+            className="mt-1 block w-full rounded-md shadow-sm px-3 py-2"
+            style={{
+              backgroundColor: 'var(--surface)',
+              border: '1px solid var(--border)',
+              color: 'var(--foreground)',
+              borderRadius: 'var(--border-radius)'
+            }}
           />
         </div>
 
         <div>
-          <h3 className="text-lg font-medium text-gray-900 mb-3">ステータス</h3>
+          <h3 className="text-lg font-medium mb-3" style={{ color: 'var(--foreground)' }}>ステータス</h3>
           <div className="space-y-3">
             {Object.entries(formData.stats).map(([key, value]) => (
               <div key={key}>
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium" style={{ color: 'var(--foreground)' }}>
                   {key === "looks" && "ルックス"}
                   {key === "talk" && "トーク"}
                   {key === "drinking" && "酒の強さ"}
@@ -204,14 +238,14 @@ export default function NewCastPage() {
           <button
             type="button"
             onClick={() => router.push("/admin/casts")}
-            className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+            className="btn-secondary"
           >
             キャンセル
           </button>
           <button
             type="submit"
             disabled={loading}
-            className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-pink-600 hover:bg-pink-700 disabled:opacity-50"
+            className="btn-primary disabled:opacity-50"
           >
             {loading ? "登録中..." : "登録"}
           </button>

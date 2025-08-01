@@ -45,7 +45,10 @@ export const Navigation = forwardRef<HTMLElement, NavigationProps>(
   }, ref) => {
     const pathname = usePathname();
 
-    const baseClasses = 'bg-black border-t border-gray-800';
+    const baseClasses = 'border-t' 
+      + ' ' + (typeof window !== 'undefined' ? 
+        `bg-surface border-border` : 
+        'bg-black border-gray-800');
     
     const variantClasses = {
       bottom: 'fixed bottom-0 left-0 right-0 z-50',
@@ -64,6 +67,10 @@ export const Navigation = forwardRef<HTMLElement, NavigationProps>(
           variantClasses[variant],
           className
         )}
+        style={{
+          backgroundColor: 'var(--surface)',
+          borderColor: 'var(--border)'
+        }}
         ref={ref}
         {...props}
       >
@@ -81,8 +88,8 @@ export const Navigation = forwardRef<HTMLElement, NavigationProps>(
                   'flex flex-col items-center justify-center transition-colors',
                   variant === 'bottom' ? 'px-3 py-2 min-w-[60px]' : 'w-12 h-12 rounded-lg',
                   isActive 
-                    ? 'text-blue-400' 
-                    : 'text-gray-400 hover:text-blue-300'
+                    ? 'text-primary' 
+                    : 'text-secondary hover:text-primary'
                 )}
               >
                 <Icon 

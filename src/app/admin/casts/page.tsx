@@ -49,38 +49,38 @@ export default function AdminCastsPage() {
     }
   };
 
-  if (loading) return <div className="text-center">読み込み中...</div>;
-  if (error) return <div className="text-red-600 text-center">{error}</div>;
+  if (loading) return <div className="text-center loading-spinner mx-auto"></div>;
+  if (error) return <div className="error-message text-center">{error}</div>;
 
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">キャスト管理</h1>
+        <h1 className="text-3xl font-bold" style={{ color: 'var(--primary-500)' }}>キャスト管理</h1>
         <Link
           href="/admin/casts/new"
-          className="bg-pink-600 text-white px-4 py-2 rounded hover:bg-pink-700"
+          className="btn-primary"
         >
           新規登録
         </Link>
       </div>
 
-      <div className="bg-white shadow overflow-hidden sm:rounded-md">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+      <div className="cast-card overflow-hidden">
+        <table className="min-w-full divide-y" style={{ borderColor: 'var(--border)' }}>
+          <thead style={{ backgroundColor: 'var(--surface-variant)' }}>
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--secondary)' }}>
                 写真
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--secondary)' }}>
                 名前
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--secondary)' }}>
                 年齢
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--secondary)' }}>
                 身長
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--secondary)' }}>
                 バッジ
               </th>
               <th className="relative px-6 py-3">
@@ -88,7 +88,7 @@ export default function AdminCastsPage() {
               </th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody style={{ backgroundColor: 'var(--surface)' }} className="divide-y" style-border-color="var(--border)">
             {casts.map((cast) => (
               <tr key={cast.id}>
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -100,28 +100,28 @@ export default function AdminCastsPage() {
                     className="h-10 w-10 rounded-full object-cover"
                   />
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium" style={{ color: 'var(--foreground)' }}>
                   {cast.name}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <td className="px-6 py-4 whitespace-nowrap text-sm" style={{ color: 'var(--secondary)' }}>
                   {cast.age}歳
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <td className="px-6 py-4 whitespace-nowrap text-sm" style={{ color: 'var(--secondary)' }}>
                   {cast.height}cm
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <td className="px-6 py-4 whitespace-nowrap text-sm" style={{ color: 'var(--secondary)' }}>
                   {cast.badges?.length || 0}個
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <Link
                     href={`/admin/casts/${cast.id}/edit`}
-                    className="text-indigo-600 hover:text-indigo-900 mr-4"
+                    className="text-primary hover:text-primary/80 mr-4"
                   >
                     編集
                   </Link>
                   <button
                     onClick={() => handleDelete(cast.id)}
-                    className="text-red-600 hover:text-red-900"
+                    style={{ color: 'var(--error)' }} className="hover:text-red-700"
                   >
                     削除
                   </button>

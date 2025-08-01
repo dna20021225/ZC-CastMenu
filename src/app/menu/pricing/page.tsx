@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowLeft, Clock, Star, Gift, User, Smartphone } from 'lucide-react';
+import { ArrowLeft, Clock, Star, Gift } from 'lucide-react';
 
 interface PricingPlan {
   id: string;
@@ -244,25 +244,6 @@ export default function PricingPage() {
         </div>
       </main>
 
-      {/* ナビゲーション */}
-      <nav className="nav-primary">
-        <div className="tablet-layout">
-          <div className="flex items-center justify-around">
-            <Link href="/" className="nav-item">
-              <User className="h-5 w-5" />
-              <span>キャスト</span>
-            </Link>
-            <Link href="/menu/pricing" className="nav-item active">
-              <Smartphone className="h-5 w-5" />
-              <span>料金</span>
-            </Link>
-            <Link href="/menu/drinks" className="nav-item">
-              <Smartphone className="h-5 w-5" />
-              <span>ドリンク</span>
-            </Link>
-          </div>
-        </div>
-      </nav>
     </div>
   );
 }

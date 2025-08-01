@@ -39,17 +39,17 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full space-y-8">
+    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--background)' }}>
+      <div className="max-w-md w-full space-y-8 tablet-layout">
         <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+          <h2 className="mt-6 text-center text-3xl font-extrabold" style={{ color: 'var(--primary-500)' }}>
             管理者ログイン
           </h2>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm space-y-4">
             <div>
-              <label htmlFor="username" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="username" className="block text-sm font-medium" style={{ color: 'var(--foreground)' }}>
                 ユーザー名
               </label>
               <input
@@ -58,14 +58,20 @@ export default function AdminLoginPage() {
                 type="text"
                 autoComplete="username"
                 required
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-pink-500 focus:border-pink-500"
+                className="mt-1 block w-full px-3 py-2 rounded-md shadow-sm"
+                style={{ 
+                  backgroundColor: 'var(--surface)',
+                  border: '1px solid var(--border)',
+                  color: 'var(--foreground)',
+                  borderRadius: 'var(--border-radius)'
+                }}
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 placeholder="admin"
               />
             </div>
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="password" className="block text-sm font-medium" style={{ color: 'var(--foreground)' }}>
                 パスワード
               </label>
               <input
@@ -74,7 +80,13 @@ export default function AdminLoginPage() {
                 type="password"
                 autoComplete="current-password"
                 required
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-pink-500 focus:border-pink-500"
+                className="mt-1 block w-full px-3 py-2 rounded-md shadow-sm"
+                style={{ 
+                  backgroundColor: 'var(--surface)',
+                  border: '1px solid var(--border)',
+                  color: 'var(--foreground)',
+                  borderRadius: 'var(--border-radius)'
+                }}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="password1234"
@@ -83,7 +95,7 @@ export default function AdminLoginPage() {
           </div>
 
           {error && (
-            <div className="text-red-600 text-sm text-center">
+            <div className="error-message text-center">
               {error}
             </div>
           )}
@@ -92,7 +104,7 @@ export default function AdminLoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-pink-600 hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? "ログイン中..." : "ログイン"}
             </button>

@@ -27,7 +27,7 @@ export default async function AdminDashboard() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold">ダッシュボード</h1>
+      <h1 className="text-3xl font-bold" style={{ color: 'var(--primary-500)' }}>ダッシュボード</h1>
       
       <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-3">
         <div className="bg-surface border border-border rounded-lg overflow-hidden">
@@ -98,7 +98,7 @@ export default async function AdminDashboard() {
       </div>
 
       <div className="mt-8">
-        <h2 className="text-xl font-semibold mb-4">クイックアクション</h2>
+        <h2 className="text-xl font-semibold mb-4" style={{ color: 'var(--foreground)' }}>クイックアクション</h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <Link
             href="/admin/casts/new"
