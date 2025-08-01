@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 
 
@@ -25,11 +25,7 @@ export default function EditAdminPage({ params }: { params: { id: string } }) {
     confirmPassword: "",
   });
 
-  useEffect(() => {
-    fetchAdmin();
-  }, [params.id]);
-
-  const fetchAdmin = async () => {
+  const fetchAdmin = useCallback(async () => {
     try {
       const response = await fetch(`/api/admins/${params.id}`);
       if (!response.ok) throw new Error("管理者情報の取得に失敗しました");
@@ -48,7 +44,11 @@ export default function EditAdminPage({ params }: { params: { id: string } }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [params.id, router]);
+
+  useEffect(() => {
+    fetchAdmin();
+  }, [fetchAdmin]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;

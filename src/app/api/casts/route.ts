@@ -1,15 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { query, getClient } from '@/lib/db';
-import { createAPILogger } from '@/lib/logger';
-import { handleApiError, asyncHandler, ValidationError } from '@/lib/error-handler';
+import { query } from '@/lib/db';
+import { asyncHandler, ValidationError } from '@/lib/error-handler';
 import { validateRequest, createCastSchema, castSearchParamsSchema } from '@/lib/validation';
 import { 
   ApiResponse, 
   CastDetail, 
   CastListResponse, 
-  CastSearchParams,
-  CastFormData,
-  CastStatsFormData 
+  CastSearchParams 
 } from '@/types/api';
 import { Cast, CastPhoto, CastStats, Badge } from '@/types/database';
 

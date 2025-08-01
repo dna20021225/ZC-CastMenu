@@ -12,7 +12,7 @@ export class PerformanceTimer {
     this.startTime = performance.now();
   }
 
-  end(additionalData?: Record<string, any>): number {
+  end(additionalData?: Record<string, unknown>): number {
     const duration = performance.now() - this.startTime;
     logger.debug('Performance measurement', {
       operation: this.name,
@@ -27,7 +27,7 @@ export class PerformanceTimer {
 export function measureAsync<T>(
   name: string,
   fn: () => Promise<T>,
-  additionalData?: Record<string, any>
+  additionalData?: Record<string, unknown>
 ): Promise<T> {
   const timer = new PerformanceTimer(name);
   
@@ -69,7 +69,7 @@ export function logMemoryUsage(context: string): void {
   }
 
   if ('memory' in performance) {
-    const memory = (performance as any).memory;
+    const memory = (performance as { memory: { usedJSHeapSize: number; totalJSHeapSize: number; jsHeapSizeLimit: number } }).memory;
     logger.debug('Memory usage', {
       context,
       usedJSHeapSize: Math.round(memory.usedJSHeapSize / 1024 / 1024), // MB
@@ -93,7 +93,7 @@ export function measureWebVitals(): void {
           if (entry.entryType === 'layout-shift' && !entry.hadRecentInput) {
             logger.debug('Layout shift detected', {
               value: entry.value,
-              sources: entry.sources?.map((source: any) => ({
+              sources: entry.sources?.map((source: { node?: { tagName: string }; currentRect: unknown; previousRect: unknown }) => ({
                 node: source.node?.tagName,
                 currentRect: source.currentRect,
                 previousRect: source.previousRect,
@@ -154,9 +154,9 @@ export function useRenderCount(componentName: string): number {
   }
 
   const key = `renderCount_${componentName}`;
-  const currentCount = (window as any)[key] || 0;
+  const currentCount = (window as Record<string, unknown>)[key] as number || 0;
   const newCount = currentCount + 1;
-  (window as any)[key] = newCount;
+  (window as Record<string, unknown>)[key] = newCount;
 
   if (process.env.NODE_ENV === 'development') {
     logger.debug('Component render', {

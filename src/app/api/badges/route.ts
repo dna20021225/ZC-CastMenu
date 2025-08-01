@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { query } from '@/lib/db';
-import { createAPILogger } from '@/lib/logger';
 import { ApiResponse } from '@/types/api';
 import { Badge } from '@/types/database';
 

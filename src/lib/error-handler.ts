@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { ZodError } from 'zod';
 
 // サーバーサイドでのみロガーを初期化
-let logger: any = null;
+let logger: { error: (msg: string, data?: unknown) => void; warn?: (msg: string, data?: unknown) => void } | null = null;
 if (typeof window === 'undefined') {
   import('@/lib/logger/server').then(({ createAPILogger }) => {
     logger = createAPILogger('error-handler');
@@ -139,9 +139,9 @@ export function handleApiError(error: unknown, context?: string): NextResponse {
 
 // 非同期処理のエラーハンドラー
 export function asyncHandler(
-  handler: (req: Request, context: any) => Promise<NextResponse>
+  handler: (req: Request, context: unknown) => Promise<NextResponse>
 ) {
-  return async (req: Request, context: any): Promise<NextResponse> => {
+  return async (req: Request, context: unknown): Promise<NextResponse> => {
     try {
       return await handler(req, context);
     } catch (error) {

@@ -15,7 +15,6 @@ import {
   Smartphone 
 } from 'lucide-react';
 import { RadarChart } from '@/components/chart';
-import { Badge } from '@/components/ui';
 import { CastDetail, ApiResponse } from '@/types/api';
 
 export default function CastDetailPage() {
@@ -114,7 +113,6 @@ export default function CastDetailPage() {
   }
 
   const mainPhoto = cast.photos.find(photo => photo.is_main) || cast.photos[0];
-  const additionalPhotos = cast.photos.filter(photo => !photo.is_main);
   const displayPhoto = cast.photos[selectedPhotoIndex] || mainPhoto;
 
   return (

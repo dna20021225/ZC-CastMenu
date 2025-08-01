@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
-import { memoryCache, CacheKeys } from '@/lib/cache';
+import { memoryCache } from '@/lib/cache';
 import { createClientLogger } from '@/lib/logger';
 
 const logger = createClientLogger();

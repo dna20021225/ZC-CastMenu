@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 
 import ImageUploader from "@/components/ImageUploader";
@@ -30,11 +30,7 @@ export default function EditCastPage({ params }: { params: { id: string } }) {
     },
   });
 
-  useEffect(() => {
-    fetchCast();
-  }, [params.id]);
-
-  const fetchCast = async () => {
+  const fetchCast = useCallback(async () => {
     try {
       const response = await fetch(`/api/casts/${params.id}`);
       if (!response.ok) throw new Error("キャストの取得に失敗しました");
@@ -63,7 +59,11 @@ export default function EditCastPage({ params }: { params: { id: string } }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [params.id, router]);
+
+  useEffect(() => {
+    fetchCast();
+  }, [fetchCast]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;

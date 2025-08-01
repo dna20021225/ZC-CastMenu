@@ -1,7 +1,7 @@
 import { Pool } from 'pg';
 
 // 動的インポートでロガーを取得
-let logger: any = console;
+let logger: { error: (msg: string, data?: unknown) => void; info?: (msg: string, data?: unknown) => void } = console;
 if (typeof window === 'undefined') {
   import('./logger').then(({ createAPILogger }) => {
     logger = createAPILogger('database');

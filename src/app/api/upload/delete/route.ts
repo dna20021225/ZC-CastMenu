@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { unlink } from 'fs/promises';
 import { join } from 'path';
-import { createAPILogger } from '@/lib/logger';
 
 // Logger initialization moved
 

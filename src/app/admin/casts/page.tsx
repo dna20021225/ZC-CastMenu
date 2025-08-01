@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 
 import type { Cast } from "@/types";
 
@@ -94,9 +95,11 @@ export default function AdminCastsPage() {
             {casts.map((cast) => (
               <tr key={cast.id}>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <img
+                  <Image
                     src={cast.profile_image || "/images/placeholder.png"}
                     alt={cast.name}
+                    width={40}
+                    height={40}
                     className="h-10 w-10 rounded-full object-cover"
                   />
                 </td>

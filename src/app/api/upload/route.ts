@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
-import { createAPILogger } from '@/lib/logger';
-import { handleApiError, asyncHandler, ValidationError } from '@/lib/error-handler';
+import { asyncHandler, ValidationError } from '@/lib/error-handler';
 import { v4 as uuidv4 } from 'uuid';
 
 // Logger initialization moved

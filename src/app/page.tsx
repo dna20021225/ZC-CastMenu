@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { User, Smartphone } from 'lucide-react';
-import { Badge } from '@/components/ui';
 
 interface Cast {
   id: string;
