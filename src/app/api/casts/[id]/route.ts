@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { query } from '@/lib/db';
+import { query, transaction } from '@/lib/db';
 import { 
   ApiResponse, 
-  CastDetail 
+  CastDetail,
+  CastFormData,
+  CastStatsFormData
 } from '@/types/api';
 import { Cast, CastPhoto, CastStats, Badge } from '@/types/database';
 

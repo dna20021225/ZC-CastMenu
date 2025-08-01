@@ -22,7 +22,7 @@ export default function AdminCastsPage() {
       const response = await fetch("/api/casts");
       if (!response.ok) throw new Error("キャストの取得に失敗しました");
       const data = await response.json();
-      setCasts(data.casts);
+      setCasts(data.data?.casts || []);
     } catch (error) {
       console.error("キャスト取得エラー", error);
       setError("キャストの取得に失敗しました");
@@ -31,7 +31,7 @@ export default function AdminCastsPage() {
     }
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => {
     if (!confirm("本当に削除しますか？この操作は取り消せません。")) return;
 
     try {
@@ -81,9 +81,6 @@ export default function AdminCastsPage() {
                 身長
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                血液型
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 バッジ
               </th>
               <th className="relative px-6 py-3">
@@ -96,7 +93,7 @@ export default function AdminCastsPage() {
               <tr key={cast.id}>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <Image
-                    src={cast.profile_image || "/images/placeholder.png"}
+                    src={cast.avatar_url || "/images/placeholder.png"}
                     alt={cast.name}
                     width={40}
                     height={40}
@@ -111,9 +108,6 @@ export default function AdminCastsPage() {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {cast.height}cm
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {cast.blood_type}型
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {cast.badges?.length || 0}個

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { query } from '@/lib/db';
+import { query, transaction } from '@/lib/db';
 import { asyncHandler, ValidationError } from '@/lib/error-handler';
 import { validateRequest, createCastSchema, castSearchParamsSchema } from '@/lib/validation';
 import { 
@@ -197,40 +197,40 @@ export const POST = asyncHandler(async (request: NextRequest) => {
     const result = await transaction(async (client) => {
       // キャスト基本情報を作成
       const castResult = await client.query(`
-        INSERT INTO casts (name, age, height, blood_type, description, profile_image, is_active)
-        VALUES ($1, $2, $3, $4, $5, $6, true)
+        INSERT INTO casts (name, age, height, description, avatar_url, is_active)
+        VALUES ($1, $2, $3, $4, $5, true)
         RETURNING *
       `, [
         validatedData.name,
         validatedData.age,
         validatedData.height,
-        validatedData.blood_type,
         validatedData.description || null,
-        validatedData.profile_image || null
+        validatedData.avatar_url || null
       ]);
 
       const newCast = castResult.rows[0] as Cast;
 
       // 能力値を作成
       await client.query(`
-        INSERT INTO cast_stats (cast_id, looks, talk, drinking, intelligence, tension, special)
-        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        INSERT INTO cast_stats (cast_id, looks, talk, alcohol_tolerance, intelligence, energy, custom_stat, custom_stat_name)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
       `, [
         newCast.id,
-        validatedData.stats.looks,
-        validatedData.stats.talk,
-        validatedData.stats.drinking,
-        validatedData.stats.intelligence,
-        validatedData.stats.tension,
-        validatedData.stats.special
+        validatedData.stats.looks || 50,
+        validatedData.stats.talk || 50,
+        validatedData.stats.alcohol_tolerance || 50,
+        validatedData.stats.intelligence || 50,
+        validatedData.stats.energy || 50,
+        validatedData.stats.custom_stat || null,
+        validatedData.stats.custom_stat_name || null
       ]);
 
       // プロフィール画像があれば写真として追加
-      if (validatedData.profile_image) {
+      if (validatedData.avatar_url) {
         await client.query(`
           INSERT INTO cast_photos (cast_id, photo_url, is_main, order_index)
           VALUES ($1, $2, true, 0)
-        `, [newCast.id, validatedData.profile_image]);
+        `, [newCast.id, validatedData.avatar_url]);
       }
 
       return newCast;

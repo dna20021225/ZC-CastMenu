@@ -1,7 +1,11 @@
 import { Pool } from 'pg';
 
 // 動的インポートでロガーを取得
-let logger: { error: (msg: string, data?: unknown) => void; info?: (msg: string, data?: unknown) => void } = console;
+let logger: { 
+  error: (msg: string, data?: unknown) => void; 
+  info?: (msg: string, data?: unknown) => void;
+  debug?: (msg: string, data?: unknown) => void;
+} = console;
 if (typeof window === 'undefined') {
   import('./logger').then(({ createAPILogger }) => {
     logger = createAPILogger('database');
@@ -29,7 +33,9 @@ export async function query(text: string, params?: unknown[]) {
   try {
     const res = await pool.query(text, params);
     const duration = Date.now() - start;
-    logger.debug('クエリ実行', { text, duration, rows: res.rowCount });
+    if (logger.debug) {
+      logger.debug('クエリ実行', { text, duration, rows: res.rowCount });
+    }
     return res;
   } catch (error) {
     logger.error('クエリエラー', error, { text, params });
@@ -82,7 +88,9 @@ export async function transaction<T>(
 export async function checkConnection() {
   try {
     const result = await query('SELECT NOW()');
-    logger.info('データベース接続成功', { time: result.rows[0].now });
+    if (logger.info) {
+      logger.info('データベース接続成功', { time: result.rows[0].now });
+    }
     return true;
   } catch (error) {
     logger.error('データベース接続失敗', error);

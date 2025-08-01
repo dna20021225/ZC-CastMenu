@@ -64,3 +64,12 @@ export interface ActionLog {
   changes?: Record<string, unknown>;
   timestamp: DateString;
 }
+
+// 能力値ラベル定義
+export const STAT_LABELS = {
+  looks: 'ルックス',
+  talk: 'トーク',
+  alcohol_tolerance: '酒の強さ',
+  intelligence: '頭脳',
+  energy: 'テンション'
+} as const;

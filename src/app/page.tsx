@@ -10,7 +10,7 @@ interface Cast {
   name: string;
   age: number;
   height: number;
-  profile_image?: string;
+  avatar_url?: string;
   description?: string;
   badges?: Array<{
     id: string;
@@ -137,9 +137,9 @@ export default function Home() {
 
                   {/* 画像セクション */}
                   <div className="cast-card-image relative overflow-hidden">
-                    {cast.profile_image ? (
+                    {cast.avatar_url ? (
                       <Image
-                        src={cast.profile_image}
+                        src={cast.avatar_url}
                         alt={cast.name}
                         fill
                         className="object-cover transition-transform duration-300 group-hover:scale-105"
