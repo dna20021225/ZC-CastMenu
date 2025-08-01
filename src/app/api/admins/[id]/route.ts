@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { query } from '@/lib/database';
-import { createAPILogger } from '@/lib/logger/server';
+import { query } from '@/lib/db';
+import { createAPILogger } from '@/lib/logger';
 import bcrypt from 'bcryptjs';
 
 // Logger initialization moved

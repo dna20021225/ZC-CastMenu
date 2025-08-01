@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { query } from '@/lib/database';
+import { query } from '@/lib/db';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 

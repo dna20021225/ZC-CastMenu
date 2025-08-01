@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { query, transaction } from '@/lib/database';
-import { createAPILogger } from '@/lib/logger/server';
+import { query, getClient } from '@/lib/db';
+import { createAPILogger } from '@/lib/logger';
 import { 
   ApiResponse, 
   CastDetail,

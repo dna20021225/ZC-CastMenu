@@ -8,10 +8,10 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "ZC-CastMenu - キャストメニュー",
-  description: "キャスト一覧とプロフィール表示システム",
+  title: "ZC-CastMenu - タブレット専用男メニュー",
+  description: "タブレット専用男メニューアプリケーション",
   manifest: "/manifest.json",
-  themeColor: "#ec4899",
+  themeColor: "#3b82f6",
   viewport: {
     width: "device-width",
     initialScale: 1,
@@ -20,14 +20,21 @@ export const metadata: Metadata = {
   },
   appleWebApp: {
     capable: true,
-    statusBarStyle: "default",
-    title: "CastMenu",
+    statusBarStyle: "black-translucent",
+    title: "ZC-CastMenu",
   },
   openGraph: {
     title: "ZC-CastMenu",
-    description: "キャスト一覧とプロフィール表示システム",
+    description: "タブレット専用男メニューアプリケーション",
     type: "website",
     locale: "ja_JP",
+  },
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
+  },
+  formatDetection: {
+    telephone: false,
   },
 };
 
@@ -39,7 +46,7 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <body
-        className={`${inter.className} antialiased bg-gray-50 min-h-screen`}
+        className={`${inter.className} antialiased bg-background min-h-screen`}
       >
         <main className="pb-16">
           {children}

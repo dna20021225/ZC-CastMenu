@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
-import { testConnection } from '@/lib/database';
+import { checkConnection } from '@/lib/db';
 
 export async function GET() {
   try {
-    const isConnected = await testConnection();
+    const isConnected = await checkConnection();
     
     if (isConnected) {
       return NextResponse.json({ 

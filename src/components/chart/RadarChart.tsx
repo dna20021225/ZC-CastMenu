@@ -19,6 +19,7 @@ interface RadarChartProps extends HTMLAttributes<HTMLDivElement> {
     fill: string;
     stroke: string;
   };
+  theme?: 'default' | 'premium';
 }
 
 export const RadarChart = forwardRef<HTMLDivElement, RadarChartProps>(
@@ -26,13 +27,11 @@ export const RadarChart = forwardRef<HTMLDivElement, RadarChartProps>(
     className, 
     stats,
     size = 'md',
-    colors = {
-      fill: 'rgba(59, 130, 246, 0.3)', // blue-500 with opacity
-      stroke: '#3b82f6' // blue-500
-    },
+    colors,
+    theme = 'default',
     ...props 
   }, ref) => {
-    const baseClasses = 'flex items-center justify-center';
+    const baseClasses = 'flex items-center justify-center p-4';
     
     const sizes = {
       sm: 'h-48 w-48',
@@ -40,31 +39,44 @@ export const RadarChart = forwardRef<HTMLDivElement, RadarChartProps>(
       lg: 'h-80 w-80'
     };
 
+    // 新デザインシステムに対応したカラーパレット
+    const defaultColors = {
+      fill: 'rgba(59, 130, 246, 0.2)', // CSS変数対応の青
+      stroke: '#2563eb' // primary-600
+    };
+
+    const premiumColors = {
+      fill: 'rgba(147, 51, 234, 0.2)', // 紫系
+      stroke: '#9333ea'
+    };
+
+    const chartColors = colors || (theme === 'premium' ? premiumColors : defaultColors);
+
     // データの準備（1-100の範囲）
     const chartData = [
       {
         stat: STAT_LABELS.looks,
-        value: stats.looks,
+        value: stats.looks || 0,
         fullMark: 100
       },
       {
         stat: STAT_LABELS.talk,
-        value: stats.talk,
+        value: stats.talk || 0,
         fullMark: 100
       },
       {
         stat: STAT_LABELS.alcohol_tolerance,
-        value: stats.alcohol_tolerance,
+        value: stats.alcohol_tolerance || 0,
         fullMark: 100
       },
       {
         stat: STAT_LABELS.intelligence,
-        value: stats.intelligence,
+        value: stats.intelligence || 0,
         fullMark: 100
       },
       {
         stat: STAT_LABELS.energy,
-        value: stats.energy,
+        value: stats.energy || 0,
         fullMark: 100
       }
     ];
@@ -83,50 +95,85 @@ export const RadarChart = forwardRef<HTMLDivElement, RadarChartProps>(
         className={clsx(
           baseClasses,
           sizes[size],
+          'bg-gradient-to-br from-surface to-surface-variant rounded-xl shadow-sm',
           className
         )}
         ref={ref}
         {...props}
       >
         <ResponsiveContainer width="100%" height="100%">
-          <RechartsRadarChart data={chartData}>
+          <RechartsRadarChart data={chartData} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+            {/* グリッド線 */}
             <PolarGrid 
-              stroke="#e5e7eb" 
+              stroke="var(--border)" 
               strokeWidth={1}
+              strokeOpacity={0.6}
             />
+            
+            {/* ラベル軸 */}
             <PolarAngleAxis 
               dataKey="stat"
               tick={{ 
-                fontSize: 12, 
-                fill: '#374151',
-                fontWeight: 500
+                fontSize: 11, 
+                fill: 'var(--foreground)',
+                fontWeight: 600
               }}
-              className="text-xs font-medium text-gray-700"
+              tickFormatter={(value) => {
+                // 長いラベルを短縮
+                if (value.length > 6) {
+                  return value.substring(0, 5) + '...';
+                }
+                return value;
+              }}
             />
+            
+            {/* 数値軸 */}
             <PolarRadiusAxis
               domain={[0, 100]}
               tick={{ 
-                fontSize: 10, 
-                fill: '#9ca3af' 
+                fontSize: 9, 
+                fill: 'var(--accent-600)',
+                fontWeight: 500
               }}
-              tickCount={6}
+              tickCount={5}
               angle={90}
+              axisLine={false}
             />
+            
+            {/* データ表示 */}
             <Radar
-              name={stats.cast_id}
+              name="能力値"
               dataKey="value"
-              stroke={colors.stroke}
-              fill={colors.fill}
-              strokeWidth={2}
+              stroke={chartColors.stroke}
+              fill={chartColors.fill}
+              strokeWidth={3}
+              fillOpacity={0.3}
               dot={{ 
-                r: 4, 
-                fill: colors.stroke,
+                r: 5, 
+                fill: chartColors.stroke,
                 strokeWidth: 2,
-                stroke: '#ffffff'
+                stroke: '#ffffff',
+                fillOpacity: 1
+              }}
+              activeDot={{
+                r: 7,
+                fill: chartColors.stroke,
+                strokeWidth: 3,
+                stroke: '#ffffff',
+                filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))'
               }}
             />
           </RechartsRadarChart>
         </ResponsiveContainer>
+        
+        {/* レーダーチャートの説明 */}
+        <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2">
+          <div className="text-xs text-secondary text-center">
+            <span className="bg-surface-variant px-2 py-1 rounded-full">
+              最大値: 100
+            </span>
+          </div>
+        </div>
       </div>
     );
   }

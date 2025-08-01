@@ -1,187 +1,268 @@
-"use client";
+'use client';
 
-import { DollarSign, Clock, Users, Star } from 'lucide-react';
+import Link from 'next/link';
+import { ArrowLeft, Clock, Star, Gift, User, Smartphone } from 'lucide-react';
 
 interface PricingPlan {
   id: string;
   name: string;
-  price: string;
   duration: string;
+  price: number;
+  description: string;
   features: string[];
   popular?: boolean;
 }
 
 const pricingPlans: PricingPlan[] = [
   {
-    id: 'basic',
+    id: 'basic-30',
     name: 'ベーシック',
-    price: '¥3,000',
     duration: '30分',
+    price: 3000,
+    description: 'お気軽にお楽しみいただけるプラン',
     features: [
-      'キャストとの会話',
-      'ドリンク1杯込み',
-      '基本的なサービス'
+      'キャストとの会話タイム',
+      'お飲み物1杯込み',
+      '写真撮影OK'
     ]
   },
   {
-    id: 'standard',
+    id: 'standard-60',
     name: 'スタンダード',
-    price: '¥5,500',
     duration: '60分',
+    price: 5500,
+    description: 'じっくりお話したい方におすすめ',
     features: [
-      'キャストとの会話',
-      'ドリンク2杯込み',
-      'カラオケ利用可',
-      'ゲーム参加可'
+      'キャストとの会話タイム',
+      'お飲み物2杯込み',
+      '写真撮影OK',
+      'ゲーム参加可能'
     ],
     popular: true
   },
   {
-    id: 'premium',
+    id: 'premium-90',
     name: 'プレミアム',
-    price: '¥8,000',
     duration: '90分',
+    price: 8000,
+    description: 'たっぷり時間をかけて楽しめる',
     features: [
-      'キャストとの会話',
-      'ドリンク飲み放題',
-      'カラオケ利用可',
-      'ゲーム参加可',
-      '写真撮影サービス'
+      'キャストとの会話タイム',
+      'お飲み物3杯込み',
+      '写真撮影OK',
+      'ゲーム参加可能',
+      '軽食サービス'
     ]
   },
   {
-    id: 'vip',
+    id: 'vip-120',
     name: 'VIP',
-    price: '¥12,000',
     duration: '120分',
+    price: 12000,
+    description: '特別なひとときをお過ごしください',
     features: [
-      'キャストとの会話',
-      'ドリンク飲み放題',
-      'カラオケ利用可',
-      'ゲーム参加可',
-      '写真撮影サービス',
-      '専用個室利用',
-      'VIP特別サービス'
+      'キャストとの会話タイム',
+      'お飲み物無制限',
+      '写真撮影OK',
+      'ゲーム参加可能',
+      '軽食サービス',
+      '個室利用可能'
     ]
+  }
+];
+
+const additionalServices = [
+  {
+    name: 'ドリンク追加',
+    price: 500,
+    description: 'アルコール・ソフトドリンク各種'
+  },
+  {
+    name: 'フード追加',
+    price: 800,
+    description: '軽食・おつまみ各種'
+  },
+  {
+    name: '写真プリント',
+    price: 300,
+    description: 'チェキ風プリント（1枚）'
+  },
+  {
+    name: '延長料金',
+    price: 1000,
+    description: '15分毎の延長料金'
   }
 ];
 
 export default function PricingPage() {
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        
-        {/* ヘッダー */}
-        <div className="text-center mb-12">
-          <div className="flex items-center justify-center mb-4">
-            <DollarSign className="w-8 h-8 text-pink-600 mr-2" />
-            <h1 className="text-4xl font-bold text-gray-900">料金プラン</h1>
+    <div className="min-h-screen pb-20">
+      {/* ヘッダー */}
+      <header className="sticky top-0 z-40 border-b border-border backdrop-blur-md bg-surface/80">
+        <div className="tablet-layout py-3">
+          <div className="flex items-center gap-4">
+            <Link 
+              href="/"
+              className="flex items-center gap-2 text-secondary hover:text-primary transition-colors"
+            >
+              <ArrowLeft className="h-5 w-5" />
+              戻る
+            </Link>
+            <div className="flex-1 min-w-0">
+              <h1 className="text-lg font-bold">料金表</h1>
+            </div>
           </div>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            お客様のニーズに合わせた様々なプランをご用意しております
-          </p>
+        </div>
+      </header>
+
+      {/* メインコンテンツ */}
+      <main className="tablet-layout py-6">
+        {/* タイトルセクション */}
+        <div className="text-center mb-8">
+          <h2 className="text-2xl font-bold mb-2">料金プラン</h2>
+          <p className="text-secondary text-sm">お客様のご予算に合わせてお選びください</p>
         </div>
 
-        {/* 料金プラン */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        {/* プラン一覧 */}
+        <div className="grid md:grid-cols-2 gap-6 mb-10">
           {pricingPlans.map((plan) => (
             <div
               key={plan.id}
-              className={`relative bg-white rounded-lg shadow-lg overflow-hidden ${
-                plan.popular ? 'ring-2 ring-pink-500 scale-105' : ''
+              className={`cast-card p-6 relative ${
+                plan.popular ? 'ring-2 ring-primary' : ''
               }`}
             >
+              {/* 人気プランバッジ */}
               {plan.popular && (
-                <div className="absolute top-0 left-0 right-0 bg-pink-500 text-white text-center py-2">
-                  <div className="flex items-center justify-center">
-                    <Star className="w-4 h-4 mr-1" />
-                    <span className="text-sm font-medium">人気</span>
+                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                  <div className="bg-primary text-white px-4 py-1 rounded-full text-xs font-semibold flex items-center gap-1">
+                    <Star className="h-3 w-3" />
+                    人気プラン
                   </div>
                 </div>
               )}
-              
-              <div className={`p-6 ${plan.popular ? 'pt-12' : ''}`}>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">
-                  {plan.name}
-                </h3>
-                
-                <div className="mb-4">
-                  <span className="text-3xl font-bold text-pink-600">
-                    {plan.price}
-                  </span>
+
+              <div className="space-y-4">
+                {/* プラン名と時間 */}
+                <div className="text-center">
+                  <h3 className="text-xl font-bold mb-1">{plan.name}</h3>
+                  <div className="flex items-center justify-center gap-2 text-primary">
+                    <Clock className="h-4 w-4" />
+                    <span className="font-semibold">{plan.duration}</span>
+                  </div>
                 </div>
-                
-                <div className="flex items-center text-gray-600 mb-6">
-                  <Clock className="w-4 h-4 mr-2" />
-                  <span>{plan.duration}</span>
+
+                {/* 価格 */}
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-primary mb-1">
+                    ¥{plan.price.toLocaleString()}
+                  </div>
+                  <p className="text-xs text-secondary">{plan.description}</p>
                 </div>
-                
-                <ul className="space-y-3 mb-6">
-                  {plan.features.map((feature, index) => (
-                    <li key={index} className="flex items-start">
-                      <div className="w-2 h-2 bg-pink-500 rounded-full mt-2 mr-3 flex-shrink-0" />
-                      <span className="text-sm text-gray-700">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-                
-                <button
-                  className={`w-full py-3 px-4 rounded-lg font-medium transition-colors ${
-                    plan.popular
-                      ? 'bg-pink-600 text-white hover:bg-pink-700'
-                      : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
-                  }`}
-                >
-                  プランを選択
-                </button>
+
+                {/* 機能リスト */}
+                <div className="space-y-3">
+                  <h4 className="text-sm font-semibold text-secondary">含まれるサービス</h4>
+                  <ul className="space-y-2">
+                    {plan.features.map((feature, index) => (
+                      <li key={index} className="flex items-center gap-2 text-sm">
+                        <div className="w-1.5 h-1.5 bg-primary rounded-full flex-shrink-0" />
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
             </div>
           ))}
         </div>
 
-        {/* 追加情報 */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
-            ご利用について
-          </h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <h3 className="text-lg font-semibold text-gray-800 mb-3">
-                営業時間
-              </h3>
-              <div className="space-y-2 text-gray-600">
-                <p>平日: 18:00 - 26:00</p>
-                <p>土日祝: 16:00 - 27:00</p>
+        {/* 追加サービス */}
+        <div className="cast-card p-6 mb-6">
+          <div className="text-center mb-6">
+            <h3 className="text-xl font-bold mb-2">追加サービス</h3>
+            <p className="text-secondary text-sm">オプションでご利用いただけます</p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-4">
+            {additionalServices.map((service, index) => (
+              <div key={index} className="flex items-center justify-between p-4 bg-surface-variant rounded-lg">
+                <div>
+                  <h4 className="font-semibold text-sm">{service.name}</h4>
+                  <p className="text-xs text-secondary">{service.description}</p>
+                </div>
+                <div className="text-right">
+                  <div className="text-lg font-bold text-primary">
+                    ¥{service.price.toLocaleString()}
+                  </div>
+                </div>
               </div>
-            </div>
-            
-            <div>
-              <h3 className="text-lg font-semibold text-gray-800 mb-3">
-                ご予約・お問い合わせ
-              </h3>
-              <div className="space-y-2 text-gray-600">
-                <p>電話: 03-XXXX-XXXX</p>
-                <p>受付時間: 15:00 - 25:00</p>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
 
         {/* 注意事項 */}
-        <div className="bg-gray-100 rounded-lg p-6">
-          <h3 className="text-lg font-semibold text-gray-800 mb-3">
-            注意事項
-          </h3>
-          <ul className="space-y-2 text-sm text-gray-600">
-            <li>• 料金は税込み価格です</li>
-            <li>• 延長料金は15分毎に¥1,000となります</li>
-            <li>• キャンセルは当日17:00まで承ります</li>
-            <li>• 未成年者のご利用はお断りしております</li>
-            <li>• ドリンクの追加注文も承っております</li>
-          </ul>
+        <div className="cast-card p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <Gift className="h-5 w-5 text-primary" />
+            <h3 className="text-lg font-bold">ご利用について</h3>
+          </div>
+          
+          <div className="space-y-3 text-sm text-secondary">
+            <div className="flex gap-2">
+              <span className="text-primary font-semibold">•</span>
+              <span>料金は税込み価格です</span>
+            </div>
+            <div className="flex gap-2">
+              <span className="text-primary font-semibold">•</span>
+              <span>ご予約は事前にお電話またはオンラインでお願いします</span>
+            </div>
+            <div className="flex gap-2">
+              <span className="text-primary font-semibold">•</span>
+              <span>キャンセルは前日までにご連絡ください</span>
+            </div>
+            <div className="flex gap-2">
+              <span className="text-primary font-semibold">•</span>
+              <span>延長をご希望の場合は、当日キャストにお申し付けください</span>
+            </div>
+            <div className="flex gap-2">
+              <span className="text-primary font-semibold">•</span>
+              <span>お支払いは現金またはクレジットカードをご利用いただけます</span>
+            </div>
+          </div>
         </div>
-      </div>
+
+        {/* お問い合わせセクション */}
+        <div className="text-center mt-8">
+          <p className="text-secondary text-sm mb-4">
+            ご不明な点がございましたら、お気軽にお問い合わせください
+          </p>
+          <div className="space-y-2">
+            <p className="text-lg font-bold">📞 03-XXXX-XXXX</p>
+            <p className="text-xs text-secondary">営業時間: 18:00 - 26:00 (月-土)</p>
+          </div>
+        </div>
+      </main>
+
+      {/* ナビゲーション */}
+      <nav className="nav-primary">
+        <div className="tablet-layout">
+          <div className="flex items-center justify-around">
+            <Link href="/" className="nav-item">
+              <User className="h-5 w-5" />
+              <span>キャスト</span>
+            </Link>
+            <Link href="/menu/pricing" className="nav-item active">
+              <Smartphone className="h-5 w-5" />
+              <span>料金</span>
+            </Link>
+            <Link href="/menu/drinks" className="nav-item">
+              <Smartphone className="h-5 w-5" />
+              <span>ドリンク</span>
+            </Link>
+          </div>
+        </div>
+      </nav>
     </div>
   );
 }
