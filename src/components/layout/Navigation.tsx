@@ -45,10 +45,8 @@ export const Navigation = forwardRef<HTMLElement, NavigationProps>(
   }, ref) => {
     const pathname = usePathname();
 
-    const baseClasses = 'border-t' 
-      + ' ' + (typeof window !== 'undefined' ? 
-        `bg-surface border-border` : 
-        'bg-black border-gray-800');
+    // Hydration mismatch修正：統一されたclassNameを使用
+    const baseClasses = 'border-t';
     
     const variantClasses = {
       bottom: 'fixed bottom-0 left-0 right-0 z-50',

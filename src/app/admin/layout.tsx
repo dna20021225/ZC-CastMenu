@@ -1,13 +1,14 @@
-import { auth } from "@/lib/auth";
 import Link from "next/link";
 import { SessionProvider } from "@/components/SessionProvider";
+import { LogoutButton } from "@/components/LogoutButton";
+import { UserDisplay } from "@/components/UserDisplay";
 
-export default async function AdminLayout({
+export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const session = await auth();
+  // 認証チェックはMiddlewareに一元化（サーバーサイド認証チェックを削除）
 
   return (
     <SessionProvider>
@@ -35,12 +36,8 @@ export default async function AdminLayout({
                 </div>
               </div>
               <div className="flex items-center">
-                <span className="text-secondary text-sm mr-4">{session?.user?.name || 'ユーザー'}</span>
-                <form action="/api/auth/signout" method="POST">
-                  <button className="btn-secondary text-sm">
-                    ログアウト
-                  </button>
-                </form>
+                <UserDisplay />
+                <LogoutButton />
               </div>
             </div>
           </div>

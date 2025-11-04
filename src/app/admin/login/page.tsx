@@ -1,15 +1,40 @@
 "use client";
 
-import { useState } from "react";
-import { signIn } from "next-auth/react";
+import { useState, useEffect } from "react";
+import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
 export default function AdminLoginPage() {
   const router = useRouter();
+  const { data: session, status } = useSession();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  // 既にログインしている場合は管理画面にリダイレクト
+  useEffect(() => {
+    if (status === "authenticated" && session) {
+      router.push("/admin");
+      // router.refresh()を削除 - 無限ループの原因
+    }
+  }, [session, status, router]);
+
+  // ローディング中は何も表示しない
+  if (status === "loading") {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--background)' }}>
+        <div className="text-center">
+          <div className="text-lg" style={{ color: 'var(--foreground)' }}>読み込み中...</div>
+        </div>
+      </div>
+    );
+  }
+
+  // 認証済みの場合は何も表示しない（リダイレクト処理中）
+  if (status === "authenticated") {
+    return null;
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,10 +50,11 @@ export default function AdminLoginPage() {
 
       if (result?.error) {
         setError("ユーザー名またはパスワードが正しくありません");
-        console.warn("ログイン失敗", { username });
-      } else {
-        console.info("ログイン成功", { username });
+      } else if (result?.ok) {
         router.push("/admin");
+        // router.refresh()を削除 - 無限ループの原因
+      } else {
+        setError("ログインに失敗しました");
       }
     } catch (error) {
       console.error("ログインエラー", error);

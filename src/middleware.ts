@@ -16,7 +16,7 @@ export async function middleware(request: NextRequest) {
       secret: process.env.NEXTAUTH_SECRET
     });
     
-    if (!token) {
+    if (!token || !token.role) {
       const loginUrl = new URL("/admin/login", request.url);
       return NextResponse.redirect(loginUrl);
     }
@@ -26,5 +26,8 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: [
+    // /admin/loginとapi/authを除外して無限リダイレクトを防止
+    "/admin/((?!login|api/auth).*)+"
+  ],
 };
