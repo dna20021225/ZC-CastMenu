@@ -40,44 +40,38 @@ export const GET = asyncHandler(async (request: NextRequest) => {
     const params = validation.data;
 
     // WHERE句の構築
-    const conditions: string[] = ['c.is_active = true'];
+    const conditions: string[] = ['c.is_active = 1'];
     const queryParams: unknown[] = [];
-    let paramIndex = 1;
 
     if (params.search) {
-      conditions.push(`c.name ILIKE $${paramIndex}`);
+      conditions.push(`c.name LIKE ?`);
       queryParams.push(`%${params.search}%`);
-      paramIndex++;
     }
 
     if (params.age_min) {
-      conditions.push(`c.age >= $${paramIndex}`);
+      conditions.push(`c.age >= ?`);
       queryParams.push(params.age_min);
-      paramIndex++;
     }
 
     if (params.age_max) {
-      conditions.push(`c.age <= $${paramIndex}`);
+      conditions.push(`c.age <= ?`);
       queryParams.push(params.age_max);
-      paramIndex++;
     }
 
     if (params.height_min) {
-      conditions.push(`c.height >= $${paramIndex}`);
+      conditions.push(`c.height >= ?`);
       queryParams.push(params.height_min);
-      paramIndex++;
     }
 
     if (params.height_max) {
-      conditions.push(`c.height <= $${paramIndex}`);
+      conditions.push(`c.height <= ?`);
       queryParams.push(params.height_max);
-      paramIndex++;
     }
 
     // バッジフィルタ
     let badgeJoin = '';
     if (params.badges && params.badges.length > 0) {
-      const placeholders = params.badges.map(() => `$${paramIndex++}`).join(',');
+      const placeholders = params.badges.map(() => `?`).join(',');
       queryParams.push(...params.badges);
       badgeJoin = `
         INNER JOIN cast_badges cb ON c.id = cb.cast_id
@@ -86,7 +80,7 @@ export const GET = asyncHandler(async (request: NextRequest) => {
     }
 
     const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
-    
+
     // ソート
     const sortColumn = params.sort_by === 'created_at' ? 'c.created_at' : `c.${params.sort_by}`;
     const orderClause = `ORDER BY ${sortColumn} ${params.sort_order?.toUpperCase()}`;
@@ -94,7 +88,7 @@ export const GET = asyncHandler(async (request: NextRequest) => {
     // ページネーション
     const offset = ((params.page || 1) - 1) * (params.limit || 20);
     queryParams.push(params.limit, offset);
-    const paginationClause = `LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
+    const paginationClause = `LIMIT ? OFFSET ?`;
 
     // メインクエリ
     const castsQuery = `
@@ -116,13 +110,13 @@ export const GET = asyncHandler(async (request: NextRequest) => {
       casts.map(async (cast) => {
         // 写真を取得
         const photosResult = await query(
-          'SELECT * FROM cast_photos WHERE cast_id = $1 ORDER BY order_index',
+          'SELECT * FROM cast_photos WHERE cast_id = ? ORDER BY order_index',
           [cast.id]
         ) as { rows: CastPhoto[] };
 
         // 能力値を取得
         const statsResult = await query(
-          'SELECT * FROM cast_stats WHERE cast_id = $1',
+          'SELECT * FROM cast_stats WHERE cast_id = ?',
           [cast.id]
         ) as { rows: CastStats[] };
 
@@ -131,7 +125,7 @@ export const GET = asyncHandler(async (request: NextRequest) => {
           SELECT b.*, cb.assigned_at
           FROM badges b
           INNER JOIN cast_badges cb ON b.id = cb.badge_id
-          WHERE cb.cast_id = $1
+          WHERE cb.cast_id = ?
           ORDER BY b.display_order
         `, [cast.id]) as { rows: (Badge & { assigned_at: string })[] };
 
@@ -196,10 +190,9 @@ export const POST = asyncHandler(async (request: NextRequest) => {
 
     const result = await transaction(async (client) => {
       // キャスト基本情報を作成
-      const castResult = await client.query(`
+      await client.query(`
         INSERT INTO casts (name, age, height, description, avatar_url, is_active)
-        VALUES ($1, $2, $3, $4, $5, true)
-        RETURNING *
+        VALUES (?, ?, ?, ?, ?, 1)
       `, [
         validatedData.name,
         validatedData.age,
@@ -208,14 +201,16 @@ export const POST = asyncHandler(async (request: NextRequest) => {
         validatedData.avatar_url || null
       ]);
 
-      const newCast = castResult.rows[0] as Cast;
+      // 最後に挿入されたIDを取得
+      const lastIdResult = await client.query('SELECT last_insert_rowid() as id');
+      const castId = lastIdResult.rows[0].id as number;
 
       // 能力値を作成
       await client.query(`
         INSERT INTO cast_stats (cast_id, looks, talk, alcohol_tolerance, intelligence, energy, custom_stat, custom_stat_name)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
       `, [
-        newCast.id,
+        castId,
         validatedData.stats.looks || 50,
         validatedData.stats.talk || 50,
         validatedData.stats.alcohol_tolerance || 50,
@@ -229,11 +224,13 @@ export const POST = asyncHandler(async (request: NextRequest) => {
       if (validatedData.avatar_url) {
         await client.query(`
           INSERT INTO cast_photos (cast_id, photo_url, is_main, order_index)
-          VALUES ($1, $2, true, 0)
-        `, [newCast.id, validatedData.avatar_url]);
+          VALUES (?, ?, 1, 0)
+        `, [castId, validatedData.avatar_url]);
       }
 
-      return newCast;
+      // 作成されたキャストを取得
+      const castResult = await client.query('SELECT * FROM casts WHERE id = ?', [castId]);
+      return castResult.rows[0] as Cast;
     });
 
     console.info('キャスト作成完了', { castId: result.id, name: result.name });

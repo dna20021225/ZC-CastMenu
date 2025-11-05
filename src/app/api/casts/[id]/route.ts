@@ -21,7 +21,7 @@ export async function GET(
 
     // キャスト基本情報を取得
     const castResult = await query(
-      'SELECT * FROM casts WHERE id = $1 AND is_active = true',
+      'SELECT * FROM casts WHERE id = ? AND is_active = 1',
       [params.id]
     ) as { rows: Cast[] };
 
@@ -37,13 +37,13 @@ export async function GET(
 
     // 写真を取得
     const photosResult = await query(
-      'SELECT * FROM cast_photos WHERE cast_id = $1 ORDER BY order_index',
+      'SELECT * FROM cast_photos WHERE cast_id = ? ORDER BY order_index',
       [cast.id]
     ) as { rows: CastPhoto[] };
 
     // 能力値を取得
     const statsResult = await query(
-      'SELECT * FROM cast_stats WHERE cast_id = $1',
+      'SELECT * FROM cast_stats WHERE cast_id = ?',
       [cast.id]
     ) as { rows: CastStats[] };
 
@@ -52,7 +52,7 @@ export async function GET(
       SELECT b.*, cb.assigned_at
       FROM badges b
       INNER JOIN cast_badges cb ON b.id = cb.badge_id
-      WHERE cb.cast_id = $1
+      WHERE cb.cast_id = ?
       ORDER BY b.display_order
     `, [cast.id]) as { rows: (Badge & { assigned_at: string })[] };
 
@@ -108,7 +108,7 @@ export async function PUT(
     const result = await transaction(async (client) => {
       // キャストの存在確認
       const existingCastResult = await client.query(
-        'SELECT * FROM casts WHERE id = $1 AND is_active = true',
+        'SELECT * FROM casts WHERE id = ? AND is_active = 1',
         [params.id]
       );
 
@@ -122,46 +122,50 @@ export async function PUT(
       if (body.cast) {
         const updateFields: string[] = [];
         const updateValues: unknown[] = [];
-        let paramIndex = 1;
 
         if (body.cast.name !== undefined) {
-          updateFields.push(`name = $${paramIndex++}`);
+          updateFields.push(`name = ?`);
           updateValues.push(body.cast.name);
         }
         if (body.cast.age !== undefined) {
-          updateFields.push(`age = $${paramIndex++}`);
+          updateFields.push(`age = ?`);
           updateValues.push(body.cast.age);
         }
         if (body.cast.height !== undefined) {
-          updateFields.push(`height = $${paramIndex++}`);
+          updateFields.push(`height = ?`);
           updateValues.push(body.cast.height);
         }
         if (body.cast.hobby !== undefined) {
-          updateFields.push(`hobby = $${paramIndex++}`);
+          updateFields.push(`hobby = ?`);
           updateValues.push(body.cast.hobby);
         }
         if (body.cast.description !== undefined) {
-          updateFields.push(`description = $${paramIndex++}`);
+          updateFields.push(`description = ?`);
           updateValues.push(body.cast.description);
         }
         if (body.cast.avatar_url !== undefined) {
-          updateFields.push(`avatar_url = $${paramIndex++}`);
+          updateFields.push(`avatar_url = ?`);
           updateValues.push(body.cast.avatar_url);
         }
 
         if (updateFields.length > 0) {
-          updateFields.push(`updated_at = NOW()`);
+          updateFields.push(`updated_at = datetime('now')`);
           updateValues.push(params.id);
 
           const updateQuery = `
-            UPDATE casts 
+            UPDATE casts
             SET ${updateFields.join(', ')}
-            WHERE id = $${paramIndex}
-            RETURNING *
+            WHERE id = ?
           `;
 
-          const updateResult = await client.query(updateQuery, updateValues);
-          updatedCast = updateResult.rows[0] as Cast;
+          await client.query(updateQuery, updateValues);
+
+          // SQLiteではRETURNING句が使えないため、再度取得
+          const updatedResult = await client.query(
+            'SELECT * FROM casts WHERE id = ?',
+            [params.id]
+          );
+          updatedCast = updatedResult.rows[0] as Cast;
         }
       }
 
@@ -169,45 +173,44 @@ export async function PUT(
       if (body.stats) {
         const updateFields: string[] = [];
         const updateValues: unknown[] = [];
-        let paramIndex = 1;
 
         if (body.stats.looks !== undefined) {
-          updateFields.push(`looks = $${paramIndex++}`);
+          updateFields.push(`looks = ?`);
           updateValues.push(body.stats.looks);
         }
         if (body.stats.talk !== undefined) {
-          updateFields.push(`talk = $${paramIndex++}`);
+          updateFields.push(`talk = ?`);
           updateValues.push(body.stats.talk);
         }
         if (body.stats.alcohol_tolerance !== undefined) {
-          updateFields.push(`alcohol_tolerance = $${paramIndex++}`);
+          updateFields.push(`alcohol_tolerance = ?`);
           updateValues.push(body.stats.alcohol_tolerance);
         }
         if (body.stats.intelligence !== undefined) {
-          updateFields.push(`intelligence = $${paramIndex++}`);
+          updateFields.push(`intelligence = ?`);
           updateValues.push(body.stats.intelligence);
         }
         if (body.stats.energy !== undefined) {
-          updateFields.push(`energy = $${paramIndex++}`);
+          updateFields.push(`energy = ?`);
           updateValues.push(body.stats.energy);
         }
         if (body.stats.custom_stat !== undefined) {
-          updateFields.push(`custom_stat = $${paramIndex++}`);
+          updateFields.push(`custom_stat = ?`);
           updateValues.push(body.stats.custom_stat);
         }
         if (body.stats.custom_stat_name !== undefined) {
-          updateFields.push(`custom_stat_name = $${paramIndex++}`);
+          updateFields.push(`custom_stat_name = ?`);
           updateValues.push(body.stats.custom_stat_name);
         }
 
         if (updateFields.length > 0) {
-          updateFields.push(`updated_at = NOW()`);
+          updateFields.push(`updated_at = datetime('now')`);
           updateValues.push(params.id);
 
           const statsUpdateQuery = `
-            UPDATE cast_stats 
+            UPDATE cast_stats
             SET ${updateFields.join(', ')}
-            WHERE cast_id = $${paramIndex}
+            WHERE cast_id = ?
           `;
 
           await client.query(statsUpdateQuery, updateValues);
@@ -217,15 +220,15 @@ export async function PUT(
       // 写真を更新（完全置換）
       if (body.photos !== undefined) {
         // 既存の写真を削除
-        await client.query('DELETE FROM cast_photos WHERE cast_id = $1', [params.id]);
+        await client.query('DELETE FROM cast_photos WHERE cast_id = ?', [params.id]);
 
         // 新しい写真を追加
         if (body.photos.length > 0) {
           for (let i = 0; i < body.photos.length; i++) {
             await client.query(`
               INSERT INTO cast_photos (cast_id, photo_url, is_main, order_index)
-              VALUES ($1, $2, $3, $4)
-            `, [params.id, body.photos[i], i === 0, i]);
+              VALUES (?, ?, ?, ?)
+            `, [params.id, body.photos[i], i === 0 ? 1 : 0, i]);
           }
         }
       }
@@ -233,14 +236,14 @@ export async function PUT(
       // バッジを更新（完全置換）
       if (body.badges !== undefined) {
         // 既存のバッジを削除
-        await client.query('DELETE FROM cast_badges WHERE cast_id = $1', [params.id]);
+        await client.query('DELETE FROM cast_badges WHERE cast_id = ?', [params.id]);
 
         // 新しいバッジを追加
         if (body.badges.length > 0) {
           for (const badgeId of body.badges) {
             await client.query(`
               INSERT INTO cast_badges (cast_id, badge_id, assigned_by)
-              VALUES ($1, $2, $3)
+              VALUES (?, ?, ?)
             `, [params.id, badgeId, 'system']); // TODO: 実際のユーザーIDに変更
           }
         }
@@ -286,7 +289,7 @@ export async function DELETE(
     const result = await transaction(async (client) => {
       // キャストの存在確認
       const existingCastResult = await client.query(
-        'SELECT * FROM casts WHERE id = $1 AND is_active = true',
+        'SELECT * FROM casts WHERE id = ? AND is_active = 1',
         [params.id]
       );
 
@@ -296,14 +299,14 @@ export async function DELETE(
 
       const cast = existingCastResult.rows[0] as Cast;
 
-      // 論理削除（is_activeをfalseに設定）
+      // 論理削除（is_activeを0に設定）
       await client.query(
-        'UPDATE casts SET is_active = false, updated_at = NOW() WHERE id = $1',
+        'UPDATE casts SET is_active = 0, updated_at = datetime(\'now\') WHERE id = ?',
         [params.id]
       );
 
       // 関連データも無効化
-      await client.query('DELETE FROM cast_badges WHERE cast_id = $1', [params.id]);
+      await client.query('DELETE FROM cast_badges WHERE cast_id = ?', [params.id]);
 
       return cast;
     });

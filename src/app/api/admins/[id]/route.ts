@@ -13,7 +13,7 @@ export async function GET(
     console.info('管理者詳細取得開始', { id: params.id });
 
     const result = await query(
-      'SELECT id, username, email, is_active, created_at, last_login FROM admins WHERE id = $1',
+      'SELECT id, username, email, is_active, created_at, last_login FROM admins WHERE id = ?',
       [params.id]
     );
 
@@ -59,7 +59,7 @@ export async function PUT(
 
     // 他の管理者との重複チェック
     const existingUser = await query(
-      'SELECT id FROM admins WHERE (username = $1 OR email = $2) AND id != $3',
+      'SELECT id FROM admins WHERE (username = ? OR email = ?) AND id != ?',
       [username, email, params.id]
     );
 
@@ -74,12 +74,12 @@ export async function PUT(
     if (password) {
       const hashedPassword = await bcrypt.hash(password, 10);
       await query(
-        'UPDATE admins SET username = $1, email = $2, password = $3, updated_at = NOW() WHERE id = $4',
+        'UPDATE admins SET username = ?, email = ?, password = ?, updated_at = datetime(\'now\') WHERE id = ?',
         [username, email, hashedPassword, params.id]
       );
     } else {
       await query(
-        'UPDATE admins SET username = $1, email = $2, updated_at = NOW() WHERE id = $3',
+        'UPDATE admins SET username = ?, email = ?, updated_at = datetime(\'now\') WHERE id = ?',
         [username, email, params.id]
       );
     }
@@ -108,7 +108,7 @@ export async function DELETE(
     console.info('管理者削除開始', { id: params.id });
 
     // 管理者が1人だけの場合は削除不可
-    const countResult = await query('SELECT COUNT(*) as count FROM admins WHERE is_active = true');
+    const countResult = await query('SELECT COUNT(*) as count FROM admins WHERE is_active = 1');
     const activeCount = parseInt(countResult.rows[0].count);
 
     if (activeCount <= 1) {
@@ -118,19 +118,28 @@ export async function DELETE(
       }, { status: 400 });
     }
 
-    const result = await query(
-      'DELETE FROM admins WHERE id = $1 RETURNING username',
+    // 削除前にユーザー名を取得
+    const adminResult = await query(
+      'SELECT username FROM admins WHERE id = ?',
       [params.id]
     );
 
-    if (result.rows.length === 0) {
+    if (adminResult.rows.length === 0) {
       return NextResponse.json({
         success: false,
         error: '管理者が見つかりません',
       }, { status: 404 });
     }
 
-    console.info('管理者削除完了', { id: params.id, username: result.rows[0].username });
+    const username = adminResult.rows[0].username;
+
+    // 管理者を削除
+    await query(
+      'DELETE FROM admins WHERE id = ?',
+      [params.id]
+    );
+
+    console.info('管理者削除完了', { id: params.id, username });
 
     return NextResponse.json({
       success: true,
@@ -165,7 +174,7 @@ export async function PATCH(
 
     // 無効化する場合、有効な管理者が1人だけなら拒否
     if (!is_active) {
-      const countResult = await query('SELECT COUNT(*) as count FROM admins WHERE is_active = true');
+      const countResult = await query('SELECT COUNT(*) as count FROM admins WHERE is_active = 1');
       const activeCount = parseInt(countResult.rows[0].count);
 
       if (activeCount <= 1) {
@@ -177,8 +186,8 @@ export async function PATCH(
     }
 
     await query(
-      'UPDATE admins SET is_active = $1, updated_at = NOW() WHERE id = $2',
-      [is_active, params.id]
+      'UPDATE admins SET is_active = ?, updated_at = datetime(\'now\') WHERE id = ?',
+      [is_active ? 1 : 0, params.id]
     );
 
     console.info('管理者ステータス更新完了', { id: params.id, is_active });

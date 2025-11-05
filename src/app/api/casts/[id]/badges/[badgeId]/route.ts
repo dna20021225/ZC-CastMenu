@@ -13,7 +13,7 @@ export async function DELETE(
     const badgeId = parseInt(params.badgeId);
 
     await query(
-      "DELETE FROM cast_badges WHERE cast_id = $1 AND badge_id = $2",
+      "DELETE FROM cast_badges WHERE cast_id = ? AND badge_id = ?",
       [castId, badgeId]
     );
 

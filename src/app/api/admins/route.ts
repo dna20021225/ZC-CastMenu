@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
 
     // ユーザー名の重複チェック
     const existingUser = await query(
-      'SELECT id FROM admins WHERE username = $1 OR email = $2',
+      'SELECT id FROM admins WHERE username = ? OR email = ?',
       [username, email]
     );
 
@@ -60,9 +60,19 @@ export async function POST(request: NextRequest) {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // 管理者作成
-    const result = await query(
-      'INSERT INTO admins (username, email, password, is_active) VALUES ($1, $2, $3, true) RETURNING id, username, email, is_active, created_at',
+    await query(
+      'INSERT INTO admins (username, email, password, is_active) VALUES (?, ?, ?, 1)',
       [username, email, hashedPassword]
+    );
+
+    // 最後に挿入されたIDを取得
+    const lastIdResult = await query('SELECT last_insert_rowid() as id');
+    const adminId = lastIdResult.rows[0].id;
+
+    // 作成された管理者を取得
+    const result = await query(
+      'SELECT id, username, email, is_active, created_at FROM admins WHERE id = ?',
+      [adminId]
     );
 
     console.info('管理者作成完了', { id: result.rows[0].id, username });

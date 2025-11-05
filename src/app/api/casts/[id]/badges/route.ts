@@ -14,7 +14,7 @@ export async function POST(
 
     // 既に付与されているかチェック
     const existing = await query(
-      "SELECT * FROM cast_badges WHERE cast_id = $1 AND badge_id = $2",
+      "SELECT * FROM cast_badges WHERE cast_id = ? AND badge_id = ?",
       [castId, badge_id]
     );
 
@@ -27,7 +27,7 @@ export async function POST(
 
     // バッジを付与
     await query(
-      "INSERT INTO cast_badges (cast_id, badge_id) VALUES ($1, $2)",
+      "INSERT INTO cast_badges (cast_id, badge_id) VALUES (?, ?)",
       [castId, badge_id]
     );
 
