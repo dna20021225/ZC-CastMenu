@@ -5,7 +5,7 @@ async function getStats() {
   try {
     const castCount = await query("SELECT COUNT(*) FROM casts");
     const badgeCount = await query("SELECT COUNT(DISTINCT badge_id) FROM cast_badges");
-    const adminCount = await query("SELECT COUNT(*) FROM users WHERE is_active = true");
+    const adminCount = await query("SELECT COUNT(*) FROM admins WHERE is_active = 1");
     
     return {
       casts: castCount.rows[0].count,

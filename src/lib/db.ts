@@ -20,8 +20,13 @@ if (typeof window === 'undefined') {
 }
 
 // 環境判定
+// USE_LOCAL_DB=true でローカルSQLiteを強制使用（ビルド時に便利）
+// USE_TURSO=true でTursoを強制使用
+// それ以外は NODE_ENV で判定
+const forceLocalDb = process.env.USE_LOCAL_DB === 'true';
+const forceTurso = process.env.USE_TURSO === 'true';
 const isProduction = process.env.NODE_ENV === 'production';
-const useTurso = isProduction || process.env.USE_TURSO === 'true';
+const useTurso = !forceLocalDb && (forceTurso || isProduction);
 
 // Tursoクライアント（本番環境）
 let tursoClient: ReturnType<typeof createClient> | null = null;
@@ -106,10 +111,22 @@ export async function query(
     } else {
       // Better-SQLite3（開発環境）
       const db = getLocalDb();
-
-      // プリペアドステートメントを使用
       const stmt = db.prepare(text);
-      const rows = params ? stmt.all(...params) : stmt.all();
+
+      // SQL文の種類に応じてrun()とall()を使い分け
+      const trimmedSql = text.trim().toUpperCase();
+      const isSelectQuery = trimmedSql.startsWith('SELECT');
+
+      let rows: unknown[];
+      if (isSelectQuery) {
+        // SELECT文はall()でデータ取得
+        rows = params ? stmt.all(...params) : stmt.all();
+      } else {
+        // CREATE/INSERT/UPDATE/DELETE文はrun()を使用
+        const result = params ? stmt.run(...params) : stmt.run();
+        // run()の結果を返す（変更行数など）
+        rows = [{ changes: result.changes, lastInsertRowid: result.lastInsertRowid }];
+      }
 
       const duration = Date.now() - start;
       if (logger.debug) {
