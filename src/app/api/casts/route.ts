@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { query, transaction } from '@/lib/db';
+import { query } from '@/lib/db';
 import { asyncHandler, ValidationError } from '@/lib/error-handler';
 import { validateRequest, createCastSchema, castSearchParamsSchema } from '@/lib/validation';
 import {
@@ -103,7 +103,7 @@ export const GET = asyncHandler(async (request: NextRequest) => {
 
     console.debug('キャスト一覧クエリ実行', { query: castsQuery, params: queryParams });
     
-    const castsResult = await query(castsQuery, queryParams) as { rows: Cast[] };
+    const castsResult = await query(castsQuery, queryParams) as unknown as { rows: Cast[] };
     const casts = castsResult.rows;
 
     // 各キャストの関連データを取得
@@ -113,13 +113,13 @@ export const GET = asyncHandler(async (request: NextRequest) => {
         const photosResult = await query(
           'SELECT * FROM cast_photos WHERE cast_id = ? ORDER BY order_index',
           [cast.id]
-        ) as { rows: CastPhoto[] };
+        ) as unknown as { rows: CastPhoto[] };
 
         // 能力値を取得
         const statsResult = await query(
           'SELECT * FROM cast_stats WHERE cast_id = ?',
           [cast.id]
-        ) as { rows: CastStats[] };
+        ) as unknown as { rows: CastStats[] };
 
         // バッジを取得
         const badgesResult = await query(`
@@ -128,7 +128,7 @@ export const GET = asyncHandler(async (request: NextRequest) => {
           INNER JOIN cast_badges cb ON b.id = cb.badge_id
           WHERE cb.cast_id = ?
           ORDER BY b.display_order
-        `, [cast.id]) as { rows: (Badge & { assigned_at: string })[] };
+        `, [cast.id]) as unknown as { rows: (Badge & { assigned_at: string })[] };
 
         return {
           ...cast,
@@ -157,7 +157,7 @@ export const GET = asyncHandler(async (request: NextRequest) => {
       ${whereClause}
     `;
     
-    const countResult = await query(countQuery, queryParams.slice(0, -2)) as { rows: [{ total: string }] };
+    const countResult = await query(countQuery, queryParams.slice(0, -2)) as unknown as { rows: [{ total: string }] };
     const total = parseInt(countResult.rows[0].total);
 
     const response: CastListResponse = {
@@ -193,47 +193,45 @@ export const POST = asyncHandler(async (request: NextRequest) => {
     const castId = uuidv4();
     const photoId = uuidv4();
 
-    const result = await transaction(async (exec) => {
-      // キャスト基本情報を作成
-      await exec(`
-        INSERT INTO casts (id, name, age, height, description, avatar_url, is_active)
-        VALUES (?, ?, ?, ?, ?, ?, 1)
-      `, [
-        castId,
-        validatedData.name,
-        validatedData.age,
-        validatedData.height,
-        validatedData.description || null,
-        validatedData.profile_image || null
-      ]);
+    // キャスト基本情報を作成
+    await query(`
+      INSERT INTO casts (id, name, age, height, description, avatar_url, is_active)
+      VALUES (?, ?, ?, ?, ?, ?, 1)
+    `, [
+      castId,
+      validatedData.name,
+      validatedData.age,
+      validatedData.height,
+      validatedData.description || null,
+      validatedData.profile_image || null
+    ]);
 
-      // 能力値を作成（フォームのフィールド名をDBカラム名にマッピング）
-      await exec(`
-        INSERT INTO cast_stats (cast_id, looks, talk, alcohol_tolerance, intelligence, energy, custom_stat, custom_stat_name)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-      `, [
-        castId,
-        validatedData.stats.looks || 50,
-        validatedData.stats.talk || 50,
-        validatedData.stats.drinking || 50,      // drinking -> alcohol_tolerance
-        validatedData.stats.intelligence || 50,
-        validatedData.stats.tension || 50,       // tension -> energy
-        validatedData.stats.special || null,     // special -> custom_stat
-        null
-      ]);
+    // 能力値を作成（フォームのフィールド名をDBカラム名にマッピング）
+    await query(`
+      INSERT INTO cast_stats (cast_id, looks, talk, alcohol_tolerance, intelligence, energy, custom_stat, custom_stat_name)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `, [
+      castId,
+      validatedData.stats.looks || 50,
+      validatedData.stats.talk || 50,
+      validatedData.stats.drinking || 50,      // drinking -> alcohol_tolerance
+      validatedData.stats.intelligence || 50,
+      validatedData.stats.tension || 50,       // tension -> energy
+      validatedData.stats.special || null,     // special -> custom_stat
+      null
+    ]);
 
-      // プロフィール画像があれば写真として追加
-      if (validatedData.profile_image) {
-        await exec(`
-          INSERT INTO cast_photos (id, cast_id, photo_url, is_main, order_index)
-          VALUES (?, ?, ?, 1, 0)
-        `, [photoId, castId, validatedData.profile_image]);
-      }
+    // プロフィール画像があれば写真として追加
+    if (validatedData.profile_image) {
+      await query(`
+        INSERT INTO cast_photos (id, cast_id, photo_url, is_main, order_index)
+        VALUES (?, ?, ?, 1, 0)
+      `, [photoId, castId, validatedData.profile_image]);
+    }
 
-      // 作成されたキャストを取得
-      const castResult = await exec('SELECT * FROM casts WHERE id = ?', [castId]);
-      return castResult.rows[0] as Cast;
-    });
+    // 作成されたキャストを取得
+    const castResult = await query('SELECT * FROM casts WHERE id = ?', [castId]);
+    const result = castResult.rows[0] as unknown as Cast;
 
     console.info('キャスト作成完了', { castId: result.id, name: result.name });
 

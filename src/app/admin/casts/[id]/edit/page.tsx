@@ -1,19 +1,30 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, use } from "react";
 import { useRouter } from "next/navigation";
 
 import ImageUploader from "@/components/ImageUploader";
-import type { Cast, UpdateCastInput } from "@/types";
+import type { CastDetail, CreateCastInput } from "@/types";
 
+// フォーム用の型定義
+interface CastFormData extends Omit<CreateCastInput, 'stats'> {
+  stats: {
+    looks: number;
+    talk: number;
+    drinking: number;
+    intelligence: number;
+    tension: number;
+    special: number;
+  };
+}
 
-
-export default function EditCastPage({ params }: { params: { id: string } }) {
+export default function EditCastPage({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = use(params);
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [cast, setCast] = useState<Cast | null>(null);
-  const [formData, setFormData] = useState<UpdateCastInput>({
+  const [cast, setCast] = useState<CastDetail | null>(null);
+  const [formData, setFormData] = useState<CastFormData>({
     name: "",
     age: 20,
     height: 160,
@@ -32,18 +43,26 @@ export default function EditCastPage({ params }: { params: { id: string } }) {
 
   const fetchCast = useCallback(async () => {
     try {
-      const response = await fetch(`/api/casts/${params.id}`);
+      const response = await fetch(`/api/casts/${resolvedParams.id}`);
       if (!response.ok) throw new Error("キャストの取得に失敗しました");
-      const data = await response.json();
+      const result = await response.json();
+      const data = result.data;
       setCast(data);
       setFormData({
         name: data.name,
         age: data.age,
         height: data.height,
-        blood_type: data.blood_type,
-        profile_image: data.profile_image || "",
+        blood_type: data.blood_type || "A",
+        profile_image: data.avatar_url || "",
         description: data.description || "",
-        stats: data.stats || {
+        stats: data.stats ? {
+          looks: data.stats.looks || 50,
+          talk: data.stats.talk || 50,
+          drinking: data.stats.alcohol_tolerance || 50,
+          intelligence: data.stats.intelligence || 50,
+          tension: data.stats.energy || 50,
+          special: data.stats.custom_stat || 50,
+        } : {
           looks: 50,
           talk: 50,
           drinking: 50,
@@ -59,7 +78,7 @@ export default function EditCastPage({ params }: { params: { id: string } }) {
     } finally {
       setLoading(false);
     }
-  }, [params.id, router]);
+  }, [resolvedParams.id, router]);
 
   useEffect(() => {
     fetchCast();
@@ -67,10 +86,10 @@ export default function EditCastPage({ params }: { params: { id: string } }) {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    
+
     if (name.startsWith("stats.")) {
-      const statName = name.split(".")[1];
-      setFormData(prev => ({
+      const statName = name.split(".")[1] as keyof CastFormData['stats'];
+      setFormData((prev: CastFormData) => ({
         ...prev,
         stats: {
           ...prev.stats,
@@ -78,12 +97,12 @@ export default function EditCastPage({ params }: { params: { id: string } }) {
         },
       }));
     } else if (name === "age" || name === "height") {
-      setFormData(prev => ({
+      setFormData((prev: CastFormData) => ({
         ...prev,
         [name]: parseInt(value) || 0,
       }));
     } else {
-      setFormData(prev => ({
+      setFormData((prev: CastFormData) => ({
         ...prev,
         [name]: value,
       }));
@@ -95,17 +114,33 @@ export default function EditCastPage({ params }: { params: { id: string } }) {
     setSaving(true);
 
     try {
-      const response = await fetch(`/api/casts/${params.id}`, {
+      const response = await fetch(`/api/casts/${resolvedParams.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          cast: {
+            name: formData.name,
+            age: formData.age,
+            height: formData.height,
+            description: formData.description,
+            avatar_url: formData.profile_image,
+          },
+          stats: {
+            looks: formData.stats.looks,
+            talk: formData.stats.talk,
+            alcohol_tolerance: formData.stats.drinking,
+            intelligence: formData.stats.intelligence,
+            energy: formData.stats.tension,
+            custom_stat: formData.stats.special,
+          },
+        }),
       });
 
       if (!response.ok) throw new Error("更新に失敗しました");
 
-      console.info("キャスト更新成功", { id: params.id });
+      console.info("キャスト更新成功", { id: resolvedParams.id });
       router.push("/admin/casts");
     } catch (error) {
       console.error("キャスト更新エラー", error);
@@ -193,8 +228,8 @@ export default function EditCastPage({ params }: { params: { id: string } }) {
           <ImageUploader
             label="プロフィール画像"
             value={formData.profile_image}
-            onChange={(url) => setFormData(prev => ({ ...prev, profile_image: url }))}
-            onRemove={() => setFormData(prev => ({ ...prev, profile_image: "" }))}
+            onChange={(url) => setFormData((prev: CastFormData) => ({ ...prev, profile_image: url }))}
+            onRemove={() => setFormData((prev: CastFormData) => ({ ...prev, profile_image: "" }))}
           />
         </div>
 
@@ -214,7 +249,7 @@ export default function EditCastPage({ params }: { params: { id: string } }) {
         <div>
           <h3 className="text-lg font-medium text-gray-900 mb-3">ステータス</h3>
           <div className="space-y-3">
-            {Object.entries(formData.stats).map(([key, value]) => (
+            {(Object.entries(formData.stats) as [keyof CastFormData['stats'], number][]).map(([key, value]) => (
               <div key={key}>
                 <label className="block text-sm font-medium text-gray-700">
                   {key === "looks" && "ルックス"}

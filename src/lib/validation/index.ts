@@ -23,9 +23,7 @@ export const createCastSchema = z.object({
   name: z.string().min(1, '名前を入力してください').max(100, '名前は100文字以内で入力してください'),
   age: z.number().min(18, '年齢は18歳以上で入力してください').max(99, '年齢は99歳以下で入力してください'),
   height: z.number().min(140, '身長は140cm以上で入力してください').max(200, '身長は200cm以下で入力してください'),
-  blood_type: z.enum(['A', 'B', 'O', 'AB'], {
-    errorMap: () => ({ message: '血液型を選択してください' }),
-  }),
+  blood_type: z.enum(['A', 'B', 'O', 'AB']).optional(),  // DBにカラムがないためオプショナル
   profile_image: z.string().optional(),
   description: z.string().max(1000, '自己紹介は1000文字以内で入力してください').optional(),
   stats: castStatsSchema,

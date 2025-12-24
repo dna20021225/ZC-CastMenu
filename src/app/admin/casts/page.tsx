@@ -4,12 +4,12 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
-import type { Cast } from "@/types";
+import type { CastDetail } from "@/types";
 
 
 
 export default function AdminCastsPage() {
-  const [casts, setCasts] = useState<Cast[]>([]);
+  const [casts, setCasts] = useState<CastDetail[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

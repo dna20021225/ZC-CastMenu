@@ -109,7 +109,7 @@ export async function DELETE(
 
     // 管理者が1人だけの場合は削除不可
     const countResult = await query('SELECT COUNT(*) as count FROM admins WHERE is_active = 1');
-    const activeCount = parseInt(countResult.rows[0].count);
+    const activeCount = Number(countResult.rows[0]?.count ?? 0);
 
     if (activeCount <= 1) {
       return NextResponse.json({
@@ -131,7 +131,7 @@ export async function DELETE(
       }, { status: 404 });
     }
 
-    const username = adminResult.rows[0].username;
+    const username = String(adminResult.rows[0]?.username ?? '');
 
     // 管理者を削除
     await query(
@@ -175,7 +175,7 @@ export async function PATCH(
     // 無効化する場合、有効な管理者が1人だけなら拒否
     if (!is_active) {
       const countResult = await query('SELECT COUNT(*) as count FROM admins WHERE is_active = 1');
-      const activeCount = parseInt(countResult.rows[0].count);
+      const activeCount = Number(countResult.rows[0]?.count ?? 0);
 
       if (activeCount <= 1) {
         return NextResponse.json({

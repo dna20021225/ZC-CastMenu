@@ -2,16 +2,16 @@
 
 import { useState, useEffect } from "react";
 
-import type { Cast, Badge } from "@/types";
+import type { CastDetail, Badge } from "@/types";
 
 
 
 export default function AdminBadgesPage() {
-  const [casts, setCasts] = useState<Cast[]>([]);
+  const [casts, setCasts] = useState<CastDetail[]>([]);
   const [badges, setBadges] = useState<Badge[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedCastId, setSelectedCastId] = useState<number | null>(null);
-  const [selectedBadgeId, setSelectedBadgeId] = useState<number | null>(null);
+  const [selectedCastId, setSelectedCastId] = useState<string | null>(null);
+  const [selectedBadgeId, setSelectedBadgeId] = useState<string | null>(null);
 
   useEffect(() => {
     Promise.all([fetchCasts(), fetchBadges()]).finally(() => setLoading(false));
@@ -22,7 +22,7 @@ export default function AdminBadgesPage() {
       const response = await fetch("/api/casts");
       if (!response.ok) throw new Error("キャストの取得に失敗しました");
       const data = await response.json();
-      setCasts(data.casts);
+      setCasts(data.data?.casts || []);
     } catch (error) {
       console.error("キャスト取得エラー", error);
     }
@@ -33,7 +33,7 @@ export default function AdminBadgesPage() {
       const response = await fetch("/api/badges");
       if (!response.ok) throw new Error("バッジの取得に失敗しました");
       const data = await response.json();
-      setBadges(data);
+      setBadges(data.data || []);
     } catch (error) {
       console.error("バッジ取得エラー", error);
     }
@@ -65,7 +65,7 @@ export default function AdminBadgesPage() {
     }
   };
 
-  const handleRemoveBadge = async (castId: number, badgeId: number) => {
+  const handleRemoveBadge = async (castId: string, badgeId: string) => {
     if (!confirm("このバッジを削除しますか？")) return;
 
     try {
@@ -98,7 +98,7 @@ export default function AdminBadgesPage() {
             </label>
             <select
               value={selectedCastId || ""}
-              onChange={(e) => setSelectedCastId(Number(e.target.value))}
+              onChange={(e) => setSelectedCastId(e.target.value || null)}
               className="w-full border-gray-300 rounded-md shadow-sm focus:ring-pink-500 focus:border-pink-500"
             >
               <option value="">選択してください</option>
@@ -116,7 +116,7 @@ export default function AdminBadgesPage() {
             </label>
             <select
               value={selectedBadgeId || ""}
-              onChange={(e) => setSelectedBadgeId(Number(e.target.value))}
+              onChange={(e) => setSelectedBadgeId(e.target.value || null)}
               className="w-full border-gray-300 rounded-md shadow-sm focus:ring-pink-500 focus:border-pink-500"
             >
               <option value="">選択してください</option>

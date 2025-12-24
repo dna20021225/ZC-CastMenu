@@ -8,7 +8,6 @@ import {
   GlassWater,
   Beer,
   Martini,
-  Star,
   Info
 } from 'lucide-react';
 

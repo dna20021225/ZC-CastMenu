@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { ZodError } from 'zod';
 
 // サーバーサイドでのみロガーを初期化
@@ -138,10 +138,10 @@ export function handleApiError(error: unknown, context?: string): NextResponse {
 }
 
 // 非同期処理のエラーハンドラー
-export function asyncHandler(
-  handler: (req: Request, context: unknown) => Promise<NextResponse>
+export function asyncHandler<T = unknown>(
+  handler: (req: NextRequest, context?: T) => Promise<NextResponse>
 ) {
-  return async (req: Request, context: unknown): Promise<NextResponse> => {
+  return async (req: NextRequest, context?: T): Promise<NextResponse> => {
     try {
       return await handler(req, context);
     } catch (error) {

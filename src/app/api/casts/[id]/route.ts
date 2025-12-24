@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { query, transaction } from '@/lib/db';
-import { 
-  ApiResponse, 
+import { query } from '@/lib/db';
+import {
+  ApiResponse,
   CastDetail,
   CastFormData,
   CastStatsFormData
@@ -23,7 +23,7 @@ export async function GET(
     const castResult = await query(
       'SELECT * FROM casts WHERE id = ? AND is_active = 1',
       [params.id]
-    ) as { rows: Cast[] };
+    ) as unknown as { rows: Cast[] };
 
     if (castResult.rows.length === 0) {
       console.warn('キャストが見つかりません', { castId: params.id });
@@ -39,13 +39,13 @@ export async function GET(
     const photosResult = await query(
       'SELECT * FROM cast_photos WHERE cast_id = ? ORDER BY order_index',
       [cast.id]
-    ) as { rows: CastPhoto[] };
+    ) as unknown as { rows: CastPhoto[] };
 
     // 能力値を取得
     const statsResult = await query(
       'SELECT * FROM cast_stats WHERE cast_id = ?',
       [cast.id]
-    ) as { rows: CastStats[] };
+    ) as unknown as { rows: CastStats[] };
 
     // バッジを取得
     const badgesResult = await query(`
@@ -54,7 +54,7 @@ export async function GET(
       INNER JOIN cast_badges cb ON b.id = cb.badge_id
       WHERE cb.cast_id = ?
       ORDER BY b.display_order
-    `, [cast.id]) as { rows: (Badge & { assigned_at: string })[] };
+    `, [cast.id]) as unknown as { rows: (Badge & { assigned_at: string })[] };
 
     const castDetail: CastDetail = {
       ...cast,
@@ -105,170 +105,157 @@ export async function PUT(
       badges?: string[];
     };
 
-    const result = await transaction(async (client) => {
-      // キャストの存在確認
-      const existingCastResult = await client.query(
-        'SELECT * FROM casts WHERE id = ? AND is_active = 1',
-        [params.id]
-      );
+    // キャストの存在確認
+    const existingCastResult = await query(
+      'SELECT * FROM casts WHERE id = ? AND is_active = 1',
+      [params.id]
+    ) as unknown as { rows: Cast[] };
 
-      if (existingCastResult.rows.length === 0) {
-        throw new Error('キャストが見つかりません');
+    if (existingCastResult.rows.length === 0) {
+      return NextResponse.json({
+        success: false,
+        error: 'キャストが見つかりません'
+      } as ApiResponse, { status: 404 });
+    }
+
+    let updatedCast = existingCastResult.rows[0];
+
+    // キャスト基本情報を更新
+    if (body.cast) {
+      const updateFields: string[] = [];
+      const updateValues: unknown[] = [];
+
+      if (body.cast.name !== undefined) {
+        updateFields.push(`name = ?`);
+        updateValues.push(body.cast.name);
+      }
+      if (body.cast.age !== undefined) {
+        updateFields.push(`age = ?`);
+        updateValues.push(body.cast.age);
+      }
+      if (body.cast.height !== undefined) {
+        updateFields.push(`height = ?`);
+        updateValues.push(body.cast.height);
+      }
+      if (body.cast.hobby !== undefined) {
+        updateFields.push(`hobby = ?`);
+        updateValues.push(body.cast.hobby);
+      }
+      if (body.cast.description !== undefined) {
+        updateFields.push(`description = ?`);
+        updateValues.push(body.cast.description);
+      }
+      if (body.cast.avatar_url !== undefined) {
+        updateFields.push(`avatar_url = ?`);
+        updateValues.push(body.cast.avatar_url);
       }
 
-      let updatedCast = existingCastResult.rows[0] as Cast;
+      if (updateFields.length > 0) {
+        updateFields.push(`updated_at = datetime('now')`);
+        updateValues.push(params.id);
 
-      // キャスト基本情報を更新
-      if (body.cast) {
-        const updateFields: string[] = [];
-        const updateValues: unknown[] = [];
+        const updateQuery = `
+          UPDATE casts
+          SET ${updateFields.join(', ')}
+          WHERE id = ?
+        `;
 
-        if (body.cast.name !== undefined) {
-          updateFields.push(`name = ?`);
-          updateValues.push(body.cast.name);
-        }
-        if (body.cast.age !== undefined) {
-          updateFields.push(`age = ?`);
-          updateValues.push(body.cast.age);
-        }
-        if (body.cast.height !== undefined) {
-          updateFields.push(`height = ?`);
-          updateValues.push(body.cast.height);
-        }
-        if (body.cast.hobby !== undefined) {
-          updateFields.push(`hobby = ?`);
-          updateValues.push(body.cast.hobby);
-        }
-        if (body.cast.description !== undefined) {
-          updateFields.push(`description = ?`);
-          updateValues.push(body.cast.description);
-        }
-        if (body.cast.avatar_url !== undefined) {
-          updateFields.push(`avatar_url = ?`);
-          updateValues.push(body.cast.avatar_url);
-        }
+        await query(updateQuery, updateValues);
 
-        if (updateFields.length > 0) {
-          updateFields.push(`updated_at = datetime('now')`);
-          updateValues.push(params.id);
+        const updatedResult = await query(
+          'SELECT * FROM casts WHERE id = ?',
+          [params.id]
+        ) as unknown as { rows: Cast[] };
+        updatedCast = updatedResult.rows[0];
+      }
+    }
 
-          const updateQuery = `
-            UPDATE casts
-            SET ${updateFields.join(', ')}
-            WHERE id = ?
-          `;
+    // 能力値を更新
+    if (body.stats) {
+      const updateFields: string[] = [];
+      const updateValues: unknown[] = [];
 
-          await client.query(updateQuery, updateValues);
-
-          // SQLiteではRETURNING句が使えないため、再度取得
-          const updatedResult = await client.query(
-            'SELECT * FROM casts WHERE id = ?',
-            [params.id]
-          );
-          updatedCast = updatedResult.rows[0] as Cast;
-        }
+      if (body.stats.looks !== undefined) {
+        updateFields.push(`looks = ?`);
+        updateValues.push(body.stats.looks);
+      }
+      if (body.stats.talk !== undefined) {
+        updateFields.push(`talk = ?`);
+        updateValues.push(body.stats.talk);
+      }
+      if (body.stats.alcohol_tolerance !== undefined) {
+        updateFields.push(`alcohol_tolerance = ?`);
+        updateValues.push(body.stats.alcohol_tolerance);
+      }
+      if (body.stats.intelligence !== undefined) {
+        updateFields.push(`intelligence = ?`);
+        updateValues.push(body.stats.intelligence);
+      }
+      if (body.stats.energy !== undefined) {
+        updateFields.push(`energy = ?`);
+        updateValues.push(body.stats.energy);
+      }
+      if (body.stats.custom_stat !== undefined) {
+        updateFields.push(`custom_stat = ?`);
+        updateValues.push(body.stats.custom_stat);
+      }
+      if (body.stats.custom_stat_name !== undefined) {
+        updateFields.push(`custom_stat_name = ?`);
+        updateValues.push(body.stats.custom_stat_name);
       }
 
-      // 能力値を更新
-      if (body.stats) {
-        const updateFields: string[] = [];
-        const updateValues: unknown[] = [];
+      if (updateFields.length > 0) {
+        updateFields.push(`updated_at = datetime('now')`);
+        updateValues.push(params.id);
 
-        if (body.stats.looks !== undefined) {
-          updateFields.push(`looks = ?`);
-          updateValues.push(body.stats.looks);
-        }
-        if (body.stats.talk !== undefined) {
-          updateFields.push(`talk = ?`);
-          updateValues.push(body.stats.talk);
-        }
-        if (body.stats.alcohol_tolerance !== undefined) {
-          updateFields.push(`alcohol_tolerance = ?`);
-          updateValues.push(body.stats.alcohol_tolerance);
-        }
-        if (body.stats.intelligence !== undefined) {
-          updateFields.push(`intelligence = ?`);
-          updateValues.push(body.stats.intelligence);
-        }
-        if (body.stats.energy !== undefined) {
-          updateFields.push(`energy = ?`);
-          updateValues.push(body.stats.energy);
-        }
-        if (body.stats.custom_stat !== undefined) {
-          updateFields.push(`custom_stat = ?`);
-          updateValues.push(body.stats.custom_stat);
-        }
-        if (body.stats.custom_stat_name !== undefined) {
-          updateFields.push(`custom_stat_name = ?`);
-          updateValues.push(body.stats.custom_stat_name);
-        }
+        const statsUpdateQuery = `
+          UPDATE cast_stats
+          SET ${updateFields.join(', ')}
+          WHERE cast_id = ?
+        `;
 
-        if (updateFields.length > 0) {
-          updateFields.push(`updated_at = datetime('now')`);
-          updateValues.push(params.id);
+        await query(statsUpdateQuery, updateValues);
+      }
+    }
 
-          const statsUpdateQuery = `
-            UPDATE cast_stats
-            SET ${updateFields.join(', ')}
-            WHERE cast_id = ?
-          `;
+    // 写真を更新（完全置換）
+    if (body.photos !== undefined) {
+      await query('DELETE FROM cast_photos WHERE cast_id = ?', [params.id]);
 
-          await client.query(statsUpdateQuery, updateValues);
+      if (body.photos.length > 0) {
+        for (let i = 0; i < body.photos.length; i++) {
+          await query(`
+            INSERT INTO cast_photos (id, cast_id, photo_url, is_main, order_index)
+            VALUES (?, ?, ?, ?, ?)
+          `, [crypto.randomUUID(), params.id, body.photos[i], i === 0 ? 1 : 0, i]);
         }
       }
+    }
 
-      // 写真を更新（完全置換）
-      if (body.photos !== undefined) {
-        // 既存の写真を削除
-        await client.query('DELETE FROM cast_photos WHERE cast_id = ?', [params.id]);
+    // バッジを更新（完全置換）
+    if (body.badges !== undefined) {
+      await query('DELETE FROM cast_badges WHERE cast_id = ?', [params.id]);
 
-        // 新しい写真を追加
-        if (body.photos.length > 0) {
-          for (let i = 0; i < body.photos.length; i++) {
-            await client.query(`
-              INSERT INTO cast_photos (cast_id, photo_url, is_main, order_index)
-              VALUES (?, ?, ?, ?)
-            `, [params.id, body.photos[i], i === 0 ? 1 : 0, i]);
-          }
+      if (body.badges.length > 0) {
+        for (const badgeId of body.badges) {
+          await query(`
+            INSERT INTO cast_badges (cast_id, badge_id, assigned_by)
+            VALUES (?, ?, ?)
+          `, [params.id, badgeId, 'system']);
         }
       }
+    }
 
-      // バッジを更新（完全置換）
-      if (body.badges !== undefined) {
-        // 既存のバッジを削除
-        await client.query('DELETE FROM cast_badges WHERE cast_id = ?', [params.id]);
-
-        // 新しいバッジを追加
-        if (body.badges.length > 0) {
-          for (const badgeId of body.badges) {
-            await client.query(`
-              INSERT INTO cast_badges (cast_id, badge_id, assigned_by)
-              VALUES (?, ?, ?)
-            `, [params.id, badgeId, 'system']); // TODO: 実際のユーザーIDに変更
-          }
-        }
-      }
-
-      return updatedCast;
-    });
-
-    console.info('キャスト更新完了', { castId: params.id, name: result.name });
+    console.info('キャスト更新完了', { castId: params.id, name: updatedCast.name });
 
     return NextResponse.json({
       success: true,
-      data: result,
+      data: updatedCast,
       message: 'キャストが正常に更新されました'
     } as ApiResponse<Cast>);
 
   } catch (error) {
     console.error('キャスト更新エラー', error instanceof Error ? error : new Error(String(error)), { castId: params.id });
-    
-    if (error instanceof Error && error.message === 'キャストが見つかりません') {
-      return NextResponse.json({
-        success: false,
-        error: error.message
-      } as ApiResponse, { status: 404 });
-    }
 
     return NextResponse.json({
       success: false,
@@ -286,32 +273,31 @@ export async function DELETE(
   try {
     console.info('キャスト削除開始', { castId: params.id });
 
-    const result = await transaction(async (client) => {
-      // キャストの存在確認
-      const existingCastResult = await client.query(
-        'SELECT * FROM casts WHERE id = ? AND is_active = 1',
-        [params.id]
-      );
+    // キャストの存在確認
+    const existingCastResult = await query(
+      'SELECT * FROM casts WHERE id = ? AND is_active = 1',
+      [params.id]
+    ) as unknown as { rows: Cast[] };
 
-      if (existingCastResult.rows.length === 0) {
-        throw new Error('キャストが見つかりません');
-      }
+    if (existingCastResult.rows.length === 0) {
+      return NextResponse.json({
+        success: false,
+        error: 'キャストが見つかりません'
+      } as ApiResponse, { status: 404 });
+    }
 
-      const cast = existingCastResult.rows[0] as Cast;
+    const cast = existingCastResult.rows[0];
 
-      // 論理削除（is_activeを0に設定）
-      await client.query(
-        'UPDATE casts SET is_active = 0, updated_at = datetime(\'now\') WHERE id = ?',
-        [params.id]
-      );
+    // 論理削除（is_activeを0に設定）
+    await query(
+      "UPDATE casts SET is_active = 0, updated_at = datetime('now') WHERE id = ?",
+      [params.id]
+    );
 
-      // 関連データも無効化
-      await client.query('DELETE FROM cast_badges WHERE cast_id = ?', [params.id]);
+    // 関連データも無効化
+    await query('DELETE FROM cast_badges WHERE cast_id = ?', [params.id]);
 
-      return cast;
-    });
-
-    console.info('キャスト削除完了', { castId: params.id, name: result.name });
+    console.info('キャスト削除完了', { castId: params.id, name: cast.name });
 
     return NextResponse.json({
       success: true,
@@ -320,13 +306,6 @@ export async function DELETE(
 
   } catch (error) {
     console.error('キャスト削除エラー', error instanceof Error ? error : new Error(String(error)), { castId: params.id });
-    
-    if (error instanceof Error && error.message === 'キャストが見つかりません') {
-      return NextResponse.json({
-        success: false,
-        error: error.message
-      } as ApiResponse, { status: 404 });
-    }
 
     return NextResponse.json({
       success: false,

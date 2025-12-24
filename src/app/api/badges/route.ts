@@ -12,7 +12,7 @@ export async function GET() {
 
     const result = await query(
       'SELECT * FROM badges ORDER BY display_order, name'
-    ) as { rows: Badge[] };
+    ) as unknown as { rows: Badge[] };
 
     console.info('バッジ一覧取得完了', { count: result.rows.length });
 

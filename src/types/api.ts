@@ -96,3 +96,26 @@ export interface ApiError {
   message: string;
   details?: Record<string, unknown>;
 }
+
+// キャスト作成入力型（フォーム用）
+export interface CreateCastInput {
+  name: string;
+  age: number;
+  height: number;
+  blood_type?: string;
+  profile_image?: string;
+  description?: string;
+  stats: {
+    looks: number;
+    talk: number;
+    drinking: number;      // API側でalcohol_toleranceにマッピング
+    intelligence: number;
+    tension: number;       // API側でenergyにマッピング
+    special: number;       // API側でcustom_statにマッピング
+  };
+}
+
+// キャスト更新入力型（フォーム用）
+export interface UpdateCastInput extends Partial<CreateCastInput> {
+  id: string;
+}

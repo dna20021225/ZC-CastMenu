@@ -3,14 +3,14 @@ import Link from "next/link";
 
 async function getStats() {
   try {
-    const castCount = await query("SELECT COUNT(*) FROM casts");
-    const badgeCount = await query("SELECT COUNT(DISTINCT badge_id) FROM cast_badges");
-    const adminCount = await query("SELECT COUNT(*) FROM admins WHERE is_active = 1");
-    
+    const castCount = await query("SELECT COUNT(*) as count FROM casts");
+    const badgeCount = await query("SELECT COUNT(DISTINCT badge_id) as count FROM cast_badges");
+    const adminCount = await query("SELECT COUNT(*) as count FROM admins WHERE is_active = 1");
+
     return {
-      casts: castCount.rows[0].count,
-      badges: badgeCount.rows[0].count,
-      admins: adminCount.rows[0].count,
+      casts: Number(castCount.rows[0]?.count ?? 0),
+      badges: Number(badgeCount.rows[0]?.count ?? 0),
+      admins: Number(adminCount.rows[0]?.count ?? 0),
     };
   } catch (error) {
     console.error("統計情報の取得エラー:", error);
