@@ -1,234 +1,144 @@
 'use client';
 
 import Link from 'next/link';
-import { 
-  ArrowLeft, 
-  Coffee, 
-  Wine, 
-  Sparkles, 
-  Heart,
+import {
+  ArrowLeft,
+  Wine,
+  Sparkles,
+  GlassWater,
+  Beer,
+  Martini,
   Star,
   Info
 } from 'lucide-react';
 
 interface DrinkItem {
-  id: string;
   name: string;
   price: number;
-  description: string;
-  category: 'alcohol' | 'soft' | 'cocktail' | 'special';
-  popular?: boolean;
+  note?: string;
 }
 
-const drinkCategories = {
-  alcohol: { name: 'アルコール', icon: Wine, color: '#dc2626' },
-  cocktail: { name: 'カクテル', icon: Sparkles, color: '#7c3aed' },
-  soft: { name: 'ソフトドリンク', icon: Coffee, color: '#059669' },
-  special: { name: 'スペシャル', icon: Heart, color: '#ea580c' }
-};
+interface DrinkCategory {
+  id: string;
+  name: string;
+  nameEn?: string;
+  icon: typeof Wine;
+  color: string;
+  items: DrinkItem[];
+}
 
-const drinkItems: DrinkItem[] = [
-  // アルコール
+const drinkCategories: DrinkCategory[] = [
+  {
+    id: 'soft',
+    name: 'ソフトドリンク',
+    nameEn: 'SOFT DRINK（1本）',
+    icon: GlassWater,
+    color: '#059669',
+    items: [
+      { name: 'ミネラルウォーター', price: 1000 },
+      { name: 'ソーダ', price: 1000 },
+      { name: 'コーラ', price: 1500 },
+      { name: 'ジンジャーエール', price: 1500 },
+    ]
+  },
   {
     id: 'beer',
-    name: 'ビール',
-    price: 600,
-    description: 'キリン一番搾り、アサヒスーパードライ等',
-    category: 'alcohol',
-    popular: true
+    name: 'ビール・チューハイ',
+    nameEn: 'BEER・チューハイ（1本）',
+    icon: Beer,
+    color: '#d97706',
+    items: [
+      { name: 'スーパードライ', price: 2000 },
+      { name: 'スタイルフリー', price: 1500 },
+      { name: '氷結 無糖レモン', price: 1500 },
+      { name: 'スラット', price: 1500, note: 'アロエ・グレフル・シャルドネ' },
+    ]
   },
   {
-    id: 'highball',
-    name: 'ハイボール',
-    price: 700,
-    description: '角ハイボール、こだわりの炭酸で',
-    category: 'alcohol',
-    popular: true
+    id: 'shot',
+    name: 'ショットドリンク',
+    icon: Martini,
+    color: '#dc2626',
+    items: [
+      { name: 'テキーラ・ローズ', price: 4000, note: '各種' },
+      { name: 'タランチュラ', price: 4000 },
+      { name: 'コカボムタワー', price: 60000 },
+      { name: 'テキーラ観覧車', price: 60000 },
+    ]
   },
   {
-    id: 'sake',
-    name: '日本酒',
-    price: 800,
-    description: '厳選された純米酒各種',
-    category: 'alcohol'
+    id: 'nonalcohol',
+    name: 'ノンアルコール',
+    nameEn: 'ノンアル各種（1本）',
+    icon: GlassWater,
+    color: '#0891b2',
+    items: [
+      { name: 'アサヒ DRY ZERO', price: 1500 },
+      { name: 'ノンアル気分', price: 1500, note: 'レモン・カシオレ' },
+      { name: 'オリジナルZERO（シャンパン）', price: 45000 },
+    ]
   },
-  {
-    id: 'shochu',
-    name: '焼酎',
-    price: 700,
-    description: 'ロック、水割り、お湯割り',
-    category: 'alcohol'
-  },
-  {
-    id: 'wine-red',
-    name: '赤ワイン',
-    price: 900,
-    description: 'フルボディの深い味わい',
-    category: 'alcohol'
-  },
-  {
-    id: 'wine-white',
-    name: '白ワイン',
-    price: 900,
-    description: 'さっぱりとした辛口',
-    category: 'alcohol'
-  },
-
-  // カクテル
-  {
-    id: 'gin-tonic',
-    name: 'ジントニック',
-    price: 800,
-    description: 'さっぱりとした定番カクテル',
-    category: 'cocktail',
-    popular: true
-  },
-  {
-    id: 'mojito',
-    name: 'モヒート',
-    price: 900,
-    description: 'ミントの香りが爽やかな人気カクテル',
-    category: 'cocktail'
-  },
-  {
-    id: 'cassis-orange',
-    name: 'カシスオレンジ',
-    price: 800,
-    description: '女性に人気のフルーティーカクテル',
-    category: 'cocktail',
-    popular: true
-  },
-  {
-    id: 'cosmopolitan',
-    name: 'コスモポリタン',
-    price: 900,
-    description: 'エレガントなピンク色のカクテル',
-    category: 'cocktail'
-  },
-  {
-    id: 'moscow-mule',
-    name: 'モスコミュール',
-    price: 850,
-    description: 'ジンジャーが効いたスパイシーカクテル',
-    category: 'cocktail'
-  },
-  {
-    id: 'margarita',
-    name: 'マルガリータ',
-    price: 950,
-    description: 'テキーラベースの定番カクテル',
-    category: 'cocktail'
-  },
-
-  // ソフトドリンク
-  {
-    id: 'cola',
-    name: 'コーラ',
-    price: 400,
-    description: 'コカコーラ、ペプシコーラ',
-    category: 'soft'
-  },
-  {
-    id: 'orange-juice',
-    name: 'オレンジジュース',
-    price: 450,
-    description: '100%フレッシュオレンジ',
-    category: 'soft'
-  },
-  {
-    id: 'coffee',
-    name: 'コーヒー',
-    price: 500,
-    description: 'ホット・アイス選べます',
-    category: 'soft'
-  },
-  {
-    id: 'tea',
-    name: '紅茶',
-    price: 500,
-    description: 'アールグレイ、ダージリン等',
-    category: 'soft'
-  },
-  {
-    id: 'green-tea',
-    name: '緑茶',
-    price: 450,
-    description: '厳選された日本茶',
-    category: 'soft'
-  },
-  {
-    id: 'ginger-ale',
-    name: 'ジンジャーエール',
-    price: 450,
-    description: 'スパイシーな大人の味',
-    category: 'soft'
-  },
-
-  // スペシャル
   {
     id: 'champagne',
     name: 'シャンパン',
-    price: 3000,
-    description: 'お祝いや特別な日に',
-    category: 'special'
+    nameEn: 'Champagne',
+    icon: Sparkles,
+    color: '#eab308',
+    items: [
+      { name: 'オリジナル・ホワイト', price: 55000 },
+      { name: 'オリジナル・ロゼ', price: 80000 },
+      { name: 'オリジナル・LED', price: 150000 },
+      { name: 'オリジナル・ゴールド', price: 200000 },
+      { name: 'オリジナル・ブラック', price: 300000 },
+      { name: 'ドン・ペリニヨン', price: 500000 },
+      { name: 'ドン・ペリニヨン・ロゼ', price: 700000 },
+    ]
   },
   {
-    id: 'fruit-cocktail',
-    name: 'フルーツカクテル',
-    price: 1200,
-    description: '季節のフルーツを使った特製カクテル',
-    category: 'special',
-    popular: true
+    id: 'brandy',
+    name: 'ブランデー',
+    nameEn: 'Brandy',
+    icon: Wine,
+    color: '#7c2d12',
+    items: [
+      { name: 'コルトンブルー', price: 105000 },
+      { name: 'マーテル XO', price: 200000 },
+      { name: 'ラーセン・ヴァイキングシップ', price: 270000 },
+    ]
   },
   {
-    id: 'signature-cocktail',
-    name: 'シグネチャーカクテル',
-    price: 1500,
-    description: '当店オリジナルの特別なカクテル',
-    category: 'special'
-  }
-];
-
-const allYouCanDrinkPlans = [
-  {
-    id: 'standard',
-    name: 'スタンダード',
-    price: 2500,
-    duration: '90分',
-    description: 'ビール、ハイボール、基本カクテル、ソフトドリンク'
+    id: 'keepbottle',
+    name: 'キープボトル',
+    nameEn: 'Keep Bottle',
+    icon: Wine,
+    color: '#6366f1',
+    items: [
+      { name: 'JAPAN', price: 15000 },
+      { name: 'サントリーウィスキー', price: 20000 },
+      { name: '神の河', price: 20000 },
+      { name: '茉莉花', price: 20000 },
+      { name: '黒霧島', price: 20000 },
+      { name: '吉四六', price: 30000 },
+    ]
   },
-  {
-    id: 'premium',
-    name: 'プレミアム',
-    price: 3500,
-    duration: '90分',
-    description: '全メニュー飲み放題（シャンパン除く）',
-    popular: true
-  }
 ];
 
 export default function DrinksPage() {
-  const groupedDrinks = Object.entries(drinkCategories).map(([key, category]) => ({
-    ...category,
-    key: key as keyof typeof drinkCategories,
-    items: drinkItems.filter(item => item.category === key)
-  }));
-
   return (
-    <div className="min-h-screen pb-20">
+    <div className="min-h-screen pb-20 bg-gradient-to-b from-gray-900 to-black">
       {/* ヘッダー */}
-      <header className="sticky top-0 z-40 border-b border-border backdrop-blur-md bg-surface/80">
+      <header className="sticky top-0 z-40 border-b border-gray-800 backdrop-blur-md bg-gray-900/80">
         <div className="tablet-layout py-3">
           <div className="flex items-center gap-4">
-            <Link 
+            <Link
               href="/"
-              className="flex items-center gap-2 text-secondary hover:text-primary transition-colors"
+              className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
             >
               <ArrowLeft className="h-5 w-5" />
               戻る
             </Link>
             <div className="flex-1 min-w-0">
-              <h1 className="text-lg font-bold">ドリンクメニュー</h1>
+              <h1 className="text-lg font-bold text-white">ドリンクメニュー</h1>
             </div>
           </div>
         </div>
@@ -238,68 +148,57 @@ export default function DrinksPage() {
       <main className="tablet-layout py-6">
         {/* タイトルセクション */}
         <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold mb-2">ドリンクメニュー</h2>
-          <p className="text-secondary text-sm">豊富なドリンクからお好みの一杯をお選びください</p>
+          <h2 className="text-3xl font-bold mb-2 text-white">DRINK MENU</h2>
+          <p className="text-gray-400 text-sm">※全て税込表記となります</p>
         </div>
 
         {/* ドリンクカテゴリ */}
-        <div className="space-y-8">
-          {groupedDrinks.map((category) => (
-            <div key={category.key} className="cast-card p-0 overflow-hidden">
+        <div className="space-y-6">
+          {drinkCategories.map((category) => (
+            <div
+              key={category.id}
+              className="rounded-xl overflow-hidden border border-gray-800 bg-gray-900/50 backdrop-blur"
+            >
               {/* カテゴリヘッダー */}
-              <div 
-                className="px-6 py-4 border-b border-border"
-                style={{ backgroundColor: `${category.color}10` }}
+              <div
+                className="px-6 py-4 border-b border-gray-800"
+                style={{
+                  background: `linear-gradient(135deg, ${category.color}20 0%, transparent 100%)`
+                }}
               >
                 <div className="flex items-center gap-3">
-                  <category.icon 
-                    className="h-6 w-6" 
-                    style={{ color: category.color }} 
+                  <category.icon
+                    className="h-6 w-6"
+                    style={{ color: category.color }}
                   />
-                  <h3 className="text-xl font-bold">{category.name}</h3>
-                  <div className="ml-auto text-sm text-secondary">
-                    {category.items.length}種類
+                  <div>
+                    <h3 className="text-xl font-bold text-white">{category.name}</h3>
+                    {category.nameEn && (
+                      <p className="text-sm text-gray-400">{category.nameEn}</p>
+                    )}
                   </div>
                 </div>
               </div>
 
               {/* ドリンクリスト */}
-              <div className="p-6">
-                <div className="grid md:grid-cols-2 gap-4">
-                  {category.items.map((drink) => (
+              <div className="p-4">
+                <div className="space-y-2">
+                  {category.items.map((drink, index) => (
                     <div
-                      key={drink.id}
-                      className={`relative p-4 rounded-lg border transition-all hover:shadow-md ${
-                        drink.popular 
-                          ? 'border-primary bg-primary/5' 
-                          : 'border-border bg-surface-variant/50'
-                      }`}
+                      key={index}
+                      className="flex justify-between items-center py-3 px-4 rounded-lg bg-gray-800/50 hover:bg-gray-800 transition-colors"
                     >
-                      {/* 人気バッジ */}
-                      {drink.popular && (
-                        <div className="absolute -top-2 -right-2">
-                          <div className="bg-primary text-white px-2 py-1 rounded-full text-xs font-semibold flex items-center gap-1">
-                            <Star className="h-3 w-3" />
-                            人気
-                          </div>
-                        </div>
-                      )}
-                      
-                      {/* ドリンク情報 */}
-                      <div className="flex justify-between items-start mb-3">
-                        <h4 className="text-lg font-semibold">
-                          {drink.name}
-                        </h4>
-                        <div className="text-right ml-4">
-                          <div className="text-xl font-bold text-primary">
-                            ¥{drink.price.toLocaleString()}
-                          </div>
-                        </div>
+                      <div className="flex-1">
+                        <span className="text-white font-medium">{drink.name}</span>
+                        {drink.note && (
+                          <span className="text-gray-500 text-sm ml-2">({drink.note})</span>
+                        )}
                       </div>
-                      
-                      <p className="text-sm text-secondary leading-relaxed">
-                        {drink.description}
-                      </p>
+                      <div className="text-right">
+                        <span className="text-xl font-bold" style={{ color: category.color }}>
+                          ¥{drink.price.toLocaleString()}
+                        </span>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -308,93 +207,33 @@ export default function DrinksPage() {
           ))}
         </div>
 
-        {/* 飲み放題プラン */}
-        <div className="mt-10 cast-card p-0 overflow-hidden">
-          <div className="bg-gradient-to-r from-primary to-primary/80 px-6 py-4">
-            <div className="flex items-center gap-3">
-              <Sparkles className="h-6 w-6 text-white" />
-              <h3 className="text-xl font-bold text-white">飲み放題プラン</h3>
-            </div>
-          </div>
-
-          <div className="p-6">
-            <div className="text-center mb-6">
-              <p className="text-secondary">対象ドリンクが時間内飲み放題でお得にお楽しみいただけます</p>
-            </div>
-
-            <div className="grid md:grid-cols-2 gap-6">
-              {allYouCanDrinkPlans.map((plan) => (
-                <div
-                  key={plan.id}
-                  className={`p-6 rounded-lg border-2 transition-all ${
-                    plan.popular 
-                      ? 'border-primary bg-primary/5' 
-                      : 'border-border bg-surface-variant'
-                  }`}
-                >
-                  {plan.popular && (
-                    <div className="flex justify-center mb-3">
-                      <div className="bg-primary text-white px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1">
-                        <Star className="h-3 w-3" />
-                        おすすめ
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="text-center space-y-3">
-                    <h4 className="text-xl font-bold">{plan.name}</h4>
-                    <div className="text-3xl font-bold text-primary">
-                      ¥{plan.price.toLocaleString()}
-                    </div>
-                    <div className="text-sm text-secondary">
-                      {plan.duration}
-                    </div>
-                    <p className="text-sm leading-relaxed">
-                      {plan.description}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
         {/* 注意事項 */}
-        <div className="mt-8 cast-card p-6">
+        <div className="mt-8 rounded-xl p-6 border border-gray-800 bg-gray-900/50">
           <div className="flex items-center gap-3 mb-4">
-            <Info className="h-5 w-5 text-primary" />
-            <h3 className="text-lg font-bold">ドリンクについて</h3>
+            <Info className="h-5 w-5 text-yellow-500" />
+            <h3 className="text-lg font-bold text-white">ご案内</h3>
           </div>
-          
-          <div className="space-y-3 text-sm text-secondary">
+
+          <div className="space-y-3 text-sm text-gray-400">
             <div className="flex gap-2">
-              <span className="text-primary font-semibold">•</span>
+              <span className="text-yellow-500 font-semibold">•</span>
               <span>価格は全て税込み表示です</span>
             </div>
             <div className="flex gap-2">
-              <span className="text-primary font-semibold">•</span>
-              <span>アルコールの提供は20歳以上の方に限ります</span>
+              <span className="text-yellow-500 font-semibold">•</span>
+              <span>キープボトルは開栓後3ヶ月間お預かりいたします</span>
             </div>
             <div className="flex gap-2">
-              <span className="text-primary font-semibold">•</span>
-              <span>ドリンクの種類によっては在庫切れの場合があります</span>
+              <span className="text-yellow-500 font-semibold">•</span>
+              <span>シャンパンタワー等の演出もご相談ください</span>
             </div>
             <div className="flex gap-2">
-              <span className="text-primary font-semibold">•</span>
-              <span>お酒の飲み過ぎにはご注意ください</span>
-            </div>
-            <div className="flex gap-2">
-              <span className="text-primary font-semibold">•</span>
-              <span>ノンアルコールカクテルもご用意しております</span>
-            </div>
-            <div className="flex gap-2">
-              <span className="text-primary font-semibold">•</span>
-              <span>ドリンクのご注文はキャストまでお声がけください</span>
+              <span className="text-yellow-500 font-semibold">•</span>
+              <span>その他ご要望がございましたらスタッフまでお申し付けください</span>
             </div>
           </div>
         </div>
       </main>
-
     </div>
   );
 }

@@ -2,13 +2,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { query, transaction } from '@/lib/db';
 import { asyncHandler, ValidationError } from '@/lib/error-handler';
 import { validateRequest, createCastSchema, castSearchParamsSchema } from '@/lib/validation';
-import { 
-  ApiResponse, 
-  CastDetail, 
-  CastListResponse, 
-  CastSearchParams 
+import {
+  ApiResponse,
+  CastDetail,
+  CastListResponse,
+  CastSearchParams
 } from '@/types/api';
 import { Cast, CastPhoto, CastStats, Badge } from '@/types/database';
+import { v4 as uuidv4 } from 'uuid';
 
 // Logger initialization moved
 
@@ -188,48 +189,49 @@ export const POST = asyncHandler(async (request: NextRequest) => {
     
     const validatedData = validation.data;
 
-    const result = await transaction(async (client) => {
+    // UUIDを生成
+    const castId = uuidv4();
+    const photoId = uuidv4();
+
+    const result = await transaction(async (exec) => {
       // キャスト基本情報を作成
-      await client.query(`
-        INSERT INTO casts (name, age, height, description, avatar_url, is_active)
-        VALUES (?, ?, ?, ?, ?, 1)
+      await exec(`
+        INSERT INTO casts (id, name, age, height, description, avatar_url, is_active)
+        VALUES (?, ?, ?, ?, ?, ?, 1)
       `, [
+        castId,
         validatedData.name,
         validatedData.age,
         validatedData.height,
         validatedData.description || null,
-        validatedData.avatar_url || null
+        validatedData.profile_image || null
       ]);
 
-      // 最後に挿入されたIDを取得
-      const lastIdResult = await client.query('SELECT last_insert_rowid() as id');
-      const castId = lastIdResult.rows[0].id as number;
-
-      // 能力値を作成
-      await client.query(`
+      // 能力値を作成（フォームのフィールド名をDBカラム名にマッピング）
+      await exec(`
         INSERT INTO cast_stats (cast_id, looks, talk, alcohol_tolerance, intelligence, energy, custom_stat, custom_stat_name)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
       `, [
         castId,
         validatedData.stats.looks || 50,
         validatedData.stats.talk || 50,
-        validatedData.stats.alcohol_tolerance || 50,
+        validatedData.stats.drinking || 50,      // drinking -> alcohol_tolerance
         validatedData.stats.intelligence || 50,
-        validatedData.stats.energy || 50,
-        validatedData.stats.custom_stat || null,
-        validatedData.stats.custom_stat_name || null
+        validatedData.stats.tension || 50,       // tension -> energy
+        validatedData.stats.special || null,     // special -> custom_stat
+        null
       ]);
 
       // プロフィール画像があれば写真として追加
-      if (validatedData.avatar_url) {
-        await client.query(`
-          INSERT INTO cast_photos (cast_id, photo_url, is_main, order_index)
-          VALUES (?, ?, 1, 0)
-        `, [castId, validatedData.avatar_url]);
+      if (validatedData.profile_image) {
+        await exec(`
+          INSERT INTO cast_photos (id, cast_id, photo_url, is_main, order_index)
+          VALUES (?, ?, ?, 1, 0)
+        `, [photoId, castId, validatedData.profile_image]);
       }
 
       // 作成されたキャストを取得
-      const castResult = await client.query('SELECT * FROM casts WHERE id = ?', [castId]);
+      const castResult = await exec('SELECT * FROM casts WHERE id = ?', [castId]);
       return castResult.rows[0] as Cast;
     });
 

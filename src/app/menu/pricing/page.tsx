@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowLeft, Clock, Star, Gift } from 'lucide-react';
+import { ArrowLeft, Clock, Star, AlertCircle, Info } from 'lucide-react';
 
 interface PricingPlan {
   id: string;
@@ -15,101 +15,67 @@ interface PricingPlan {
 
 const pricingPlans: PricingPlan[] = [
   {
-    id: 'basic-30',
+    id: 'basic-60',
     name: 'ベーシック',
-    duration: '30分',
-    price: 3000,
+    duration: '60分',
+    price: 5000,
     description: 'お気軽にお楽しみいただけるプラン',
     features: [
-      'キャストとの会話タイム',
-      'お飲み物1杯込み',
-      '写真撮影OK'
+      'キャストとの会話',
+      'ハウスボトル飲み放題',
     ]
   },
   {
-    id: 'standard-60',
+    id: 'standard-90',
     name: 'スタンダード',
-    duration: '60分',
-    price: 5500,
-    description: 'じっくりお話したい方におすすめ',
+    duration: '90分',
+    price: 7500,
+    description: 'ゆっくりお話したい方におすすめ',
     features: [
-      'キャストとの会話タイム',
-      'お飲み物2杯込み',
-      '写真撮影OK',
-      'ゲーム参加可能'
+      'キャストとの会話',
+      'ハウスボトル飲み放題',
+      '指名料込み',
     ],
     popular: true
   },
   {
-    id: 'premium-90',
+    id: 'premium-120',
     name: 'プレミアム',
-    duration: '90分',
-    price: 8000,
+    duration: '120分',
+    price: 10000,
     description: 'たっぷり時間をかけて楽しめる',
     features: [
-      'キャストとの会話タイム',
-      'お飲み物3杯込み',
-      '写真撮影OK',
-      'ゲーム参加可能',
-      '軽食サービス'
+      'キャストとの会話',
+      'ハウスボトル飲み放題',
+      '指名料込み',
+      'VIPルーム利用可',
     ]
   },
-  {
-    id: 'vip-120',
-    name: 'VIP',
-    duration: '120分',
-    price: 12000,
-    description: '特別なひとときをお過ごしください',
-    features: [
-      'キャストとの会話タイム',
-      'お飲み物無制限',
-      '写真撮影OK',
-      'ゲーム参加可能',
-      '軽食サービス',
-      '個室利用可能'
-    ]
-  }
 ];
 
 const additionalServices = [
-  {
-    name: 'ドリンク追加',
-    price: 500,
-    description: 'アルコール・ソフトドリンク各種'
-  },
-  {
-    name: 'フード追加',
-    price: 800,
-    description: '軽食・おつまみ各種'
-  },
-  {
-    name: '写真プリント',
-    price: 300,
-    description: 'チェキ風プリント（1枚）'
-  },
-  {
-    name: '延長料金',
-    price: 1000,
-    description: '15分毎の延長料金'
-  }
+  { name: '延長料金', price: 2500, note: '30分毎' },
+  { name: '指名料', price: 2000, note: '1名様' },
+  { name: '同伴料', price: 3000, note: '1名様' },
+  { name: 'VIPルーム', price: 5000, note: '1時間' },
 ];
 
 export default function PricingPage() {
   return (
-    <div className="min-h-screen pb-20">
+    <div className="min-h-screen pb-20 bg-gradient-to-b from-gray-900 to-black">
       {/* ヘッダー */}
-      <header className="sticky top-0 z-40 border-b border-border backdrop-blur-md bg-surface/80">
+      <header className="sticky top-0 z-40 border-b border-gray-800 backdrop-blur-md bg-gray-900/80">
         <div className="tablet-layout py-3">
           <div className="flex items-center gap-4">
-            <Link 
+            <Link
               href="/"
-              className="flex items-center gap-2 text-secondary hover:text-primary transition-colors"
+              className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
             >
               <ArrowLeft className="h-5 w-5" />
               戻る
             </Link>
             <div className="flex-1 min-w-0">
-              <h1 className="text-lg font-bold">料金表</h1>
+              <h1 className="text-lg font-bold text-white">料金表</h1>
             </div>
           </div>
         </div>
@@ -117,60 +83,70 @@ export default function PricingPage() {
 
       {/* メインコンテンツ */}
       <main className="tablet-layout py-6">
+        {/* サンプル表示の警告 */}
+        <div className="mb-6 p-4 rounded-xl bg-yellow-500/10 border border-yellow-500/30">
+          <div className="flex items-center gap-3">
+            <AlertCircle className="h-5 w-5 text-yellow-500 flex-shrink-0" />
+            <p className="text-yellow-500 text-sm font-medium">
+              ※詳細不明のためサンプルで代替しています。実際の料金は店舗にてご確認ください。
+            </p>
+          </div>
+        </div>
+
         {/* タイトルセクション */}
         <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold mb-2">料金プラン</h2>
-          <p className="text-secondary text-sm">お客様のご予算に合わせてお選びください</p>
+          <h2 className="text-3xl font-bold mb-2 text-white">PRICE</h2>
+          <p className="text-gray-400 text-sm">※料金は全て税込表記です</p>
         </div>
 
         {/* プラン一覧 */}
-        <div className="grid md:grid-cols-2 gap-6 mb-10">
+        <div className="grid md:grid-cols-3 gap-6 mb-10">
           {pricingPlans.map((plan) => (
             <div
               key={plan.id}
-              className={`cast-card p-6 relative ${
-                plan.popular ? 'ring-2 ring-primary' : ''
+              className={`relative rounded-xl overflow-hidden border ${
+                plan.popular
+                  ? 'border-yellow-500 bg-gradient-to-b from-yellow-500/10 to-gray-900'
+                  : 'border-gray-800 bg-gray-900/50'
               }`}
             >
               {/* 人気プランバッジ */}
               {plan.popular && (
-                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                  <div className="bg-primary text-white px-4 py-1 rounded-full text-xs font-semibold flex items-center gap-1">
-                    <Star className="h-3 w-3" />
+                <div className="absolute top-0 left-0 right-0">
+                  <div className="bg-gradient-to-r from-yellow-500 to-amber-500 text-black px-4 py-2 text-center text-sm font-bold flex items-center justify-center gap-2">
+                    <Star className="h-4 w-4" />
                     人気プラン
                   </div>
                 </div>
               )}
 
-              <div className="space-y-4">
+              <div className={`p-6 ${plan.popular ? 'pt-14' : ''}`}>
                 {/* プラン名と時間 */}
-                <div className="text-center">
-                  <h3 className="text-xl font-bold mb-1">{plan.name}</h3>
-                  <div className="flex items-center justify-center gap-2 text-primary">
+                <div className="text-center mb-6">
+                  <h3 className="text-2xl font-bold text-white mb-2">{plan.name}</h3>
+                  <div className="flex items-center justify-center gap-2 text-gray-400">
                     <Clock className="h-4 w-4" />
-                    <span className="font-semibold">{plan.duration}</span>
+                    <span>{plan.duration}</span>
                   </div>
                 </div>
 
                 {/* 価格 */}
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-primary mb-1">
-                    ¥{plan.price.toLocaleString()}
+                <div className="text-center mb-6">
+                  <div className="text-4xl font-bold text-white mb-1">
+                    <span className="text-yellow-500">¥</span>
+                    {plan.price.toLocaleString()}
                   </div>
-                  <p className="text-xs text-secondary">{plan.description}</p>
+                  <p className="text-xs text-gray-500">{plan.description}</p>
                 </div>
 
                 {/* 機能リスト */}
                 <div className="space-y-3">
-                  <h4 className="text-sm font-semibold text-secondary">含まれるサービス</h4>
-                  <ul className="space-y-2">
-                    {plan.features.map((feature, index) => (
-                      <li key={index} className="flex items-center gap-2 text-sm">
-                        <div className="w-1.5 h-1.5 bg-primary rounded-full flex-shrink-0" />
-                        <span>{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
+                  {plan.features.map((feature, index) => (
+                    <div key={index} className="flex items-center gap-3 text-gray-300">
+                      <div className="w-2 h-2 bg-yellow-500 rounded-full flex-shrink-0" />
+                      <span className="text-sm">{feature}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
@@ -178,72 +154,57 @@ export default function PricingPage() {
         </div>
 
         {/* 追加サービス */}
-        <div className="cast-card p-6 mb-6">
-          <div className="text-center mb-6">
-            <h3 className="text-xl font-bold mb-2">追加サービス</h3>
-            <p className="text-secondary text-sm">オプションでご利用いただけます</p>
+        <div className="rounded-xl overflow-hidden border border-gray-800 bg-gray-900/50 mb-8">
+          <div className="px-6 py-4 border-b border-gray-800 bg-gray-800/50">
+            <h3 className="text-xl font-bold text-white">追加料金</h3>
           </div>
-
-          <div className="grid md:grid-cols-2 gap-4">
-            {additionalServices.map((service, index) => (
-              <div key={index} className="flex items-center justify-between p-4 bg-surface-variant rounded-lg">
-                <div>
-                  <h4 className="font-semibold text-sm">{service.name}</h4>
-                  <p className="text-xs text-secondary">{service.description}</p>
-                </div>
-                <div className="text-right">
-                  <div className="text-lg font-bold text-primary">
+          <div className="p-4">
+            <div className="grid md:grid-cols-2 gap-3">
+              {additionalServices.map((service, index) => (
+                <div
+                  key={index}
+                  className="flex justify-between items-center py-3 px-4 rounded-lg bg-gray-800/50"
+                >
+                  <div>
+                    <span className="text-white font-medium">{service.name}</span>
+                    <span className="text-gray-500 text-sm ml-2">({service.note})</span>
+                  </div>
+                  <div className="text-xl font-bold text-yellow-500">
                     ¥{service.price.toLocaleString()}
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
 
         {/* 注意事項 */}
-        <div className="cast-card p-6">
+        <div className="rounded-xl p-6 border border-gray-800 bg-gray-900/50">
           <div className="flex items-center gap-3 mb-4">
-            <Gift className="h-5 w-5 text-primary" />
-            <h3 className="text-lg font-bold">ご利用について</h3>
+            <Info className="h-5 w-5 text-yellow-500" />
+            <h3 className="text-lg font-bold text-white">ご利用案内</h3>
           </div>
-          
-          <div className="space-y-3 text-sm text-secondary">
-            <div className="flex gap-2">
-              <span className="text-primary font-semibold">•</span>
-              <span>料金は税込み価格です</span>
-            </div>
-            <div className="flex gap-2">
-              <span className="text-primary font-semibold">•</span>
-              <span>ご予約は事前にお電話またはオンラインでお願いします</span>
-            </div>
-            <div className="flex gap-2">
-              <span className="text-primary font-semibold">•</span>
-              <span>キャンセルは前日までにご連絡ください</span>
-            </div>
-            <div className="flex gap-2">
-              <span className="text-primary font-semibold">•</span>
-              <span>延長をご希望の場合は、当日キャストにお申し付けください</span>
-            </div>
-            <div className="flex gap-2">
-              <span className="text-primary font-semibold">•</span>
-              <span>お支払いは現金またはクレジットカードをご利用いただけます</span>
-            </div>
-          </div>
-        </div>
 
-        {/* お問い合わせセクション */}
-        <div className="text-center mt-8">
-          <p className="text-secondary text-sm mb-4">
-            ご不明な点がございましたら、お気軽にお問い合わせください
-          </p>
-          <div className="space-y-2">
-            <p className="text-lg font-bold">📞 03-XXXX-XXXX</p>
-            <p className="text-xs text-secondary">営業時間: 18:00 - 26:00 (月-土)</p>
+          <div className="space-y-3 text-sm text-gray-400">
+            <div className="flex gap-2">
+              <span className="text-yellow-500 font-semibold">•</span>
+              <span>料金は全て税込み価格です</span>
+            </div>
+            <div className="flex gap-2">
+              <span className="text-yellow-500 font-semibold">•</span>
+              <span>初回のお客様は身分証のご提示をお願いしております</span>
+            </div>
+            <div className="flex gap-2">
+              <span className="text-yellow-500 font-semibold">•</span>
+              <span>クレジットカード・各種電子マネーをご利用いただけます</span>
+            </div>
+            <div className="flex gap-2">
+              <span className="text-yellow-500 font-semibold">•</span>
+              <span>ご予約・お問い合わせはお気軽にどうぞ</span>
+            </div>
           </div>
         </div>
       </main>
-
     </div>
   );
 }

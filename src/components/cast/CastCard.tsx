@@ -15,17 +15,17 @@ interface CastCardProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onClick'> 
 }
 
 export const CastCard = forwardRef<HTMLDivElement, CastCardProps>(
-  ({ 
-    className, 
+  ({
+    className,
     cast,
-    size = 'md', 
+    size = 'md',
     onClick,
     showBadges = true,
     showStats = false,
-    ...props 
+    ...props
   }, ref) => {
-    const baseClasses = 'relative bg-white rounded-lg shadow-md overflow-hidden transition-all duration-200 hover:shadow-lg cursor-pointer';
-    
+    const baseClasses = 'relative rounded-xl overflow-hidden transition-all duration-300 cursor-pointer group';
+
     const sizes = {
       sm: 'aspect-[3/4]',
       md: 'aspect-[3/4]',
@@ -45,6 +45,9 @@ export const CastCard = forwardRef<HTMLDivElement, CastCardProps>(
         className={clsx(
           baseClasses,
           sizes[size],
+          'bg-gray-900 border border-gray-800',
+          'hover:border-yellow-500/50 hover:shadow-xl hover:shadow-yellow-500/10',
+          'hover:scale-[1.02]',
           className
         )}
         ref={ref}
@@ -61,12 +64,13 @@ export const CastCard = forwardRef<HTMLDivElement, CastCardProps>(
       >
         {/* バッジ表示エリア */}
         {showBadges && cast.badges.length > 0 && (
-          <div className="absolute top-2 left-2 z-10 flex flex-wrap gap-1">
-            {cast.badges.map((badge) => (
+          <div className="absolute top-3 left-3 z-20 flex flex-wrap gap-1.5">
+            {cast.badges.slice(0, 3).map((badge) => (
               <Badge
                 key={badge.id}
                 badge={badge}
                 size="sm"
+                variant="glow"
               />
             ))}
           </div>
@@ -78,40 +82,51 @@ export const CastCard = forwardRef<HTMLDivElement, CastCardProps>(
             src={avatarUrl}
             alt={cast.name}
             fill
-            sizes="(max-width: 768px) 33vw, (max-width: 1024px) 20vw, 16vw"
-            className="object-cover"
+            sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            className="object-cover transition-transform duration-500 group-hover:scale-110"
             priority={false}
           />
+          {/* グラデーションオーバーレイ */}
+          <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent opacity-60" />
         </div>
 
         {/* キャスト情報 */}
-        <div className="h-1/4 p-3 flex flex-col justify-center">
-          <h3 className="font-semibold text-gray-900 text-sm truncate">
+        <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-gray-900 via-gray-900/95 to-transparent">
+          <h3 className="font-bold text-white text-lg truncate mb-1">
             {cast.name}
           </h3>
-          
-          <div className="flex items-center gap-2 text-xs text-gray-600 mt-1">
-            <span>{cast.age}歳</span>
-            <span>•</span>
-            <span>{cast.height}cm</span>
+
+          <div className="flex items-center gap-3 text-sm text-gray-400">
+            <span className="flex items-center gap-1">
+              <span className="text-yellow-500 font-semibold">{cast.age}</span>
+              <span>歳</span>
+            </span>
+            <span className="text-gray-600">|</span>
+            <span className="flex items-center gap-1">
+              <span className="text-yellow-500 font-semibold">{cast.height}</span>
+              <span>cm</span>
+            </span>
           </div>
 
           {/* 統計表示（オプション） */}
-          {showStats && (
-            <div className="flex items-center gap-1 mt-1">
-              {Object.entries({
-                ルックス: cast.stats.looks,
-                トーク: cast.stats.talk,
-                テンション: cast.stats.energy
-              }).map(([key, value]) => (
-                <div key={key} className="flex items-center gap-1 text-xs">
-                  <span className="text-gray-500">{key}</span>
-                  <span className="font-medium text-blue-600">{value}</span>
+          {showStats && cast.stats && (
+            <div className="flex items-center gap-2 mt-2 pt-2 border-t border-gray-800">
+              {[
+                { label: 'ルックス', value: cast.stats.looks },
+                { label: 'トーク', value: cast.stats.talk },
+                { label: 'テンション', value: cast.stats.energy }
+              ].map(({ label, value }) => (
+                <div key={label} className="flex-1 text-center">
+                  <div className="text-xs text-gray-500">{label}</div>
+                  <div className="text-sm font-bold text-yellow-500">{value || '-'}</div>
                 </div>
               ))}
             </div>
           )}
         </div>
+
+        {/* ホバー時のハイライト効果 */}
+        <div className="absolute inset-0 border-2 border-transparent group-hover:border-yellow-500/30 rounded-xl transition-colors pointer-events-none" />
       </div>
     );
   }
