@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback, use } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, useCallback } from "react";
+import { useRouter, useParams } from "next/navigation";
 
 import MultiImageUploader from "@/components/MultiImageUploader";
 import type { CastDetail } from "@/types";
@@ -29,8 +29,9 @@ interface CastFormData {
   };
 }
 
-export default function EditCastPage({ params }: { params: Promise<{ id: string }> }) {
-  const resolvedParams = use(params);
+export default function EditCastPage() {
+  const params = useParams();
+  const castId = params.id as string;
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -54,7 +55,7 @@ export default function EditCastPage({ params }: { params: Promise<{ id: string 
 
   const fetchCast = useCallback(async () => {
     try {
-      const response = await fetch(`/api/casts/${resolvedParams.id}`);
+      const response = await fetch(`/api/casts/${castId}`);
       if (!response.ok) throw new Error("キャストの取得に失敗しました");
       const result = await response.json();
       const data = result.data;
@@ -96,7 +97,7 @@ export default function EditCastPage({ params }: { params: Promise<{ id: string 
     } finally {
       setLoading(false);
     }
-  }, [resolvedParams.id, router]);
+  }, [castId, router]);
 
   useEffect(() => {
     fetchCast();
@@ -136,7 +137,7 @@ export default function EditCastPage({ params }: { params: Promise<{ id: string 
       const mainPhoto = formData.photos.find(p => p.isMain) || formData.photos[0];
       const avatarUrl = mainPhoto?.url || "";
 
-      const response = await fetch(`/api/casts/${resolvedParams.id}`, {
+      const response = await fetch(`/api/casts/${castId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -163,7 +164,7 @@ export default function EditCastPage({ params }: { params: Promise<{ id: string 
 
       if (!response.ok) throw new Error("更新に失敗しました");
 
-      console.info("キャスト更新成功", { id: resolvedParams.id });
+      console.info("キャスト更新成功", { id: castId });
       router.push("/admin/casts");
     } catch (error) {
       console.error("キャスト更新エラー", error);
