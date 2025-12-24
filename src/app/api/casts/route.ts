@@ -191,7 +191,6 @@ export const POST = asyncHandler(async (request: NextRequest) => {
 
     // UUIDを生成
     const castId = uuidv4();
-    const photoId = uuidv4();
 
     // キャスト基本情報を作成
     await query(`
@@ -221,12 +220,22 @@ export const POST = asyncHandler(async (request: NextRequest) => {
       null
     ]);
 
-    // プロフィール画像があれば写真として追加
-    if (validatedData.profile_image) {
+    // 複数写真を追加（photos配列がある場合）
+    const photos = (body.photos as string[]) || [];
+    if (photos.length > 0) {
+      for (let i = 0; i < photos.length; i++) {
+        const photoId = uuidv4();
+        await query(`
+          INSERT INTO cast_photos (id, cast_id, photo_url, is_main, order_index)
+          VALUES (?, ?, ?, ?, ?)
+        `, [photoId, castId, photos[i], i === 0 ? 1 : 0, i]);
+      }
+    } else if (validatedData.profile_image) {
+      // 後方互換性: profile_imageのみの場合
       await query(`
         INSERT INTO cast_photos (id, cast_id, photo_url, is_main, order_index)
         VALUES (?, ?, ?, 1, 0)
-      `, [photoId, castId, validatedData.profile_image]);
+      `, [uuidv4(), castId, validatedData.profile_image]);
     }
 
     // 作成されたキャストを取得

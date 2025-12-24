@@ -3,11 +3,22 @@
 import { useState, useEffect, useCallback, use } from "react";
 import { useRouter } from "next/navigation";
 
-import ImageUploader from "@/components/ImageUploader";
-import type { CastDetail, CreateCastInput } from "@/types";
+import MultiImageUploader from "@/components/MultiImageUploader";
+import type { CastDetail } from "@/types";
+
+interface UploadedImage {
+  url: string;
+  isMain: boolean;
+}
 
 // フォーム用の型定義
-interface CastFormData extends Omit<CreateCastInput, 'stats'> {
+interface CastFormData {
+  name: string;
+  age: number;
+  height: number;
+  blood_type: string;
+  photos: UploadedImage[];
+  description: string;
   stats: {
     looks: number;
     talk: number;
@@ -29,7 +40,7 @@ export default function EditCastPage({ params }: { params: Promise<{ id: string 
     age: 20,
     height: 160,
     blood_type: "A",
-    profile_image: "",
+    photos: [],
     description: "",
     stats: {
       looks: 50,
@@ -48,12 +59,19 @@ export default function EditCastPage({ params }: { params: Promise<{ id: string 
       const result = await response.json();
       const data = result.data;
       setCast(data);
+
+      // 写真データを変換
+      const photos: UploadedImage[] = (data.photos || []).map((photo: { photo_url: string; is_main: number | boolean }, index: number) => ({
+        url: photo.photo_url,
+        isMain: photo.is_main === 1 || photo.is_main === true || index === 0
+      }));
+
       setFormData({
         name: data.name,
         age: data.age,
         height: data.height,
         blood_type: data.blood_type || "A",
-        profile_image: data.avatar_url || "",
+        photos,
         description: data.description || "",
         stats: data.stats ? {
           looks: data.stats.looks || 50,
@@ -114,6 +132,10 @@ export default function EditCastPage({ params }: { params: Promise<{ id: string 
     setSaving(true);
 
     try {
+      // メイン画像のURLを取得
+      const mainPhoto = formData.photos.find(p => p.isMain) || formData.photos[0];
+      const avatarUrl = mainPhoto?.url || "";
+
       const response = await fetch(`/api/casts/${resolvedParams.id}`, {
         method: "PUT",
         headers: {
@@ -125,7 +147,7 @@ export default function EditCastPage({ params }: { params: Promise<{ id: string 
             age: formData.age,
             height: formData.height,
             description: formData.description,
-            avatar_url: formData.profile_image,
+            avatar_url: avatarUrl,
           },
           stats: {
             looks: formData.stats.looks,
@@ -135,6 +157,7 @@ export default function EditCastPage({ params }: { params: Promise<{ id: string 
             energy: formData.stats.tension,
             custom_stat: formData.stats.special,
           },
+          photos: formData.photos.map(p => p.url),
         }),
       });
 
@@ -225,11 +248,11 @@ export default function EditCastPage({ params }: { params: Promise<{ id: string 
         </div>
 
         <div>
-          <ImageUploader
-            label="プロフィール画像"
-            value={formData.profile_image}
-            onChange={(url) => setFormData((prev: CastFormData) => ({ ...prev, profile_image: url }))}
-            onRemove={() => setFormData((prev: CastFormData) => ({ ...prev, profile_image: "" }))}
+          <MultiImageUploader
+            label="キャスト写真"
+            value={formData.photos}
+            onChange={(photos) => setFormData((prev: CastFormData) => ({ ...prev, photos }))}
+            maxImages={5}
           />
         </div>
 

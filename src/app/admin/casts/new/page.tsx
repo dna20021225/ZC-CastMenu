@@ -3,20 +3,41 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-import ImageUploader from "@/components/ImageUploader";
-import type { CreateCastInput } from "@/types";
+import MultiImageUploader from "@/components/MultiImageUploader";
+
+interface UploadedImage {
+  url: string;
+  isMain: boolean;
+}
 
 
+
+interface CastFormData {
+  name: string;
+  age: number;
+  height: number;
+  blood_type: string;
+  photos: UploadedImage[];
+  description: string;
+  stats: {
+    looks: number;
+    talk: number;
+    drinking: number;
+    intelligence: number;
+    tension: number;
+    special: number;
+  };
+}
 
 export default function NewCastPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState<CreateCastInput>({
+  const [formData, setFormData] = useState<CastFormData>({
     name: "",
     age: 20,
     height: 160,
     blood_type: "A",
-    profile_image: "",
+    photos: [],
     description: "",
     stats: {
       looks: 50,
@@ -58,18 +79,30 @@ export default function NewCastPage() {
     setLoading(true);
 
     try {
+      // メイン画像のURLを取得
+      const mainPhoto = formData.photos.find(p => p.isMain) || formData.photos[0];
+      const profileImage = mainPhoto?.url || "";
+
       const response = await fetch("/api/casts", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          name: formData.name,
+          age: formData.age,
+          height: formData.height,
+          profile_image: profileImage,
+          description: formData.description,
+          stats: formData.stats,
+          photos: formData.photos.map(p => p.url),
+        }),
       });
 
       if (!response.ok) throw new Error("登録に失敗しました");
 
       const data = await response.json();
-      console.info("キャスト登録成功", { id: data.id });
+      console.info("キャスト登録成功", { id: data.data?.id });
       router.push("/admin/casts");
     } catch (error) {
       console.error("キャスト登録エラー", error);
@@ -179,11 +212,11 @@ export default function NewCastPage() {
         </div>
 
         <div>
-          <ImageUploader
-            label="プロフィール画像"
-            value={formData.profile_image}
-            onChange={(url) => setFormData(prev => ({ ...prev, profile_image: url }))}
-            onRemove={() => setFormData(prev => ({ ...prev, profile_image: "" }))}
+          <MultiImageUploader
+            label="キャスト写真"
+            value={formData.photos}
+            onChange={(photos) => setFormData(prev => ({ ...prev, photos }))}
+            maxImages={5}
           />
         </div>
 
