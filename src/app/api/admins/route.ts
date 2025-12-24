@@ -10,7 +10,7 @@ export async function GET() {
     console.info('管理者一覧取得開始');
 
     const result = await query(
-      'SELECT id, username, email, is_active, created_at, last_login FROM admins ORDER BY created_at DESC'
+      'SELECT id, name, email, is_active, created_at FROM admins ORDER BY created_at DESC'
     );
 
     console.info('管理者一覧取得完了', { count: result.rows.length });
@@ -35,18 +35,19 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const { username, email, password } = body;
+    const name = username; // フロントエンドはusernameを送信するのでマッピング
 
-    if (!username || !email || !password) {
+    if (!name || !email || !password) {
       return NextResponse.json({
         success: false,
         error: '必須項目が入力されていません',
       }, { status: 400 });
     }
 
-    // ユーザー名の重複チェック
+    // 名前・メールアドレスの重複チェック
     const existingUser = await query(
-      'SELECT id FROM admins WHERE username = ? OR email = ?',
-      [username, email]
+      'SELECT id FROM admins WHERE name = ? OR email = ?',
+      [name, email]
     );
 
     if (existingUser.rows.length > 0) {
@@ -61,21 +62,21 @@ export async function POST(request: NextRequest) {
 
     // 管理者作成
     await query(
-      'INSERT INTO admins (username, email, password, is_active) VALUES (?, ?, ?, 1)',
-      [username, email, hashedPassword]
+      'INSERT INTO admins (name, email, password_hash, is_active) VALUES (?, ?, ?, 1)',
+      [name, email, hashedPassword]
     );
 
     // 最後に挿入されたIDを取得
     const lastIdResult = await query('SELECT last_insert_rowid() as id');
-    const adminId = lastIdResult.rows[0].id;
+    const adminId = lastIdResult.rows[0]?.id;
 
     // 作成された管理者を取得
     const result = await query(
-      'SELECT id, username, email, is_active, created_at FROM admins WHERE id = ?',
+      'SELECT id, name, email, is_active, created_at FROM admins WHERE id = ?',
       [adminId]
     );
 
-    console.info('管理者作成完了', { id: result.rows[0].id, username });
+    console.info('管理者作成完了', { id: result.rows[0]?.id, name });
 
     return NextResponse.json({
       success: true,

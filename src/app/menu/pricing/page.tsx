@@ -65,13 +65,13 @@ export default function PricingPage() {
     <div className="min-h-screen pb-20 bg-gradient-to-b from-gray-900 to-black">
       {/* ヘッダー */}
       <header className="sticky top-0 z-40 border-b border-gray-800 backdrop-blur-md bg-gray-900/80">
-        <div className="tablet-layout py-3">
+        <div className="py-3 tablet-layout">
           <div className="flex items-center gap-4">
             <Link
               href="/"
-              className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+              className="flex items-center gap-2 text-gray-400 transition-colors hover:text-white"
             >
-              <ArrowLeft className="h-5 w-5" />
+              <ArrowLeft className="w-5 h-5" />
               戻る
             </Link>
             <div className="flex-1 min-w-0">
@@ -82,25 +82,25 @@ export default function PricingPage() {
       </header>
 
       {/* メインコンテンツ */}
-      <main className="tablet-layout py-6">
+      <main className="py-6 tablet-layout">
         {/* サンプル表示の警告 */}
-        <div className="mb-6 p-4 rounded-xl bg-yellow-500/10 border border-yellow-500/30">
+        <div className="p-4 mb-6 border rounded-xl bg-yellow-500/10 border-yellow-500/30">
           <div className="flex items-center gap-3">
-            <AlertCircle className="h-5 w-5 text-yellow-500 flex-shrink-0" />
-            <p className="text-yellow-500 text-sm font-medium">
-              ※詳細不明のためサンプルで代替しています。実際の料金は店舗にてご確認ください。
+            <AlertCircle className="flex-shrink-0 w-5 h-5 text-yellow-500" />
+            <p className="text-sm font-medium text-yellow-500">
+              ※【鷹さんへ】詳細忘れちゃったので適当に掲載してます。
             </p>
           </div>
         </div>
 
         {/* タイトルセクション */}
-        <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold mb-2 text-white">PRICE</h2>
-          <p className="text-gray-400 text-sm">※料金は全て税込表記です</p>
+        <div className="mb-8 text-center">
+          <h2 className="mb-2 text-3xl font-bold text-white">PRICE</h2>
+          <p className="text-sm text-gray-400">※料金は全て税込表記です</p>
         </div>
 
         {/* プラン一覧 */}
-        <div className="grid md:grid-cols-3 gap-6 mb-10">
+        <div className="grid gap-6 mb-10 md:grid-cols-3">
           {pricingPlans.map((plan) => (
             <div
               key={plan.id}
@@ -113,8 +113,8 @@ export default function PricingPage() {
               {/* 人気プランバッジ */}
               {plan.popular && (
                 <div className="absolute top-0 left-0 right-0">
-                  <div className="bg-gradient-to-r from-yellow-500 to-amber-500 text-black px-4 py-2 text-center text-sm font-bold flex items-center justify-center gap-2">
-                    <Star className="h-4 w-4" />
+                  <div className="flex items-center justify-center gap-2 px-4 py-2 text-sm font-bold text-center text-black bg-gradient-to-r from-yellow-500 to-amber-500">
+                    <Star className="w-4 h-4" />
                     人気プラン
                   </div>
                 </div>
@@ -122,17 +122,17 @@ export default function PricingPage() {
 
               <div className={`p-6 ${plan.popular ? 'pt-14' : ''}`}>
                 {/* プラン名と時間 */}
-                <div className="text-center mb-6">
-                  <h3 className="text-2xl font-bold text-white mb-2">{plan.name}</h3>
+                <div className="mb-6 text-center">
+                  <h3 className="mb-2 text-2xl font-bold text-white">{plan.name}</h3>
                   <div className="flex items-center justify-center gap-2 text-gray-400">
-                    <Clock className="h-4 w-4" />
+                    <Clock className="w-4 h-4" />
                     <span>{plan.duration}</span>
                   </div>
                 </div>
 
                 {/* 価格 */}
-                <div className="text-center mb-6">
-                  <div className="text-4xl font-bold text-white mb-1">
+                <div className="mb-6 text-center">
+                  <div className="mb-1 text-4xl font-bold text-white">
                     <span className="text-yellow-500">¥</span>
                     {plan.price.toLocaleString()}
                   </div>
@@ -143,7 +143,7 @@ export default function PricingPage() {
                 <div className="space-y-3">
                   {plan.features.map((feature, index) => (
                     <div key={index} className="flex items-center gap-3 text-gray-300">
-                      <div className="w-2 h-2 bg-yellow-500 rounded-full flex-shrink-0" />
+                      <div className="flex-shrink-0 w-2 h-2 bg-yellow-500 rounded-full" />
                       <span className="text-sm">{feature}</span>
                     </div>
                   ))}
@@ -154,20 +154,20 @@ export default function PricingPage() {
         </div>
 
         {/* 追加サービス */}
-        <div className="rounded-xl overflow-hidden border border-gray-800 bg-gray-900/50 mb-8">
+        <div className="mb-8 overflow-hidden border border-gray-800 rounded-xl bg-gray-900/50">
           <div className="px-6 py-4 border-b border-gray-800 bg-gray-800/50">
             <h3 className="text-xl font-bold text-white">追加料金</h3>
           </div>
           <div className="p-4">
-            <div className="grid md:grid-cols-2 gap-3">
+            <div className="grid gap-3 md:grid-cols-2">
               {additionalServices.map((service, index) => (
                 <div
                   key={index}
-                  className="flex justify-between items-center py-3 px-4 rounded-lg bg-gray-800/50"
+                  className="flex items-center justify-between px-4 py-3 rounded-lg bg-gray-800/50"
                 >
                   <div>
-                    <span className="text-white font-medium">{service.name}</span>
-                    <span className="text-gray-500 text-sm ml-2">({service.note})</span>
+                    <span className="font-medium text-white">{service.name}</span>
+                    <span className="ml-2 text-sm text-gray-500">({service.note})</span>
                   </div>
                   <div className="text-xl font-bold text-yellow-500">
                     ¥{service.price.toLocaleString()}
@@ -179,27 +179,27 @@ export default function PricingPage() {
         </div>
 
         {/* 注意事項 */}
-        <div className="rounded-xl p-6 border border-gray-800 bg-gray-900/50">
+        <div className="p-6 border border-gray-800 rounded-xl bg-gray-900/50">
           <div className="flex items-center gap-3 mb-4">
-            <Info className="h-5 w-5 text-yellow-500" />
+            <Info className="w-5 h-5 text-yellow-500" />
             <h3 className="text-lg font-bold text-white">ご利用案内</h3>
           </div>
 
           <div className="space-y-3 text-sm text-gray-400">
             <div className="flex gap-2">
-              <span className="text-yellow-500 font-semibold">•</span>
+              <span className="font-semibold text-yellow-500">•</span>
               <span>料金は全て税込み価格です</span>
             </div>
             <div className="flex gap-2">
-              <span className="text-yellow-500 font-semibold">•</span>
+              <span className="font-semibold text-yellow-500">•</span>
               <span>初回のお客様は身分証のご提示をお願いしております</span>
             </div>
             <div className="flex gap-2">
-              <span className="text-yellow-500 font-semibold">•</span>
+              <span className="font-semibold text-yellow-500">•</span>
               <span>クレジットカード・各種電子マネーをご利用いただけます</span>
             </div>
             <div className="flex gap-2">
-              <span className="text-yellow-500 font-semibold">•</span>
+              <span className="font-semibold text-yellow-500">•</span>
               <span>ご予約・お問い合わせはお気軽にどうぞ</span>
             </div>
           </div>

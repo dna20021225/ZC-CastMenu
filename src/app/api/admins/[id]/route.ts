@@ -13,7 +13,7 @@ export async function GET(
     console.info('管理者詳細取得開始', { id: params.id });
 
     const result = await query(
-      'SELECT id, username, email, is_active, created_at, last_login FROM admins WHERE id = ?',
+      'SELECT id, name, email, is_active, created_at FROM admins WHERE id = ?',
       [params.id]
     );
 
@@ -49,8 +49,9 @@ export async function PUT(
 
     const body = await request.json();
     const { username, email, password } = body;
+    const name = username; // フロントエンドはusernameを送信
 
-    if (!username || !email) {
+    if (!name || !email) {
       return NextResponse.json({
         success: false,
         error: '必須項目が入力されていません',
@@ -59,8 +60,8 @@ export async function PUT(
 
     // 他の管理者との重複チェック
     const existingUser = await query(
-      'SELECT id FROM admins WHERE (username = ? OR email = ?) AND id != ?',
-      [username, email, params.id]
+      'SELECT id FROM admins WHERE (name = ? OR email = ?) AND id != ?',
+      [name, email, params.id]
     );
 
     if (existingUser.rows.length > 0) {
@@ -74,13 +75,13 @@ export async function PUT(
     if (password) {
       const hashedPassword = await bcrypt.hash(password, 10);
       await query(
-        'UPDATE admins SET username = ?, email = ?, password = ?, updated_at = datetime(\'now\') WHERE id = ?',
-        [username, email, hashedPassword, params.id]
+        "UPDATE admins SET name = ?, email = ?, password_hash = ?, updated_at = datetime('now') WHERE id = ?",
+        [name, email, hashedPassword, params.id]
       );
     } else {
       await query(
-        'UPDATE admins SET username = ?, email = ?, updated_at = datetime(\'now\') WHERE id = ?',
-        [username, email, params.id]
+        "UPDATE admins SET name = ?, email = ?, updated_at = datetime('now') WHERE id = ?",
+        [name, email, params.id]
       );
     }
 
@@ -120,7 +121,7 @@ export async function DELETE(
 
     // 削除前にユーザー名を取得
     const adminResult = await query(
-      'SELECT username FROM admins WHERE id = ?',
+      'SELECT name FROM admins WHERE id = ?',
       [params.id]
     );
 
@@ -131,7 +132,7 @@ export async function DELETE(
       }, { status: 404 });
     }
 
-    const username = String(adminResult.rows[0]?.username ?? '');
+    const name = String(adminResult.rows[0]?.name ?? '');
 
     // 管理者を削除
     await query(
@@ -139,7 +140,7 @@ export async function DELETE(
       [params.id]
     );
 
-    console.info('管理者削除完了', { id: params.id, username });
+    console.info('管理者削除完了', { id: params.id, name });
 
     return NextResponse.json({
       success: true,
@@ -186,7 +187,7 @@ export async function PATCH(
     }
 
     await query(
-      'UPDATE admins SET is_active = ?, updated_at = datetime(\'now\') WHERE id = ?',
+      "UPDATE admins SET is_active = ?, updated_at = datetime('now') WHERE id = ?",
       [is_active ? 1 : 0, params.id]
     );
 

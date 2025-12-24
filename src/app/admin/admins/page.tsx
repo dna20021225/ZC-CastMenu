@@ -9,11 +9,10 @@ import { UserPlus, Edit, Trash2 } from "lucide-react";
 
 interface Admin {
   id: string;
-  username: string;
+  name: string;
   email: string;
   is_active: boolean;
   created_at: string;
-  last_login: string | null;
 }
 
 export default function AdminsPage() {
@@ -39,8 +38,8 @@ export default function AdminsPage() {
     }
   };
 
-  const handleDelete = async (id: string, username: string) => {
-    if (!confirm(`管理者「${username}」を削除してもよろしいですか？`)) return;
+  const handleDelete = async (id: string, name: string) => {
+    if (!confirm(`管理者「${name}」を削除してもよろしいですか？`)) return;
 
     try {
       const response = await fetch(`/api/admins/${id}`, {
@@ -49,7 +48,7 @@ export default function AdminsPage() {
 
       if (!response.ok) throw new Error("削除に失敗しました");
 
-      console.info("管理者削除成功", { id, username });
+      console.info("管理者削除成功", { id, name });
       fetchAdmins();
     } catch (error) {
       console.error("管理者削除エラー", error);
@@ -106,9 +105,6 @@ export default function AdminsPage() {
                 ステータス
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--secondary)' }}>
-                最終ログイン
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--secondary)' }}>
                 登録日
               </th>
               <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -120,7 +116,7 @@ export default function AdminsPage() {
             {admins.map((admin) => (
               <tr key={admin.id}>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-medium" style={{ color: 'var(--foreground)' }}>{admin.username}</div>
+                  <div className="text-sm font-medium" style={{ color: 'var(--foreground)' }}>{admin.name}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm" style={{ color: 'var(--secondary)' }}>{admin.email}</div>
@@ -138,11 +134,6 @@ export default function AdminsPage() {
                   </button>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm" style={{ color: 'var(--secondary)' }}>
-                  {admin.last_login
-                    ? new Date(admin.last_login).toLocaleString("ja-JP")
-                    : "未ログイン"}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm" style={{ color: 'var(--secondary)' }}>
                   {new Date(admin.created_at).toLocaleDateString("ja-JP")}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -153,7 +144,7 @@ export default function AdminsPage() {
                     <Edit className="w-5 h-5" />
                   </button>
                   <button
-                    onClick={() => handleDelete(admin.id, admin.username)}
+                    onClick={() => handleDelete(admin.id, admin.name)}
                     style={{ color: 'var(--error)' }} className="hover:text-red-700"
                   >
                     <Trash2 className="w-5 h-5" />
