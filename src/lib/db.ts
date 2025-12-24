@@ -187,19 +187,13 @@ export async function transaction<T>(
     }
   } else {
     // Better-SQLite3の場合
-    const db = getLocalDb();
+    // Better-SQLite3はトランザクション内で同期的に実行する必要があるため、
+    // asyncインターフェースとの互換性のため、通常のqueryを使用して順次実行
+    const exec = async (text: string, params?: unknown[]) => {
+      return query(text, params);
+    };
 
-    return db.transaction(() => {
-      const exec = async (text: string, params?: unknown[]) => {
-        const stmt = db.prepare(text);
-        const rows = params ? stmt.all(...params) : stmt.all();
-        return {
-          rows: (Array.isArray(rows) ? rows : [rows]) as Record<string, unknown>[],
-        };
-      };
-
-      return callback(exec);
-    })();
+    return callback(exec);
   }
 }
 
