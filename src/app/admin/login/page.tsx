@@ -7,8 +7,8 @@ import { useRouter } from "next/navigation";
 export default function AdminLoginPage() {
   const router = useRouter();
   const { data: session, status } = useSession();
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [username, setUsername] = useState("admin");
+  const [password, setPassword] = useState("password1234");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 

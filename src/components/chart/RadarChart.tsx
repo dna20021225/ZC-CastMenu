@@ -34,9 +34,9 @@ export const RadarChart = forwardRef<HTMLDivElement, RadarChartProps>(
     const baseClasses = 'flex items-center justify-center p-4';
     
     const sizes = {
-      sm: 'h-48 w-48',
-      md: 'h-64 w-64', 
-      lg: 'h-80 w-80'
+      sm: 'h-48 w-full',
+      md: 'h-72 w-full',
+      lg: 'h-96 w-full'
     };
 
     // 新デザインシステムに対応したカラーパレット
@@ -81,14 +81,12 @@ export const RadarChart = forwardRef<HTMLDivElement, RadarChartProps>(
       }
     ];
 
-    // カスタム能力値がある場合は追加
-    if (stats.custom_stat && stats.custom_stat_name) {
-      chartData.push({
-        stat: stats.custom_stat_name,
-        value: stats.custom_stat,
-        fullMark: 100
-      });
-    }
+    // カスタム能力値（スペシャル）を追加
+    chartData.push({
+      stat: stats.custom_stat_name || '(未設定)',
+      value: stats.custom_stat || 0,
+      fullMark: 100
+    });
 
     return (
       <div
@@ -102,29 +100,29 @@ export const RadarChart = forwardRef<HTMLDivElement, RadarChartProps>(
         {...props}
       >
         <ResponsiveContainer width="100%" height="100%">
-          <RechartsRadarChart data={chartData} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+          <RechartsRadarChart data={chartData} margin={{ top: 30, right: 60, bottom: 30, left: 60 }}>
             {/* グリッド線 */}
-            <PolarGrid 
-              stroke="var(--border)" 
+            <PolarGrid
+              stroke="var(--border)"
               strokeWidth={1}
               strokeOpacity={0.6}
             />
-            
+
             {/* ラベル軸 */}
-            <PolarAngleAxis 
+            <PolarAngleAxis
               dataKey="stat"
-              tick={{ 
-                fontSize: 11, 
-                fill: 'var(--foreground)',
-                fontWeight: 600
-              }}
-              tickFormatter={(value) => {
-                // 長いラベルを短縮
-                if (value.length > 6) {
-                  return value.substring(0, 5) + '...';
-                }
-                return value;
-              }}
+              tick={({ payload, x, y, textAnchor }) => (
+                <text
+                  x={x}
+                  y={y}
+                  textAnchor={textAnchor}
+                  fontSize={10}
+                  fontWeight={600}
+                  fill={payload.value === '(未設定)' ? '#3b82f6' : 'var(--foreground)'}
+                >
+                  {payload.value}
+                </text>
+              )}
             />
             
             {/* 数値軸 */}

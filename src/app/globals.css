@@ -127,21 +127,18 @@ body {
   padding: 0 1rem;
 }
 
-/* 縦画面（ポートレート）4:3 */
-@media screen and (orientation: portrait) and (max-aspect-ratio: 4/3) {
-  .cast-grid-portrait {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--grid-gap);
-  }
+/* キャストグリッド - 要件定義書準拠 */
+/* デフォルト: 縦画面3列 */
+.cast-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--grid-gap);
 }
 
-/* 横画面（ランドスケープ）4:3 */
-@media screen and (orientation: landscape) and (min-aspect-ratio: 4/3) {
-  .cast-grid-landscape {
-    display: grid;
+/* 横画面: 5列（幅が広い場合） */
+@media screen and (min-width: 900px) {
+  .cast-grid {
     grid-template-columns: repeat(5, 1fr);
-    gap: var(--grid-gap);
   }
 }
 
@@ -324,6 +321,11 @@ body {
 *:focus {
   outline: 2px solid var(--primary-500);
   outline-offset: 2px;
+}
+
+/* スクロールバー非表示（カルーセル用） */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
 }
 
 /* スクロールバーカスタマイズ */

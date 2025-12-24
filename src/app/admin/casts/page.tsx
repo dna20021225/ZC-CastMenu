@@ -93,11 +93,12 @@ export default function AdminCastsPage() {
               <tr key={cast.id}>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <Image
-                    src={cast.avatar_url || "/images/placeholder.png"}
+                    src={cast.avatar_url || "/images/placeholder.svg"}
                     alt={cast.name}
                     width={40}
                     height={40}
                     className="h-10 w-10 rounded-full object-cover"
+                    unoptimized={!cast.avatar_url}
                   />
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium" style={{ color: 'var(--foreground)' }}>

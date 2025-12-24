@@ -110,7 +110,7 @@ export default function Home() {
             </div>
 
             {/* キャストグリッド */}
-            <div className="cast-grid-portrait cast-grid-landscape">
+            <div className="cast-grid">
               {casts.map((cast) => (
                 <Link 
                   key={cast.id} 
@@ -119,19 +119,25 @@ export default function Home() {
                 >
                   {/* バッジ表示 */}
                   {cast.badges && cast.badges.length > 0 && (
-                    <div className="absolute top-2 right-2 z-20 flex flex-wrap gap-1">
+                    <div className="absolute top-2 left-2 z-20 flex flex-col gap-1 max-w-[70%]">
                       {cast.badges
                         .sort((a, b) => a.display_order - b.display_order)
                         .slice(0, 2)
                         .map((badge) => (
-                          <div
+                          <span
                             key={badge.id}
-                            className="cast-badge text-xs"
-                            style={{ backgroundColor: badge.color }}
+                            className="px-2 py-0.5 rounded-full text-[10px] font-bold text-white shadow-md truncate"
+                            style={{
+                              background: `linear-gradient(135deg, ${badge.color} 0%, ${badge.color}cc 100%)`,
+                              boxShadow: `0 2px 4px ${badge.color}40`
+                            }}
                           >
                             {badge.name}
-                          </div>
+                          </span>
                         ))}
+                      {cast.badges.length > 2 && (
+                        <span className="text-[10px] text-white/80 pl-1">+{cast.badges.length - 2}</span>
+                      )}
                     </div>
                   )}
 

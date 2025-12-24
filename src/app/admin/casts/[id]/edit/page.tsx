@@ -11,6 +11,13 @@ interface UploadedImage {
   isMain: boolean;
 }
 
+interface Badge {
+  id: string;
+  name: string;
+  color: string;
+  display_order: number;
+}
+
 // フォーム用の型定義
 interface CastFormData {
   name: string;
@@ -27,6 +34,8 @@ interface CastFormData {
     tension: number;
     special: number;
   };
+  specialName: string;
+  badgeIds: string[];
 }
 
 export default function EditCastPage() {
@@ -36,6 +45,7 @@ export default function EditCastPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [cast, setCast] = useState<CastDetail | null>(null);
+  const [availableBadges, setAvailableBadges] = useState<Badge[]>([]);
   const [formData, setFormData] = useState<CastFormData>({
     name: "",
     age: 20,
@@ -51,7 +61,21 @@ export default function EditCastPage() {
       tension: 50,
       special: 50,
     },
+    specialName: '',
+    badgeIds: [],
   });
+
+  const fetchBadges = useCallback(async () => {
+    try {
+      const response = await fetch('/api/badges');
+      if (response.ok) {
+        const result = await response.json();
+        setAvailableBadges(result.data || []);
+      }
+    } catch (error) {
+      console.error("バッジ取得エラー", error);
+    }
+  }, []);
 
   const fetchCast = useCallback(async () => {
     try {
@@ -66,6 +90,9 @@ export default function EditCastPage() {
         url: photo.photo_url,
         isMain: photo.is_main === 1 || photo.is_main === true || index === 0
       }));
+
+      // 既存のバッジIDを取得
+      const badgeIds = (data.badges || []).map((badge: Badge) => badge.id);
 
       setFormData({
         name: data.name,
@@ -89,6 +116,8 @@ export default function EditCastPage() {
           tension: 50,
           special: 50,
         },
+        specialName: data.stats?.custom_stat_name || '',
+        badgeIds,
       });
     } catch (error) {
       console.error("キャスト取得エラー", error);
@@ -100,8 +129,9 @@ export default function EditCastPage() {
   }, [castId, router]);
 
   useEffect(() => {
+    fetchBadges();
     fetchCast();
-  }, [fetchCast]);
+  }, [fetchBadges, fetchCast]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -126,6 +156,15 @@ export default function EditCastPage() {
         [name]: value,
       }));
     }
+  };
+
+  const toggleBadge = (badgeId: string) => {
+    setFormData((prev: CastFormData) => ({
+      ...prev,
+      badgeIds: prev.badgeIds.includes(badgeId)
+        ? prev.badgeIds.filter(id => id !== badgeId)
+        : [...prev.badgeIds, badgeId],
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -157,8 +196,10 @@ export default function EditCastPage() {
             intelligence: formData.stats.intelligence,
             energy: formData.stats.tension,
             custom_stat: formData.stats.special,
+            custom_stat_name: formData.specialName || null,
           },
           photos: formData.photos.map(p => p.url),
+          badges: formData.badgeIds,
         }),
       });
 
@@ -179,12 +220,12 @@ export default function EditCastPage() {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <h1 className="text-3xl font-bold text-gray-900 mb-6">キャスト編集</h1>
+      <h1 className="text-3xl font-bold mb-6" style={{ color: 'var(--primary-500)' }}>キャスト編集</h1>
 
-      <form onSubmit={handleSubmit} className="space-y-6 bg-white shadow px-6 py-8 rounded-lg">
+      <form onSubmit={handleSubmit} className="space-y-6 cast-card px-6 py-8">
         <div>
-          <label className="block text-sm font-medium text-gray-700">
-            名前 <span className="text-red-500">*</span>
+          <label className="block text-sm font-medium mb-1" style={{ color: 'var(--foreground)' }}>
+            名前 <span style={{ color: 'var(--error)' }}>*</span>
           </label>
           <input
             type="text"
@@ -192,14 +233,15 @@ export default function EditCastPage() {
             required
             value={formData.name}
             onChange={handleChange}
-            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-pink-500 focus:border-pink-500"
+            className="mt-1 block w-full rounded-md px-3 py-2"
+            style={{ backgroundColor: 'var(--surface-variant)', border: '1px solid var(--border)', color: 'var(--foreground)' }}
           />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              年齢 <span className="text-red-500">*</span>
+            <label className="block text-sm font-medium mb-1" style={{ color: 'var(--foreground)' }}>
+              年齢 <span style={{ color: 'var(--error)' }}>*</span>
             </label>
             <input
               type="number"
@@ -209,13 +251,14 @@ export default function EditCastPage() {
               max="99"
               value={formData.age}
               onChange={handleChange}
-              className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-pink-500 focus:border-pink-500"
+              className="mt-1 block w-full rounded-md px-3 py-2"
+              style={{ backgroundColor: 'var(--surface-variant)', border: '1px solid var(--border)', color: 'var(--foreground)' }}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700">
-              身長 (cm) <span className="text-red-500">*</span>
+            <label className="block text-sm font-medium mb-1" style={{ color: 'var(--foreground)' }}>
+              身長 (cm) <span style={{ color: 'var(--error)' }}>*</span>
             </label>
             <input
               type="number"
@@ -225,21 +268,23 @@ export default function EditCastPage() {
               max="200"
               value={formData.height}
               onChange={handleChange}
-              className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-pink-500 focus:border-pink-500"
+              className="mt-1 block w-full rounded-md px-3 py-2"
+              style={{ backgroundColor: 'var(--surface-variant)', border: '1px solid var(--border)', color: 'var(--foreground)' }}
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">
-            血液型 <span className="text-red-500">*</span>
+          <label className="block text-sm font-medium mb-1" style={{ color: 'var(--foreground)' }}>
+            血液型 <span style={{ color: 'var(--error)' }}>*</span>
           </label>
           <select
             name="blood_type"
             required
             value={formData.blood_type}
             onChange={handleChange}
-            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-pink-500 focus:border-pink-500"
+            className="mt-1 block w-full rounded-md px-3 py-2"
+            style={{ backgroundColor: 'var(--surface-variant)', border: '1px solid var(--border)', color: 'var(--foreground)' }}
           >
             <option value="A">A型</option>
             <option value="B">B型</option>
@@ -258,7 +303,7 @@ export default function EditCastPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">
+          <label className="block text-sm font-medium mb-1" style={{ color: 'var(--foreground)' }}>
             自己紹介
           </label>
           <textarea
@@ -266,24 +311,70 @@ export default function EditCastPage() {
             rows={4}
             value={formData.description}
             onChange={handleChange}
-            className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-pink-500 focus:border-pink-500"
+            className="mt-1 block w-full rounded-md px-3 py-2"
+            style={{ backgroundColor: 'var(--surface-variant)', border: '1px solid var(--border)', color: 'var(--foreground)' }}
           />
         </div>
 
+        {/* バッジ選択 */}
         <div>
-          <h3 className="text-lg font-medium text-gray-900 mb-3">ステータス</h3>
+          <h3 className="text-lg font-medium mb-3" style={{ color: 'var(--foreground)' }}>バッジ</h3>
+          <div className="flex flex-wrap gap-2">
+            {availableBadges.map((badge) => {
+              const isSelected = formData.badgeIds.includes(badge.id);
+              return (
+                <button
+                  key={badge.id}
+                  type="button"
+                  onClick={() => toggleBadge(badge.id)}
+                  className={`px-4 py-2 rounded-full text-sm font-semibold transition-all ${
+                    isSelected ? 'ring-2 ring-white ring-offset-2 ring-offset-gray-900' : 'opacity-50 hover:opacity-75'
+                  }`}
+                  style={{ backgroundColor: badge.color, color: '#fff' }}
+                >
+                  {badge.name}
+                </button>
+              );
+            })}
+          </div>
+          {formData.badgeIds.length > 0 && (
+            <p className="mt-2 text-sm" style={{ color: 'var(--accent-600)' }}>
+              {formData.badgeIds.length}個のバッジを選択中
+            </p>
+          )}
+        </div>
+
+        <div>
+          <h3 className="text-lg font-medium mb-3" style={{ color: 'var(--foreground)' }}>ステータス</h3>
           <div className="space-y-3">
             {(Object.entries(formData.stats) as [keyof CastFormData['stats'], number][]).map(([key, value]) => (
               <div key={key}>
-                <label className="block text-sm font-medium text-gray-700">
-                  {key === "looks" && "ルックス"}
-                  {key === "talk" && "トーク"}
-                  {key === "drinking" && "酒の強さ"}
-                  {key === "intelligence" && "頭脳"}
-                  {key === "tension" && "テンション"}
-                  {key === "special" && "スペシャル"}
-                  : {value}
-                </label>
+                {key === "special" ? (
+                  <>
+                    <div className="flex items-center gap-2 mb-1">
+                      <input
+                        type="text"
+                        name="specialName"
+                        placeholder="項目名（例：ギャップ萌え）"
+                        value={formData.specialName}
+                        onChange={handleChange}
+                        className="px-2 py-1 rounded text-sm w-40"
+                        style={{ backgroundColor: 'var(--surface-variant)', border: '1px solid var(--border)', color: 'var(--foreground)' }}
+                      />
+                      <span className="text-sm" style={{ color: 'var(--foreground)' }}>: </span>
+                      <span style={{ color: 'var(--primary-500)' }}>{value}</span>
+                    </div>
+                  </>
+                ) : (
+                  <label className="block text-sm font-medium" style={{ color: 'var(--foreground)' }}>
+                    {key === "looks" && "ルックス"}
+                    {key === "talk" && "トーク"}
+                    {key === "drinking" && "酒の強さ"}
+                    {key === "intelligence" && "頭脳"}
+                    {key === "tension" && "テンション"}
+                    : <span style={{ color: 'var(--primary-500)' }}>{value}</span>
+                  </label>
+                )}
                 <input
                   type="range"
                   name={`stats.${key}`}
@@ -291,25 +382,25 @@ export default function EditCastPage() {
                   max="100"
                   value={value}
                   onChange={handleChange}
-                  className="mt-1 block w-full"
+                  className="mt-1 block w-full accent-blue-500"
                 />
               </div>
             ))}
           </div>
         </div>
 
-        <div className="flex justify-end space-x-3">
+        <div className="flex justify-end space-x-3 pt-4">
           <button
             type="button"
             onClick={() => router.push("/admin/casts")}
-            className="px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+            className="btn-secondary"
           >
             キャンセル
           </button>
           <button
             type="submit"
             disabled={saving}
-            className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-pink-600 hover:bg-pink-700 disabled:opacity-50"
+            className="btn-primary disabled:opacity-50"
           >
             {saving ? "保存中..." : "保存"}
           </button>

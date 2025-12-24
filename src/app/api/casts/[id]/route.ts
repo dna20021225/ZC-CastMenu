@@ -234,6 +234,23 @@ export async function PUT(
 
     // バッジを更新（完全置換）
     if (body.badges !== undefined) {
+      // No.1, No.2, No.3 バッジは排他的（1人のみ）
+      // 他のキャストから該当バッジを削除
+      if (body.badges.length > 0) {
+        const exclusiveBadges = await query(`
+          SELECT id FROM badges WHERE name IN ('No.1', 'No.2', 'No.3')
+        `) as unknown as { rows: { id: string }[] };
+
+        const exclusiveBadgeIds = exclusiveBadges.rows.map(b => b.id);
+        const badgesToMakeExclusive = body.badges.filter(id => exclusiveBadgeIds.includes(id));
+
+        for (const badgeId of badgesToMakeExclusive) {
+          await query(`
+            DELETE FROM cast_badges WHERE badge_id = ? AND cast_id != ?
+          `, [badgeId, params.id]);
+        }
+      }
+
       await query('DELETE FROM cast_badges WHERE cast_id = ?', [params.id]);
 
       if (body.badges.length > 0) {

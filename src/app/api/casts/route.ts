@@ -82,9 +82,20 @@ export const GET = asyncHandler(async (request: NextRequest) => {
 
     const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
 
-    // ソート
-    const sortColumn = params.sort_by === 'created_at' ? 'c.created_at' : `c.${params.sort_by}`;
-    const orderClause = `ORDER BY ${sortColumn} ${params.sort_order?.toUpperCase()}`;
+    // バッジ優先度でソート（No.1 > No.2 > No.3 > バッジ数順）
+    const orderClause = `
+      ORDER BY
+        COALESCE((SELECT MIN(CASE
+          WHEN b2.name = 'No.1' THEN 1
+          WHEN b2.name = 'No.2' THEN 2
+          WHEN b2.name = 'No.3' THEN 3
+          ELSE 999
+        END) FROM cast_badges cb2
+        INNER JOIN badges b2 ON cb2.badge_id = b2.id
+        WHERE cb2.cast_id = c.id), 999) ASC,
+        (SELECT COUNT(*) FROM cast_badges cb3 WHERE cb3.cast_id = c.id) DESC,
+        c.created_at DESC
+    `;
 
     // ページネーション
     const offset = ((params.page || 1) - 1) * (params.limit || 20);

@@ -64,15 +64,22 @@ export const CastCard = forwardRef<HTMLDivElement, CastCardProps>(
       >
         {/* バッジ表示エリア */}
         {showBadges && cast.badges.length > 0 && (
-          <div className="absolute top-3 left-3 z-20 flex flex-wrap gap-1.5">
-            {cast.badges.slice(0, 3).map((badge) => (
-              <Badge
+          <div className="absolute top-2 left-2 z-20 flex flex-col gap-1 max-w-[60%]">
+            {cast.badges.slice(0, 2).map((badge) => (
+              <span
                 key={badge.id}
-                badge={badge}
-                size="sm"
-                variant="glow"
-              />
+                className="px-2 py-0.5 rounded-full text-[10px] font-bold text-white shadow-md truncate"
+                style={{
+                  background: `linear-gradient(135deg, ${badge.color} 0%, ${badge.color}dd 100%)`,
+                  boxShadow: `0 2px 6px ${badge.color}50`
+                }}
+              >
+                {badge.name}
+              </span>
             ))}
+            {cast.badges.length > 2 && (
+              <span className="text-[10px] text-white/70 pl-1">+{cast.badges.length - 2}</span>
+            )}
           </div>
         )}
 

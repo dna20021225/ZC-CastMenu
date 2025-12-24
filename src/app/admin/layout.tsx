@@ -27,11 +27,11 @@ export default function AdminLayout({
                   <Link href="/admin/casts" className="border-b-2 border-transparent text-secondary hover:border-primary/50 hover:text-primary inline-flex items-center px-1 pt-1 text-sm font-medium transition-colors">
                     キャスト管理
                   </Link>
-                  <Link href="/admin/badges" className="border-b-2 border-transparent text-secondary hover:border-primary/50 hover:text-primary inline-flex items-center px-1 pt-1 text-sm font-medium transition-colors">
-                    バッジ管理
+                  <Link href="/admin/drinks" className="border-b-2 border-transparent text-secondary hover:border-primary/50 hover:text-primary inline-flex items-center px-1 pt-1 text-sm font-medium transition-colors">
+                    ドリンクメニュー
                   </Link>
-                  <Link href="/admin/admins" className="border-b-2 border-transparent text-secondary hover:border-primary/50 hover:text-primary inline-flex items-center px-1 pt-1 text-sm font-medium transition-colors">
-                    管理者管理
+                  <Link href="/admin/pricing" className="border-b-2 border-transparent text-secondary hover:border-primary/50 hover:text-primary inline-flex items-center px-1 pt-1 text-sm font-medium transition-colors">
+                    料金表
                   </Link>
                 </div>
               </div>
