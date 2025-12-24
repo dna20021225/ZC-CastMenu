@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 
 interface Admin {
   id: string;
-  username: string;
+  name: string;
   email: string;
   is_active: boolean;
 }
@@ -32,7 +32,7 @@ export default function EditAdminPage({ params }: { params: { id: string } }) {
       const data = await response.json();
       setAdmin(data.data);
       setFormData({
-        username: data.data.username,
+        username: data.data.name,
         email: data.data.email,
         password: "",
         confirmPassword: "",

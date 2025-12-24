@@ -6,10 +6,11 @@ import { query } from "@/lib/db";
 // バッジを付与
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
+  const params = await context.params;
   try {
-    const castId = parseInt(params.id);
+    const castId = params.id;
     const { badge_id } = await request.json();
 
     // 既に付与されているかチェック

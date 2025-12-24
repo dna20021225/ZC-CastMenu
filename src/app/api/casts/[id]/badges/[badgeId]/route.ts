@@ -6,11 +6,12 @@ import { query } from "@/lib/db";
 // バッジを削除
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string; badgeId: string } }
+  context: { params: Promise<{ id: string; badgeId: string }> }
 ) {
+  const params = await context.params;
   try {
-    const castId = parseInt(params.id);
-    const badgeId = parseInt(params.badgeId);
+    const castId = params.id;
+    const badgeId = params.badgeId;
 
     await query(
       "DELETE FROM cast_badges WHERE cast_id = ? AND badge_id = ?",

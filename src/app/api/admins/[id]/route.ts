@@ -7,8 +7,9 @@ import bcrypt from 'bcryptjs';
 // 管理者詳細取得
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
+  const params = await context.params;
   try {
     console.info('管理者詳細取得開始', { id: params.id });
 
@@ -42,8 +43,9 @@ export async function GET(
 // 管理者更新
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
+  const params = await context.params;
   try {
     console.info('管理者更新開始', { id: params.id });
 
@@ -103,8 +105,9 @@ export async function PUT(
 // 管理者削除
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
+  const params = await context.params;
   try {
     console.info('管理者削除開始', { id: params.id });
 
@@ -158,8 +161,9 @@ export async function DELETE(
 // 管理者ステータス更新
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
+  const params = await context.params;
   try {
     console.info('管理者ステータス更新開始', { id: params.id });
 
