@@ -1,15 +1,12 @@
 'use client';
 
 import { AlertCircle } from 'lucide-react';
+import { AdminHeader } from '@/components/AdminHeader';
 
 export default function PricingEditor() {
   return (
     <div className="max-w-4xl mx-auto">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold" style={{ color: 'var(--primary-500)' }}>
-          料金表編集
-        </h1>
-      </div>
+      <AdminHeader title="料金表編集" backHref="/admin" />
 
       <div className="cast-card p-8">
         <div className="flex flex-col items-center justify-center text-center py-8">

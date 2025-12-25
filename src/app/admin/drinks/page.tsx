@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Trash2, Edit2, X, Check, GripVertical, Wine, Sparkles, GlassWater, Beer, Martini, LucideIcon } from 'lucide-react';
+import { Plus, Trash2, Edit2, X, Check, Wine, Sparkles, GlassWater, Beer, Martini, LucideIcon } from 'lucide-react';
+import { AdminHeader } from '@/components/AdminHeader';
 
 // アイコンの選択肢
 const iconOptions: { value: string; label: string; Icon: LucideIcon }[] = [
@@ -199,10 +200,8 @@ export default function DrinkMenuEditor() {
 
   return (
     <div className="max-w-4xl mx-auto">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold" style={{ color: 'var(--primary-500)' }}>
-          ドリンクメニュー編集
-        </h1>
+      <AdminHeader title="ドリンクメニュー編集" backHref="/admin" />
+      <div className="flex justify-end mb-6">
         <button
           onClick={() => setShowNewCategory(true)}
           className="btn-primary flex items-center gap-2"

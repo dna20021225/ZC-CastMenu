@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
-
+import { AdminHeader } from "@/components/AdminHeader";
 import MultiImageUploader from "@/components/MultiImageUploader";
 import type { CastDetail } from "@/types";
 
@@ -220,7 +220,7 @@ export default function EditCastPage() {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6" style={{ color: 'var(--primary-500)' }}>キャスト編集</h1>
+      <AdminHeader title="キャスト編集" backHref="/admin/casts" />
 
       <form onSubmit={handleSubmit} className="space-y-6 cast-card px-6 py-8">
         <div>

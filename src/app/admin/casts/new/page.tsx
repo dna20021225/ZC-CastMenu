@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-
+import { AdminHeader } from "@/components/AdminHeader";
 import MultiImageUploader from "@/components/MultiImageUploader";
 
 interface UploadedImage {
@@ -114,7 +114,7 @@ export default function NewCastPage() {
 
   return (
     <div className="max-w-2xl mx-auto tablet-layout">
-      <h1 className="text-3xl font-bold mb-6" style={{ color: 'var(--primary-500)' }}>キャスト新規登録</h1>
+      <AdminHeader title="キャスト新規登録" backHref="/admin/casts" />
 
       <form onSubmit={handleSubmit} className="space-y-6 px-6 py-8 rounded-lg" style={{ 
         backgroundColor: 'var(--surface)',

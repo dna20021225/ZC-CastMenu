@@ -3,10 +3,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-
+import { AdminHeader } from "@/components/AdminHeader";
 import type { CastDetail } from "@/types";
-
-
 
 export default function AdminCastsPage() {
   const [casts, setCasts] = useState<CastDetail[]>([]);
@@ -54,8 +52,8 @@ export default function AdminCastsPage() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold" style={{ color: 'var(--primary-500)' }}>キャスト管理</h1>
+      <AdminHeader title="キャスト管理" backHref="/admin" />
+      <div className="flex justify-end mb-6">
         <Link
           href="/admin/casts/new"
           className="btn-primary"
