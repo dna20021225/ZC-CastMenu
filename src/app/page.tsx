@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { User, Smartphone } from 'lucide-react';
+import { User, Smartphone, X, Info } from 'lucide-react';
 
 interface Cast {
   id: string;
@@ -24,6 +24,7 @@ export default function Home() {
   const [casts, setCasts] = useState<Cast[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showNotice, setShowNotice] = useState(true);
 
   useEffect(() => {
     fetchCasts();
@@ -89,6 +90,27 @@ export default function Home() {
           </div>
         </div>
       </header>
+
+      {/* システムからのお知らせ */}
+      {showNotice && (
+        <div className="bg-surface-variant/50 border-b border-border">
+          <div className="tablet-layout py-2 px-4">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2 text-xs text-secondary">
+                <Info className="h-3 w-3 flex-shrink-0" />
+                <span>12/25: 管理画面の不具合を修正しました。ご不便をおかけしました。</span>
+              </div>
+              <button
+                onClick={() => setShowNotice(false)}
+                className="text-muted hover:text-secondary transition-colors p-1"
+                aria-label="閉じる"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* メインコンテンツ */}
       <main className="tablet-layout py-6">
