@@ -11,12 +11,13 @@ export async function middleware(request: NextRequest) {
     }
 
     // JWT トークンから認証チェック（Edge Runtime対応）
-    const token = await getToken({ 
+    const token = await getToken({
       req: request,
       secret: process.env.NEXTAUTH_SECRET
     });
-    
-    if (!token || !token.role) {
+
+    // トークンが存在しない場合のみリダイレクト（roleチェックを緩和）
+    if (!token) {
       const loginUrl = new URL("/admin/login", request.url);
       return NextResponse.redirect(loginUrl);
     }
