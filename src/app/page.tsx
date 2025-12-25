@@ -24,11 +24,28 @@ export default function Home() {
   const [casts, setCasts] = useState<Cast[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<{ text: string; enabled: boolean } | null>(null);
   const [showNotice, setShowNotice] = useState(true);
 
   useEffect(() => {
     fetchCasts();
+    fetchNotice();
   }, []);
+
+  const fetchNotice = async () => {
+    try {
+      const res = await fetch('/api/settings?key=notice');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.data?.value) {
+          const parsed = JSON.parse(data.data.value);
+          setNotice(parsed);
+        }
+      }
+    } catch (error) {
+      console.error("お知らせ取得エラー:", error);
+    }
+  };
 
   const fetchCasts = async () => {
     try {
@@ -92,13 +109,13 @@ export default function Home() {
       </header>
 
       {/* システムからのお知らせ */}
-      {showNotice && (
+      {showNotice && notice?.enabled && notice?.text && (
         <div className="bg-surface-variant/50 border-b border-border">
           <div className="tablet-layout py-2 px-4">
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-2 text-xs text-secondary">
                 <Info className="h-3 w-3 flex-shrink-0" />
-                <span>12/25: 管理画面の不具合を修正しました。ご不便をおかけしました。</span>
+                <span>{notice.text}</span>
               </div>
               <button
                 onClick={() => setShowNotice(false)}

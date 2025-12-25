@@ -33,6 +33,9 @@ export default function AdminLayout({
                   <Link href="/admin/pricing" className="border-b-2 border-transparent text-secondary hover:border-primary/50 hover:text-primary inline-flex items-center px-1 pt-1 text-sm font-medium transition-colors">
                     料金表
                   </Link>
+                  <Link href="/admin#notice" className="border-b-2 border-transparent text-secondary hover:border-primary/50 hover:text-primary inline-flex items-center px-1 pt-1 text-sm font-medium transition-colors">
+                    お知らせ
+                  </Link>
                 </div>
               </div>
               <div className="flex items-center">
