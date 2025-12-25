@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   ArrowLeft,
   Wine,
@@ -42,6 +42,7 @@ const getIcon = (iconName: string) => {
 };
 
 export default function DrinksPage() {
+  const router = useRouter();
   const [categories, setCategories] = useState<DrinkCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -69,18 +70,18 @@ export default function DrinksPage() {
   return (
     <div className="min-h-screen pb-20 bg-gradient-to-b from-gray-900 to-black">
       {/* ヘッダー */}
-      <header className="sticky top-0 z-40 border-b border-gray-800 backdrop-blur-md bg-gray-900/80">
-        <div className="tablet-layout py-3">
-          <div className="flex items-center gap-4">
-            <Link
-              href="/"
-              className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+      <header className="sticky top-0 z-40 border-b-2 border-border backdrop-blur-md bg-surface/80 py-5">
+        <div className="tablet-layout">
+          <div className="flex items-center gap-4 h-12">
+            <button
+              onClick={() => router.back()}
+              className="flex items-center gap-2 text-secondary hover:text-primary transition-colors"
             >
               <ArrowLeft className="h-5 w-5" />
               戻る
-            </Link>
+            </button>
             <div className="flex-1 min-w-0">
-              <h1 className="text-lg font-bold text-white">ドリンクメニュー</h1>
+              <h1 className="text-lg font-bold truncate text-white">ドリンクメニュー</h1>
             </div>
           </div>
         </div>

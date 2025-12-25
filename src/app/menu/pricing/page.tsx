@@ -1,25 +1,26 @@
 'use client';
 
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { ArrowLeft, Info } from 'lucide-react';
 
 export default function PricingPage() {
+  const router = useRouter();
+
   return (
     <div className="min-h-screen pb-20" style={{ background: 'var(--background)' }}>
       {/* ヘッダー */}
-      <header className="sticky top-0 z-40 border-b backdrop-blur-md" style={{ borderColor: 'var(--border)', backgroundColor: 'var(--surface)' }}>
-        <div className="py-4 tablet-layout">
-          <div className="flex items-center gap-4">
-            <Link
-              href="/"
-              className="flex items-center gap-2 transition-colors"
-              style={{ color: 'var(--accent-600)' }}
+      <header className="sticky top-0 z-40 border-b-2 border-border backdrop-blur-md bg-surface/80 py-5">
+        <div className="tablet-layout">
+          <div className="flex items-center gap-4 h-12">
+            <button
+              onClick={() => router.back()}
+              className="flex items-center gap-2 text-secondary hover:text-primary transition-colors"
             >
-              <ArrowLeft className="w-5 h-5" />
+              <ArrowLeft className="h-5 w-5" />
               戻る
-            </Link>
+            </button>
             <div className="flex-1 min-w-0">
-              <h1 className="text-lg font-bold" style={{ color: 'var(--foreground)' }}>料金表</h1>
+              <h1 className="text-lg font-bold truncate" style={{ color: 'var(--foreground)' }}>料金表</h1>
             </div>
           </div>
         </div>
