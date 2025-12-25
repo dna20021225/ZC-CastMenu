@@ -30,10 +30,13 @@ export default function AdminDashboard() {
 
       if (drinksRes.ok) {
         const data = await drinksRes.json();
+        // APIはカテゴリ配列を返し、各カテゴリにitemsがある
+        const categories = Array.isArray(data.data) ? data.data : [];
+        const totalDrinks = categories.reduce((sum: number, cat: { items?: unknown[] }) => sum + (cat.items?.length || 0), 0);
         setStats(prev => ({
           ...prev,
-          drinks: data.data?.drinks?.length || 0,
-          categories: data.data?.categories?.length || 0
+          drinks: totalDrinks,
+          categories: categories.length
         }));
       }
     } catch (error) {
