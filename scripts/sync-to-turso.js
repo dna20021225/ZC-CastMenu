@@ -1,8 +1,9 @@
 const Database = require('better-sqlite3');
 const { createClient } = require('@libsql/client');
 
-const TURSO_URL = 'libsql://zc-castmenu-dna20021225.aws-ap-northeast-1.turso.io';
-const TURSO_TOKEN = 'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3NjYzODQxOTcsImlkIjoiMmFmYjk4YmUtM2UyYS00ZmI4LWJjODEtMDI2ZDU4NjM3NzA2IiwicmlkIjoiMDg3YTMwN2UtYjlkYi00NTIwLWE1ZmMtNjJhZGZlZDJkOWVjIn0.6kNXDiyzeoKb-10O75tP-4dTY-Cnjk7qmHBWhYiKBmdEkWbMhEjRvPEkf5ipbZw78GW3t6TyVhjpr6g81DbiBA';
+// 環境変数から取得（使用時に設定してください）
+const TURSO_URL = process.env.TURSO_DATABASE_URL || '';
+const TURSO_TOKEN = process.env.TURSO_AUTH_TOKEN || '';
 
 // テーブル作成SQL
 const createTableSQL = `
