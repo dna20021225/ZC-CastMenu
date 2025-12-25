@@ -1,14 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { writeFile, mkdir } from 'fs/promises';
-import { join } from 'path';
+import { put } from '@vercel/blob';
 import { asyncHandler, ValidationError } from '@/lib/error-handler';
 import { v4 as uuidv4 } from 'uuid';
 
-// Logger initialization moved
-
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
-const UPLOAD_DIR = join(process.cwd(), 'public', 'images', 'casts');
 
 export const POST = asyncHandler(async (request: NextRequest) => {
     console.info('画像アップロード開始');
@@ -32,25 +28,21 @@ export const POST = asyncHandler(async (request: NextRequest) => {
 
     // ファイル名の生成
     const fileExtension = file.name.split('.').pop()?.toLowerCase() || 'jpg';
-    const fileName = `${uuidv4()}.${fileExtension}`;
-    const filePath = join(UPLOAD_DIR, fileName);
-    const publicPath = `/images/casts/${fileName}`;
+    const fileName = `casts/${uuidv4()}.${fileExtension}`;
 
     try {
-      // ディレクトリが存在しない場合は作成
-      await mkdir(UPLOAD_DIR, { recursive: true });
+      // Vercel Blobにアップロード
+      const blob = await put(fileName, file, {
+        access: 'public',
+        addRandomSuffix: false,
+      });
 
-      // ファイルを保存
-      const bytes = await file.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-      await writeFile(filePath, buffer);
-
-      console.info('画像アップロード成功', { fileName, size: file.size });
+      console.info('画像アップロード成功', { fileName, url: blob.url, size: file.size });
 
       return NextResponse.json({
         success: true,
         data: {
-          url: publicPath,
+          url: blob.url,
           fileName: fileName,
           size: file.size,
           type: file.type
@@ -58,7 +50,7 @@ export const POST = asyncHandler(async (request: NextRequest) => {
       });
 
     } catch (error) {
-      console.error('ファイル保存エラー', error);
+      console.error('Vercel Blobアップロードエラー', error);
       throw new Error('ファイルの保存に失敗しました');
     }
 });

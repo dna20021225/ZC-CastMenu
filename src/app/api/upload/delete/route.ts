@@ -1,8 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { unlink } from 'fs/promises';
-import { join } from 'path';
-
-// Logger initialization moved
+import { del } from '@vercel/blob';
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,27 +8,37 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { url } = body;
 
-    if (!url || !url.startsWith('/images/casts/')) {
+    if (!url) {
+      return NextResponse.json({
+        success: false,
+        error: '画像URLが指定されていません'
+      }, { status: 400 });
+    }
+
+    // Vercel BlobのURLかローカルパスかを判定
+    const isVercelBlob = url.includes('blob.vercel-storage.com');
+    const isLocalPath = url.startsWith('/images/casts/');
+
+    if (!isVercelBlob && !isLocalPath) {
       return NextResponse.json({
         success: false,
         error: '無効な画像URLです'
       }, { status: 400 });
     }
 
-    // ファイル名を取得
-    const fileName = url.split('/').pop();
-    if (!fileName) {
+    // ローカルパスの場合は削除をスキップ（Git管理のため）
+    if (isLocalPath) {
+      console.info('ローカル画像のため削除をスキップ', { url });
       return NextResponse.json({
-        success: false,
-        error: 'ファイル名が不正です'
-      }, { status: 400 });
+        success: true,
+        message: 'ローカル画像は削除されません（Git管理）'
+      });
     }
 
-    const filePath = join(process.cwd(), 'public', 'images', 'casts', fileName);
-
+    // Vercel Blobの画像を削除
     try {
-      await unlink(filePath);
-      console.info('画像削除成功', { fileName });
+      await del(url);
+      console.info('画像削除成功', { url });
 
       return NextResponse.json({
         success: true,
@@ -39,7 +46,7 @@ export async function POST(request: NextRequest) {
       });
 
     } catch (error) {
-      console.error('ファイル削除エラー', error);
+      console.error('Vercel Blob削除エラー', error);
       return NextResponse.json({
         success: false,
         error: 'ファイルの削除に失敗しました'
