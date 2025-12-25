@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Save, Users, Wine, Banknote, Bell } from "lucide-react";
+import { signOut } from "next-auth/react";
+import { Save, Users, Wine, Banknote, Bell, LogOut } from "lucide-react";
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({ casts: 0, drinks: 0, categories: 0 });
@@ -89,7 +90,16 @@ export default function AdminDashboard() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold" style={{ color: 'var(--primary-500)' }}>ダッシュボード</h1>
+      <div className="flex items-center justify-between mb-2">
+        <h1 className="text-3xl font-bold" style={{ color: 'var(--primary-500)' }}>ダッシュボード</h1>
+        <button
+          onClick={() => signOut({ callbackUrl: "/admin/login" })}
+          className="btn-secondary flex items-center gap-2 text-sm"
+        >
+          <LogOut className="h-4 w-4" />
+          ログアウト
+        </button>
+      </div>
 
       {/* 統計カード */}
       <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-3">
