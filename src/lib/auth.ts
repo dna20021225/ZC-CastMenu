@@ -59,6 +59,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
     strategy: "jwt",
     maxAge: 24 * 60 * 60, // 24時間
   },
+  trustHost: true,
   debug: process.env.NODE_ENV === "development",
   logger: {
     error: (code, metadata) => {
