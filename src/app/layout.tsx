@@ -8,22 +8,22 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "ZC-CastMenu - タブレット専用男メニュー",
-  description: "タブレット専用男メニューアプリケーション",
+  title: "ZEROCLOUD NAGOYA",
+  description: "ZEROCLOUD NAGOYA キャストメニュー",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "ZC-CastMenu",
+    title: "ZEROCLOUD",
   },
   openGraph: {
-    title: "ZC-CastMenu",
-    description: "タブレット専用男メニューアプリケーション",
+    title: "ZEROCLOUD NAGOYA",
+    description: "ZEROCLOUD NAGOYA キャストメニュー",
     type: "website",
     locale: "ja_JP",
   },
   icons: {
-    icon: "/favicon.ico",
+    icon: "/favicon.png",
     apple: "/apple-touch-icon.png",
   },
   formatDetection: {

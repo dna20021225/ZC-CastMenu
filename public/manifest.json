@@ -1,21 +1,21 @@
 {
-  "name": "ZC-CastMenu タブレット専用男メニュー",
-  "short_name": "ZC-CastMenu",
-  "description": "タブレット専用男メニューアプリケーション",
+  "name": "ZEROCLOUD NAGOYA",
+  "short_name": "ZEROCLOUD",
+  "description": "ZEROCLOUD NAGOYA キャストメニュー",
   "start_url": "/",
   "display": "standalone",
-  "orientation": "landscape",
+  "orientation": "portrait",
   "background_color": "#09090b",
   "theme_color": "#3b82f6",
   "icons": [
     {
-      "src": "/icon-192x192.png",
+      "src": "/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/icon-512x512.png",
+      "src": "/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
