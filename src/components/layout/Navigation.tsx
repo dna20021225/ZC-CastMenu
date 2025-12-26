@@ -54,7 +54,7 @@ export const Navigation = forwardRef<HTMLElement, NavigationProps>(
     };
 
     const containerClasses = {
-      bottom: 'flex justify-around items-center h-16 px-4',
+      bottom: 'flex justify-around items-center h-14 px-4',
       side: 'flex flex-col justify-start items-center py-6 space-y-4'
     };
 
@@ -67,7 +67,8 @@ export const Navigation = forwardRef<HTMLElement, NavigationProps>(
         )}
         style={{
           backgroundColor: 'var(--surface)',
-          borderColor: 'var(--border)'
+          borderColor: 'var(--border)',
+          paddingBottom: variant === 'bottom' ? 'env(safe-area-inset-bottom, 8px)' : undefined,
         }}
         ref={ref}
         {...props}
