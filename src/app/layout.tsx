@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Navigation } from '@/components/layout/Navigation';
+import { SplashScreen } from '@/components/SplashScreen';
 
 const inter = Inter({
   subsets: ["latin"],
@@ -66,10 +67,12 @@ export default function RootLayout({
       <body
         className={`${inter.className} antialiased bg-background min-h-screen`}
       >
-        <main className="pb-16">
-          {children}
-        </main>
-        <Navigation />
+        <SplashScreen>
+          <main className="pb-16">
+            {children}
+          </main>
+          <Navigation />
+        </SplashScreen>
       </body>
     </html>
   );
