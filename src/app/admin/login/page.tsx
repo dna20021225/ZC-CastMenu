@@ -51,8 +51,8 @@ export default function AdminLoginPage() {
       if (result?.error) {
         setError("ユーザー名またはパスワードが正しくありません");
       } else if (result?.ok) {
-        router.push("/admin");
-        // router.refresh()を削除 - 無限ループの原因
+        // フルページリロードでSessionProviderを再初期化
+        window.location.href = "/admin";
       } else {
         setError("ログインに失敗しました");
       }
