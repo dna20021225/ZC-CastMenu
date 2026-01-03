@@ -9,16 +9,18 @@ interface SplashScreenProps {
 }
 
 export function SplashScreen({ children, duration = 1500 }: SplashScreenProps) {
-  const [showSplash, setShowSplash] = useState(true);
+  const [showSplash, setShowSplash] = useState(false);
   const [fadeOut, setFadeOut] = useState(false);
 
   useEffect(() => {
     // セッション中に既に表示済みかチェック
     const hasShown = sessionStorage.getItem('splashShown');
     if (hasShown) {
-      setShowSplash(false);
       return;
     }
+
+    // スプラッシュを表示
+    setShowSplash(true);
 
     // フェードアウト開始
     const fadeTimer = setTimeout(() => {
@@ -37,28 +39,26 @@ export function SplashScreen({ children, duration = 1500 }: SplashScreenProps) {
     };
   }, [duration]);
 
-  if (!showSplash) {
-    return <>{children}</>;
-  }
-
   return (
     <>
-      <div
-        className={`fixed inset-0 z-[9999] flex items-center justify-center bg-white transition-opacity duration-300 ${
-          fadeOut ? 'opacity-0' : 'opacity-100'
-        }`}
-      >
-        <div className="flex flex-col items-center">
-          <Image
-            src="/icon-512.png"
-            alt="ZEROCLOUD"
-            width={150}
-            height={150}
-            priority
-          />
+      {showSplash && (
+        <div
+          className={`fixed inset-0 z-[9999] flex items-center justify-center bg-white transition-opacity duration-300 ${
+            fadeOut ? 'opacity-0' : 'opacity-100'
+          }`}
+        >
+          <div className="flex flex-col items-center">
+            <Image
+              src="/icon-512.png"
+              alt="ZEROCLOUD"
+              width={150}
+              height={150}
+              priority
+            />
+          </div>
         </div>
-      </div>
-      <div className="opacity-0">{children}</div>
+      )}
+      {children}
     </>
   );
 }
