@@ -4,7 +4,7 @@
   "description": "ZEROCLOUD NAGOYA キャストメニュー",
   "start_url": "/",
   "display": "standalone",
-  "orientation": "portrait",
+  "orientation": "any",
   "background_color": "#09090b",
   "theme_color": "#3b82f6",
   "icons": [
