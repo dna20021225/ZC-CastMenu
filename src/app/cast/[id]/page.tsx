@@ -145,7 +145,7 @@ export default function CastDetailPage() {
         <div className="cast-card p-4 lg:p-5">
           <div className="lg:flex gap-6 lg:items-start">
             {/* 写真セクション - 横スクロール対応 */}
-            <div className="lg:w-1/2 relative border-2 border-primary rounded-lg overflow-hidden flex-shrink-0 lg:max-h-[calc(100vh-180px)]">
+            <div className="lg:w-2/5 relative border-2 border-primary rounded-lg overflow-hidden flex-shrink-0">
               {/* 写真カルーセル */}
               <div
                 className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide"
@@ -164,7 +164,7 @@ export default function CastDetailPage() {
                   cast.photos.map((photo, index) => (
                     <div
                       key={photo.id}
-                      className="relative aspect-[3/4] flex-shrink-0 w-full snap-center bg-surface-variant lg:max-h-[calc(100vh-180px)]"
+                      className="relative aspect-[3/4] flex-shrink-0 w-full snap-center bg-surface-variant"
                     >
                       <Image
                         src={photo.photo_url}
@@ -177,7 +177,7 @@ export default function CastDetailPage() {
                     </div>
                   ))
                 ) : (
-                  <div className="relative aspect-[3/4] flex-shrink-0 w-full flex items-center justify-center bg-surface-variant lg:max-h-[calc(100vh-180px)]">
+                  <div className="relative aspect-[3/4] flex-shrink-0 w-full flex items-center justify-center bg-surface-variant">
                     <Camera className="h-16 w-16 text-muted" />
                   </div>
                 )}
@@ -227,7 +227,7 @@ export default function CastDetailPage() {
             </div>
 
             {/* 情報セクション */}
-            <div className="lg:w-1/2 pt-4 lg:pt-0 space-y-4">
+            <div className="lg:w-3/5 pt-4 lg:pt-0 space-y-4">
               {/* 名前 */}
               <div className="text-center lg:text-left">
                 <h2 className="text-2xl font-bold mb-1">
