@@ -50,7 +50,7 @@ export const Navigation = forwardRef<HTMLElement, NavigationProps>(
     
     const variantClasses = {
       bottom: 'fixed bottom-0 left-0 right-0 z-50',
-      side: 'fixed left-0 top-0 bottom-0 w-20 border-r border-t-0 border-r-gray-800'
+      side: 'fixed left-0 top-0 bottom-0 w-20 border-r border-t-0 border-r-gray-200'
     };
 
     const containerClasses = {

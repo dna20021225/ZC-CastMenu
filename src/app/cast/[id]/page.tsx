@@ -117,9 +117,9 @@ export default function CastDetailPage() {
   return (
     <div className="min-h-screen pb-20">
       {/* ヘッダー */}
-      <header className="sticky top-0 z-40 border-b-2 border-border backdrop-blur-md bg-surface/80 py-5">
+      <header className="sticky top-0 z-40 border-b-2 border-border backdrop-blur-md bg-surface/80 py-3 lg:py-4">
         <div className="tablet-layout">
-          <div className="flex items-center gap-4 h-12">
+          <div className="flex items-center gap-4 h-10 lg:h-12">
             <button
               onClick={() => router.back()}
               className="flex items-center gap-2 text-secondary hover:text-primary transition-colors"
@@ -137,15 +137,15 @@ export default function CastDetailPage() {
       </header>
 
       {/* スペーサー */}
-      <div className="h-8"></div>
+      <div className="h-4 lg:h-6"></div>
 
       {/* メインコンテンツ */}
       <main className="tablet-layout pb-6">
         {/* プロフィールカード */}
-        <div className="cast-card p-4 lg:p-6">
-          <div className="lg:flex gap-6">
+        <div className="cast-card p-4 lg:p-5">
+          <div className="lg:flex gap-6 lg:items-start">
             {/* 写真セクション - 横スクロール対応 */}
-            <div className="lg:w-1/2 relative border-2 border-primary rounded-lg overflow-hidden flex-shrink-0">
+            <div className="lg:w-1/2 relative border-2 border-primary rounded-lg overflow-hidden flex-shrink-0 lg:max-h-[calc(100vh-180px)]">
               {/* 写真カルーセル */}
               <div
                 className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide"
@@ -164,7 +164,7 @@ export default function CastDetailPage() {
                   cast.photos.map((photo, index) => (
                     <div
                       key={photo.id}
-                      className="relative aspect-[3/4] flex-shrink-0 w-full snap-center bg-surface-variant"
+                      className="relative aspect-[3/4] flex-shrink-0 w-full snap-center bg-surface-variant lg:max-h-[calc(100vh-180px)]"
                     >
                       <Image
                         src={photo.photo_url}
@@ -177,7 +177,7 @@ export default function CastDetailPage() {
                     </div>
                   ))
                 ) : (
-                  <div className="relative aspect-[3/4] flex-shrink-0 w-full flex items-center justify-center bg-surface-variant">
+                  <div className="relative aspect-[3/4] flex-shrink-0 w-full flex items-center justify-center bg-surface-variant lg:max-h-[calc(100vh-180px)]">
                     <Camera className="h-16 w-16 text-muted" />
                   </div>
                 )}
@@ -286,7 +286,7 @@ export default function CastDetailPage() {
                 </div>
                 <RadarChart
                   stats={cast.stats}
-                  size="lg"
+                  size="md"
                   colors={{
                     fill: 'rgba(59, 130, 246, 0.2)',
                     stroke: 'var(--primary-600)'
