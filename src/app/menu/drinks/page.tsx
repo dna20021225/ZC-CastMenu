@@ -68,7 +68,7 @@ export default function DrinksPage() {
   }, []);
 
   return (
-    <div className="min-h-screen pb-20 bg-gradient-to-b from-gray-900 to-black">
+    <div className="min-h-screen pb-20 bg-gradient-to-b from-gray-50 to-white">
       {/* ヘッダー */}
       <header className="sticky top-0 z-40 border-b-2 border-border backdrop-blur-md bg-surface/80 py-5">
         <div className="tablet-layout">
@@ -81,7 +81,7 @@ export default function DrinksPage() {
               戻る
             </button>
             <div className="flex-1 min-w-0">
-              <h1 className="text-lg font-bold truncate text-white">ドリンクメニュー</h1>
+              <h1 className="text-lg font-bold truncate">ドリンクメニュー</h1>
             </div>
           </div>
         </div>
@@ -91,15 +91,15 @@ export default function DrinksPage() {
       <main className="tablet-layout py-6">
         {/* タイトルセクション */}
         <div className="text-center mb-8">
-          <h2 className="text-3xl font-bold mb-2 text-white">DRINK MENU</h2>
-          <p className="text-gray-400 text-sm">※全て税込表記となります</p>
+          <h2 className="text-3xl font-bold mb-2">DRINK MENU</h2>
+          <p className="text-gray-500 text-sm">※全て税込表記となります</p>
         </div>
 
         {/* ローディング */}
         {loading && (
           <div className="flex flex-col items-center justify-center py-16">
             <Loader2 className="w-8 h-8 text-primary animate-spin mb-4" />
-            <p className="text-gray-400">メニューを読み込み中...</p>
+            <p className="text-gray-500">メニューを読み込み中...</p>
           </div>
         )}
 
@@ -113,8 +113,8 @@ export default function DrinksPage() {
         {/* メニューが空の場合 */}
         {!loading && !error && categories.length === 0 && (
           <div className="text-center py-16">
-            <Wine className="w-16 h-16 mx-auto text-gray-600 mb-4" />
-            <p className="text-gray-400">メニューは準備中です</p>
+            <Wine className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+            <p className="text-gray-500">メニューは準備中です</p>
           </div>
         )}
 
@@ -126,11 +126,11 @@ export default function DrinksPage() {
               return (
                 <div
                   key={category.id}
-                  className="rounded-xl overflow-hidden border border-gray-800 bg-gray-900/50 backdrop-blur"
+                  className="rounded-xl overflow-hidden border border-gray-200 bg-white shadow-sm"
                 >
                   {/* カテゴリヘッダー */}
                   <div
-                    className="px-6 py-4 border-b border-gray-800"
+                    className="px-6 py-4 border-b border-gray-200"
                     style={{
                       background: `linear-gradient(135deg, ${category.color}20 0%, transparent 100%)`
                     }}
@@ -141,9 +141,9 @@ export default function DrinksPage() {
                         style={{ color: category.color }}
                       />
                       <div>
-                        <h3 className="text-xl font-bold text-white">{category.name}</h3>
+                        <h3 className="text-xl font-bold">{category.name}</h3>
                         {category.name_en && (
-                          <p className="text-sm text-gray-400">{category.name_en}</p>
+                          <p className="text-sm text-gray-500">{category.name_en}</p>
                         )}
                       </div>
                     </div>
@@ -155,12 +155,12 @@ export default function DrinksPage() {
                       {category.items.map((drink) => (
                         <div
                           key={drink.id}
-                          className="flex justify-between items-center py-3 px-4 rounded-lg bg-gray-800/50 hover:bg-gray-800 transition-colors"
+                          className="flex justify-between items-center py-3 px-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
                         >
                           <div className="flex-1">
-                            <span className="text-white font-medium">{drink.name}</span>
+                            <span className="font-medium">{drink.name}</span>
                             {drink.note && (
-                              <span className="text-gray-500 text-sm ml-2">({drink.note})</span>
+                              <span className="text-gray-400 text-sm ml-2">({drink.note})</span>
                             )}
                           </div>
                           <div className="text-right">
@@ -179,13 +179,13 @@ export default function DrinksPage() {
         )}
 
         {/* 注意事項 */}
-        <div className="mt-8 rounded-xl p-6 border border-gray-800 bg-gray-900/50">
+        <div className="mt-8 rounded-xl p-6 border border-gray-200 bg-white shadow-sm">
           <div className="flex items-center gap-3 mb-4">
             <Info className="h-5 w-5 text-yellow-500" />
-            <h3 className="text-lg font-bold text-white">ご案内</h3>
+            <h3 className="text-lg font-bold">ご案内</h3>
           </div>
 
-          <div className="space-y-3 text-sm text-gray-400">
+          <div className="space-y-3 text-sm text-gray-500">
             <div className="flex gap-2">
               <span className="text-yellow-500 font-semibold">•</span>
               <span>価格は全て税込み表示です</span>

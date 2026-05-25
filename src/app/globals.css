@@ -2,8 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ZC-CastMenu 要件定義書準拠デザインシステム */
-/* ベースカラー：黒、メインカラー：青、アクセントカラー：白 */
+/* ZC-CastMenu デザインシステム */
+/* ベースカラー：白、メインカラー：青、アクセントカラー：グレー */
 
 :root {
   /* プライマリカラー（メインカラー：青） */
@@ -75,26 +75,13 @@
   --font-size-4xl: 2.25rem;
 }
 
-/* ダークモード（要件定義書準拠） */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: var(--base-950);
-    --foreground: var(--accent-50);
-    --surface: var(--base-900);
-    --surface-variant: var(--base-800);
-    --border: var(--base-700);
-  }
-}
-
-/* ライトモード（要件定義書準拠） */
-@media (prefers-color-scheme: light) {
-  :root {
-    --background: var(--base-950);
-    --foreground: var(--accent-50);
-    --surface: var(--base-900);
-    --surface-variant: var(--base-800);
-    --border: var(--base-700);
-  }
+/* ライトテーマ（白背景ベース） */
+:root {
+  --background: #ffffff;
+  --foreground: var(--base-900);
+  --surface: var(--base-50);
+  --surface-variant: var(--base-100);
+  --border: var(--base-200);
 }
 
 /* 基本スタイルリセット */
@@ -200,7 +187,7 @@ body {
 
 .btn-secondary {
   background-color: transparent;
-  color: var(--accent-50);
+  color: var(--foreground);
   border: 1px solid var(--border);
   padding: 0.75rem 1.5rem;
   border-radius: var(--border-radius);
@@ -217,7 +204,7 @@ body {
 .btn-secondary:hover {
   background-color: var(--surface-variant);
   border-color: var(--primary-500);
-  color: var(--primary-300);
+  color: var(--primary-600);
 }
 
 /* ナビゲーションスタイル */
@@ -238,7 +225,7 @@ body {
   align-items: center;
   gap: 0.25rem;
   padding: 0.5rem;
-  color: var(--accent-600);
+  color: var(--base-500);
   text-decoration: none;
   font-size: var(--font-size-xs);
   font-weight: 500;
@@ -310,11 +297,11 @@ body {
 }
 
 .text-secondary {
-  color: var(--accent-600);
+  color: var(--base-500);
 }
 
 .text-muted {
-  color: var(--accent-700);
+  color: var(--base-400);
 }
 
 /* フォーカス可視化 */
@@ -344,5 +331,5 @@ body {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background-color: var(--accent-600);
+  background-color: var(--base-400);
 }

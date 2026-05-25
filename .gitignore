@@ -40,3 +40,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 data/
+
+# 開発時の調査用スクショ（実機/Playwrightで取得した一時資料）
+docs/スクショ/

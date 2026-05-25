@@ -45,8 +45,8 @@ export const CastCard = forwardRef<HTMLDivElement, CastCardProps>(
         className={clsx(
           baseClasses,
           sizes[size],
-          'bg-gray-900 border border-gray-800',
-          'hover:border-yellow-500/50 hover:shadow-xl hover:shadow-yellow-500/10',
+          'bg-white border border-gray-200 shadow-sm',
+          'hover:border-blue-400/50 hover:shadow-xl hover:shadow-blue-500/10',
           'hover:scale-[1.02]',
           className
         )}
@@ -94,38 +94,38 @@ export const CastCard = forwardRef<HTMLDivElement, CastCardProps>(
             priority={false}
           />
           {/* グラデーションオーバーレイ */}
-          <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent opacity-60" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-60" />
         </div>
 
         {/* キャスト情報 */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-gray-900 via-gray-900/95 to-transparent">
+        <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 via-black/60 to-transparent">
           <h3 className="font-bold text-white text-lg truncate mb-1">
             {cast.name}
           </h3>
 
-          <div className="flex items-center gap-3 text-sm text-gray-400">
+          <div className="flex items-center gap-3 text-sm text-gray-300">
             <span className="flex items-center gap-1">
-              <span className="text-yellow-500 font-semibold">{cast.age}</span>
+              <span className="text-white font-semibold">{cast.age}</span>
               <span>歳</span>
             </span>
-            <span className="text-gray-600">|</span>
+            <span className="text-gray-400">|</span>
             <span className="flex items-center gap-1">
-              <span className="text-yellow-500 font-semibold">{cast.height}</span>
+              <span className="text-white font-semibold">{cast.height}</span>
               <span>cm</span>
             </span>
           </div>
 
           {/* 統計表示（オプション） */}
           {showStats && cast.stats && (
-            <div className="flex items-center gap-2 mt-2 pt-2 border-t border-gray-800">
+            <div className="flex items-center gap-2 mt-2 pt-2 border-t border-white/20">
               {[
                 { label: 'ルックス', value: cast.stats.looks },
                 { label: 'トーク', value: cast.stats.talk },
                 { label: 'テンション', value: cast.stats.energy }
               ].map(({ label, value }) => (
                 <div key={label} className="flex-1 text-center">
-                  <div className="text-xs text-gray-500">{label}</div>
-                  <div className="text-sm font-bold text-yellow-500">{value || '-'}</div>
+                  <div className="text-xs text-gray-300">{label}</div>
+                  <div className="text-sm font-bold text-white">{value || '-'}</div>
                 </div>
               ))}
             </div>
@@ -133,7 +133,7 @@ export const CastCard = forwardRef<HTMLDivElement, CastCardProps>(
         </div>
 
         {/* ホバー時のハイライト効果 */}
-        <div className="absolute inset-0 border-2 border-transparent group-hover:border-yellow-500/30 rounded-xl transition-colors pointer-events-none" />
+        <div className="absolute inset-0 border-2 border-transparent group-hover:border-blue-400/30 rounded-xl transition-colors pointer-events-none" />
       </div>
     );
   }
