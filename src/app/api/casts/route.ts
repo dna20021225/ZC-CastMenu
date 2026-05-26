@@ -205,13 +205,14 @@ export const POST = asyncHandler(async (request: NextRequest) => {
 
     // キャスト基本情報を作成
     await query(`
-      INSERT INTO casts (id, name, age, height, description, avatar_url, is_active)
-      VALUES (?, ?, ?, ?, ?, ?, 1)
+      INSERT INTO casts (id, name, age, height, blood_type, description, avatar_url, is_active)
+      VALUES (?, ?, ?, ?, ?, ?, ?, 1)
     `, [
       castId,
       validatedData.name,
-      validatedData.age,
-      validatedData.height,
+      validatedData.age ?? null,
+      validatedData.height ?? null,
+      validatedData.blood_type ?? null,
       validatedData.description || null,
       validatedData.profile_image || null
     ]);

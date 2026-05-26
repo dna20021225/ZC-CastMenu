@@ -3,8 +3,9 @@
 export interface Cast {
   id: string;
   name: string;
-  age: number;
-  height: number;
+  age: number | null;
+  height: number | null;
+  blood_type: string | null;
   hobby: string | null;
   description: string | null;
   avatar_url: string | null;

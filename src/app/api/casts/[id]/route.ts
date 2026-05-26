@@ -137,6 +137,10 @@ export async function PUT(
         updateFields.push(`height = ?`);
         updateValues.push(body.cast.height);
       }
+      if (body.cast.blood_type !== undefined) {
+        updateFields.push(`blood_type = ?`);
+        updateValues.push(body.cast.blood_type);
+      }
       if (body.cast.hobby !== undefined) {
         updateFields.push(`hobby = ?`);
         updateValues.push(body.cast.hobby);

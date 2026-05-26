@@ -2,9 +2,78 @@ import { query } from './db';
 
 /**
  * データベース初期化
- * PostgreSQLとSQLiteでは型が異なるため、SQLite構文で統一
+ * SQLite構文で統一（開発: Better-SQLite3 / 本番: Turso）
  */
 export async function initializeDatabase(): Promise<void> {
+  // Casts テーブル
+  await query(`
+    CREATE TABLE IF NOT EXISTS casts (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      age INTEGER CHECK (age IS NULL OR (age > 0 AND age < 100)),
+      height INTEGER CHECK (height IS NULL OR (height > 0 AND height < 300)),
+      blood_type TEXT CHECK (blood_type IS NULL OR blood_type IN ('A', 'B', 'O', 'AB')),
+      hobby TEXT,
+      description TEXT,
+      avatar_url TEXT,
+      is_active INTEGER DEFAULT 1,
+      created_at TEXT DEFAULT (datetime('now')),
+      updated_at TEXT DEFAULT (datetime('now'))
+    )
+  `);
+
+  // 既存DBに対するマイグレーション: blood_typeカラムを追加（未追加の場合のみ）
+  await ensureColumn('casts', 'blood_type', 'TEXT');
+
+  // Cast Photos テーブル
+  await query(`
+    CREATE TABLE IF NOT EXISTS cast_photos (
+      id TEXT PRIMARY KEY,
+      cast_id TEXT NOT NULL REFERENCES casts(id) ON DELETE CASCADE,
+      photo_url TEXT NOT NULL,
+      is_main INTEGER DEFAULT 0,
+      order_index INTEGER DEFAULT 0,
+      created_at TEXT DEFAULT (datetime('now'))
+    )
+  `);
+
+  // Cast Stats テーブル
+  await query(`
+    CREATE TABLE IF NOT EXISTS cast_stats (
+      cast_id TEXT PRIMARY KEY REFERENCES casts(id) ON DELETE CASCADE,
+      looks INTEGER NOT NULL CHECK (looks >= 1 AND looks <= 100),
+      talk INTEGER NOT NULL CHECK (talk >= 1 AND talk <= 100),
+      alcohol_tolerance INTEGER NOT NULL CHECK (alcohol_tolerance >= 1 AND alcohol_tolerance <= 100),
+      intelligence INTEGER NOT NULL CHECK (intelligence >= 1 AND intelligence <= 100),
+      energy INTEGER NOT NULL CHECK (energy >= 1 AND energy <= 100),
+      custom_stat INTEGER CHECK (custom_stat >= 1 AND custom_stat <= 100),
+      custom_stat_name TEXT,
+      updated_at TEXT DEFAULT (datetime('now'))
+    )
+  `);
+
+  // Badges テーブル
+  await query(`
+    CREATE TABLE IF NOT EXISTS badges (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL UNIQUE,
+      color TEXT DEFAULT '#3b82f6',
+      display_order INTEGER DEFAULT 0,
+      created_at TEXT DEFAULT (datetime('now'))
+    )
+  `);
+
+  // Cast Badges 中間テーブル
+  await query(`
+    CREATE TABLE IF NOT EXISTS cast_badges (
+      cast_id TEXT REFERENCES casts(id) ON DELETE CASCADE,
+      badge_id TEXT REFERENCES badges(id) ON DELETE CASCADE,
+      assigned_at TEXT DEFAULT (datetime('now')),
+      assigned_by TEXT,
+      PRIMARY KEY (cast_id, badge_id)
+    )
+  `);
+
   // Admins テーブル
   await query(`
     CREATE TABLE IF NOT EXISTS admins (
@@ -19,80 +88,32 @@ export async function initializeDatabase(): Promise<void> {
     )
   `);
 
-  // Casts テーブル
-  await query(`
-    CREATE TABLE IF NOT EXISTS casts (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL,
-      age INTEGER,
-      height INTEGER,
-      hobbies TEXT,
-      comment TEXT,
-      image_url TEXT,
-      is_active INTEGER DEFAULT 1,
-      created_at TEXT DEFAULT (datetime('now')),
-      updated_at TEXT DEFAULT (datetime('now'))
-    )
-  `);
-
-  // Badges テーブル
-  await query(`
-    CREATE TABLE IF NOT EXISTS badges (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT UNIQUE NOT NULL,
-      display_name TEXT NOT NULL,
-      color TEXT DEFAULT '#3b82f6',
-      created_at TEXT DEFAULT (datetime('now'))
-    )
-  `);
-
-  // Cast_Badges 中間テーブル
-  await query(`
-    CREATE TABLE IF NOT EXISTS cast_badges (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      cast_id INTEGER NOT NULL,
-      badge_id INTEGER NOT NULL,
-      created_at TEXT DEFAULT (datetime('now')),
-      FOREIGN KEY (cast_id) REFERENCES casts(id) ON DELETE CASCADE,
-      FOREIGN KEY (badge_id) REFERENCES badges(id) ON DELETE CASCADE,
-      UNIQUE(cast_id, badge_id)
-    )
-  `);
-
-  // Cast_Stats テーブル（レーダーチャート用）
-  await query(`
-    CREATE TABLE IF NOT EXISTS cast_stats (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      cast_id INTEGER UNIQUE NOT NULL,
-      looks INTEGER DEFAULT 50 CHECK(looks >= 1 AND looks <= 100),
-      talk INTEGER DEFAULT 50 CHECK(talk >= 1 AND talk <= 100),
-      alcohol_tolerance INTEGER DEFAULT 50 CHECK(alcohol_tolerance >= 1 AND alcohol_tolerance <= 100),
-      intelligence INTEGER DEFAULT 50 CHECK(intelligence >= 1 AND intelligence <= 100),
-      energy INTEGER DEFAULT 50 CHECK(energy >= 1 AND energy <= 100),
-      custom_stat INTEGER DEFAULT 50 CHECK(custom_stat >= 1 AND custom_stat <= 100),
-      custom_stat_name TEXT DEFAULT 'カスタム',
-      created_at TEXT DEFAULT (datetime('now')),
-      updated_at TEXT DEFAULT (datetime('now')),
-      FOREIGN KEY (cast_id) REFERENCES casts(id) ON DELETE CASCADE
-    )
-  `);
-
-  // インデックス作成
-  await query(`CREATE INDEX IF NOT EXISTS idx_casts_is_active ON casts(is_active)`);
+  // インデックス
+  await query(`CREATE INDEX IF NOT EXISTS idx_casts_active ON casts(is_active)`);
+  await query(`CREATE INDEX IF NOT EXISTS idx_casts_name ON casts(name)`);
+  await query(`CREATE INDEX IF NOT EXISTS idx_cast_photos_cast_id ON cast_photos(cast_id)`);
+  await query(`CREATE INDEX IF NOT EXISTS idx_cast_photos_main ON cast_photos(is_main)`);
   await query(`CREATE INDEX IF NOT EXISTS idx_cast_badges_cast_id ON cast_badges(cast_id)`);
-  await query(`CREATE INDEX IF NOT EXISTS idx_cast_badges_badge_id ON cast_badges(badge_id)`);
-
-  // 初期バッジデータ
-  await query(`
-    INSERT OR IGNORE INTO badges (name, display_name, color) VALUES
-    ('no1', 'No.1', '#FFD700'),
-    ('no2', 'No.2', '#C0C0C0'),
-    ('no3', 'No.3', '#CD7F32'),
-    ('recommend', 'オススメ', '#3b82f6'),
-    ('new', '新人', '#10b981')
-  `);
+  await query(`CREATE INDEX IF NOT EXISTS idx_admins_email ON admins(email)`);
 
   console.log('Database initialized successfully');
+}
+
+/**
+ * カラムが存在しない場合のみ ALTER TABLE で追加
+ * （SQLite には IF NOT EXISTS 構文がないため pragma で確認）
+ */
+async function ensureColumn(table: string, column: string, definition: string): Promise<void> {
+  try {
+    const result = await query(`PRAGMA table_info(${table})`);
+    const exists = result.rows.some((row) => row.name === column);
+    if (!exists) {
+      await query(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);
+      console.log(`Migrated: added column ${table}.${column}`);
+    }
+  } catch (error) {
+    console.error(`Migration failed for ${table}.${column}`, error);
+  }
 }
 
 /**
@@ -101,6 +122,7 @@ export async function initializeDatabase(): Promise<void> {
 export async function dropAllTables(): Promise<void> {
   await query('DROP TABLE IF EXISTS cast_stats');
   await query('DROP TABLE IF EXISTS cast_badges');
+  await query('DROP TABLE IF EXISTS cast_photos');
   await query('DROP TABLE IF EXISTS badges');
   await query('DROP TABLE IF EXISTS casts');
   await query('DROP TABLE IF EXISTS admins');

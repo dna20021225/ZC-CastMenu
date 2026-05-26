@@ -14,9 +14,9 @@ interface UploadedImage {
 
 interface CastFormData {
   name: string;
-  age: number;
-  height: number;
-  blood_type: string;
+  age: number | null;
+  height: number | null;
+  blood_type: string; // '' = 非公開
   photos: UploadedImage[];
   description: string;
   stats: {
@@ -34,9 +34,9 @@ export default function NewCastPage() {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<CastFormData>({
     name: "",
-    age: 20,
-    height: 160,
-    blood_type: "A",
+    age: null,
+    height: null,
+    blood_type: "",
     photos: [],
     description: "",
     stats: {
@@ -62,9 +62,10 @@ export default function NewCastPage() {
         },
       }));
     } else if (name === "age" || name === "height") {
+      const parsed = value === "" ? null : parseInt(value, 10);
       setFormData(prev => ({
         ...prev,
-        [name]: parseInt(value) || 0,
+        [name]: parsed !== null && Number.isNaN(parsed) ? prev[name] : parsed,
       }));
     } else {
       setFormData(prev => ({
@@ -92,6 +93,7 @@ export default function NewCastPage() {
           name: formData.name,
           age: formData.age,
           height: formData.height,
+          blood_type: formData.blood_type === "" ? null : formData.blood_type,
           profile_image: profileImage,
           description: formData.description,
           stats: formData.stats,
@@ -144,15 +146,16 @@ export default function NewCastPage() {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium" style={{ color: 'var(--foreground)' }}>
-              年齢 <span style={{ color: 'var(--error)' }}>*</span>
+              年齢
+              <span className="ml-1 text-xs" style={{ color: 'var(--secondary)' }}>（空欄で非公開）</span>
             </label>
             <input
               type="number"
               name="age"
-              required
               min="18"
               max="99"
-              value={formData.age}
+              placeholder="非公開"
+              value={formData.age ?? ""}
               onChange={handleChange}
               className="mt-1 block w-full rounded-md shadow-sm px-3 py-2"
               style={{
@@ -166,15 +169,16 @@ export default function NewCastPage() {
 
           <div>
             <label className="block text-sm font-medium" style={{ color: 'var(--foreground)' }}>
-              身長 (cm) <span style={{ color: 'var(--error)' }}>*</span>
+              身長 (cm)
+              <span className="ml-1 text-xs" style={{ color: 'var(--secondary)' }}>（空欄で非公開）</span>
             </label>
             <input
               type="number"
               name="height"
-              required
               min="140"
               max="200"
-              value={formData.height}
+              placeholder="非公開"
+              value={formData.height ?? ""}
               onChange={handleChange}
               className="mt-1 block w-full rounded-md shadow-sm px-3 py-2"
               style={{
@@ -189,11 +193,10 @@ export default function NewCastPage() {
 
         <div>
           <label className="block text-sm font-medium" style={{ color: 'var(--foreground)' }}>
-            血液型 <span style={{ color: 'var(--error)' }}>*</span>
+            血液型
           </label>
           <select
             name="blood_type"
-            required
             value={formData.blood_type}
             onChange={handleChange}
             className="mt-1 block w-full rounded-md shadow-sm px-3 py-2"
@@ -204,6 +207,7 @@ export default function NewCastPage() {
               borderRadius: 'var(--border-radius)'
             }}
           >
+            <option value="">非公開</option>
             <option value="A">A型</option>
             <option value="B">B型</option>
             <option value="O">O型</option>

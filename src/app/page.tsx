@@ -211,9 +211,9 @@ export default function Home() {
 
                     {/* 基本情報（要件定義書では任意） */}
                     <div className="flex items-center justify-center gap-4 text-xs text-secondary">
-                      <span>{cast.age}歳</span>
+                      <span>{cast.age != null ? `${cast.age}歳` : '非公開'}</span>
                       <span className="w-1 h-1 bg-border rounded-full"></span>
-                      <span>{cast.height}cm</span>
+                      <span>{cast.height != null ? `${cast.height}cm` : '非公開'}</span>
                     </div>
 
                     {/* 説明（要件定義書では任意） */}

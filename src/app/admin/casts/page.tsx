@@ -103,10 +103,10 @@ export default function AdminCastsPage() {
                   {cast.name}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm" style={{ color: 'var(--secondary)' }}>
-                  {cast.age}歳
+                  {cast.age != null ? `${cast.age}歳` : '非公開'}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm" style={{ color: 'var(--secondary)' }}>
-                  {cast.height}cm
+                  {cast.height != null ? `${cast.height}cm` : '非公開'}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm" style={{ color: 'var(--secondary)' }}>
                   {cast.badges?.length || 0}個
