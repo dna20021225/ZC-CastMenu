@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -20,58 +20,69 @@ import { useHorizontalSwipe } from '@/hooks/useHorizontalSwipe';
 export default function CastDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const castId = params.id as string;
+  const initialCastId = params.id as string;
 
+  // 表示中のキャストID（スワイプで切り替わる）
+  const [currentCastId, setCurrentCastId] = useState<string>(initialCastId);
   const [cast, setCast] = useState<CastDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
   const [castIds, setCastIds] = useState<string[]>([]);
 
-  useEffect(() => {
-    const fetchCastDetail = async () => {
+  // 取得済みキャストのキャッシュ
+  const cacheRef = useRef<Map<string, CastDetail>>(new Map());
+  // 進行中の fetch を共有するための Promise キャッシュ（重複fetch抑止）
+  const inflightRef = useRef<Map<string, Promise<CastDetail | null>>>(new Map());
+
+  // 単一キャストfetch（キャッシュ＆重複抑止つき）
+  const fetchCastById = useCallback(async (id: string): Promise<CastDetail | null> => {
+    if (cacheRef.current.has(id)) return cacheRef.current.get(id)!;
+    const existing = inflightRef.current.get(id);
+    if (existing) return existing;
+
+    const promise = (async () => {
       try {
-        setLoading(true);
-        setError(null);
-
-        console.info('キャスト詳細取得開始', { castId });
-
-        const response = await fetch(`/api/casts/${castId}`);
+        const response = await fetch(`/api/casts/${id}`);
         const result: ApiResponse<CastDetail> = await response.json();
-
-        if (!response.ok) {
-          throw new Error(result.error || 'キャスト詳細の取得に失敗しました');
+        if (response.ok && result.success && result.data) {
+          cacheRef.current.set(id, result.data);
+          return result.data;
         }
-
-        if (!result.success || !result.data) {
-          throw new Error('キャストデータが取得できませんでした');
-        }
-
-        setCast(result.data);
-        console.info('キャスト詳細取得完了', { 
-          castId, 
-          name: result.data.name,
-          photosCount: result.data.photos.length,
-          badgesCount: result.data.badges.length
-        });
-
+        throw new Error(result.error || 'キャスト詳細の取得に失敗しました');
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : 'キャスト詳細の取得に失敗しました';
-        setError(errorMessage);
-        console.error('キャスト詳細取得エラー', err instanceof Error ? err : new Error(String(err)), { castId });
+        console.error('キャスト詳細取得エラー', err instanceof Error ? err : new Error(String(err)), { id });
+        return null;
       } finally {
-        setLoading(false);
+        inflightRef.current.delete(id);
       }
-    };
+    })();
+    inflightRef.current.set(id, promise);
+    return promise;
+  }, []);
 
-    if (castId) {
-      fetchCastDetail();
-    }
-  }, [castId]);
-
-  // 前後キャスト遷移用に display_order 順の ID 一覧を取得
+  // 初期表示
   useEffect(() => {
-    const fetchCastList = async () => {
+    let cancelled = false;
+    (async () => {
+      const data = await fetchCastById(initialCastId);
+      if (cancelled) return;
+      if (data) {
+        setCast(data);
+        setError(null);
+      } else {
+        setError('キャスト詳細の取得に失敗しました');
+      }
+      setLoading(false);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [initialCastId, fetchCastById]);
+
+  // 並び順用のID一覧を取得
+  useEffect(() => {
+    (async () => {
       try {
         const response = await fetch('/api/casts?limit=100');
         const result: ApiResponse<CastListResponse> = await response.json();
@@ -81,28 +92,64 @@ export default function CastDetailPage() {
       } catch (err) {
         console.error('キャスト一覧取得エラー（スワイプ用）', err instanceof Error ? err : new Error(String(err)));
       }
-    };
-    fetchCastList();
+    })();
   }, []);
 
-  // 前後のキャスト ID（ループ対応）
+  // currentCastId が変わったら、隣接2件をバックグラウンドでプリフェッチ
+  useEffect(() => {
+    if (castIds.length < 2 || !currentCastId) return;
+    const currentIndex = castIds.indexOf(currentCastId);
+    if (currentIndex === -1) return;
+    const total = castIds.length;
+    const neighbors = [
+      castIds[(currentIndex + 1) % total],
+      castIds[(currentIndex - 1 + total) % total],
+    ];
+    neighbors.forEach((id) => {
+      if (id && id !== currentCastId) {
+        void fetchCastById(id);
+      }
+    });
+  }, [currentCastId, castIds, fetchCastById]);
+
+  // スワイプで前後キャストへ（シームレス切り替え）
   const goToAdjacent = useCallback(
-    (direction: 'prev' | 'next') => {
-      if (castIds.length < 2 || !castId) return;
-      const currentIndex = castIds.indexOf(castId);
+    async (direction: 'prev' | 'next') => {
+      if (castIds.length < 2) return;
+      const currentIndex = castIds.indexOf(currentCastId);
       if (currentIndex === -1) return;
       const total = castIds.length;
       const nextIndex =
         direction === 'next' ? (currentIndex + 1) % total : (currentIndex - 1 + total) % total;
-      router.push(`/cast/${castIds[nextIndex]}`);
+      const nextId = castIds[nextIndex];
+
+      // キャッシュにあれば即座に切り替え
+      const cached = cacheRef.current.get(nextId);
+      if (cached) {
+        setCast(cached);
+        setCurrentCastId(nextId);
+        setSelectedPhotoIndex(0);
+        // URLだけ静かに更新（履歴に積まない）
+        window.history.replaceState(null, '', `/cast/${nextId}`);
+        return;
+      }
+
+      // キャッシュ未取得：先にURLとIDを進めつつ、現在のキャスト表示を残してフェッチ
+      const data = await fetchCastById(nextId);
+      if (data) {
+        setCast(data);
+        setCurrentCastId(nextId);
+        setSelectedPhotoIndex(0);
+        window.history.replaceState(null, '', `/cast/${nextId}`);
+      }
     },
-    [castIds, castId, router]
+    [castIds, currentCastId, fetchCastById]
   );
 
   // 写真エリア内のスワイプは写真カルーセルに任せ、外側だけで前後キャストへ
   useHorizontalSwipe({
-    onSwipeLeft: () => goToAdjacent('next'),
-    onSwipeRight: () => goToAdjacent('prev'),
+    onSwipeLeft: () => void goToAdjacent('next'),
+    onSwipeRight: () => void goToAdjacent('prev'),
     ignoreInsideSelector: '[data-photo-carousel="true"]',
     disabled: castIds.length < 2,
   });
@@ -151,8 +198,13 @@ export default function CastDetailPage() {
     return null;
   }
 
-  const mainPhoto = cast.photos.find(photo => photo.is_main) || cast.photos[0];
-  const displayPhoto = cast.photos[selectedPhotoIndex] || mainPhoto;
+  // 表示用の写真リスト。cast_photos が空のときは avatar_url を1枚目として使う
+  const displayPhotos: { id: string; photo_url: string }[] =
+    cast.photos.length > 0
+      ? cast.photos
+      : cast.avatar_url
+        ? [{ id: 'avatar-fallback', photo_url: cast.avatar_url }]
+        : [];
 
   return (
     <div className="min-h-screen pb-20">
@@ -191,6 +243,7 @@ export default function CastDetailPage() {
             >
               {/* 写真カルーセル */}
               <div
+                key={cast.id}
                 className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide"
                 style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                 onScroll={(e) => {
@@ -198,13 +251,13 @@ export default function CastDetailPage() {
                   const scrollLeft = container.scrollLeft;
                   const itemWidth = container.offsetWidth;
                   const newIndex = Math.round(scrollLeft / itemWidth);
-                  if (newIndex !== selectedPhotoIndex && newIndex >= 0 && newIndex < cast.photos.length) {
+                  if (newIndex !== selectedPhotoIndex && newIndex >= 0 && newIndex < displayPhotos.length) {
                     setSelectedPhotoIndex(newIndex);
                   }
                 }}
               >
-                {cast.photos.length > 0 ? (
-                  cast.photos.map((photo, index) => (
+                {displayPhotos.length > 0 ? (
+                  displayPhotos.map((photo, index) => (
                     <div
                       key={photo.id}
                       className="relative aspect-[3/4] flex-shrink-0 w-full snap-center bg-surface-variant"
@@ -243,19 +296,19 @@ export default function CastDetailPage() {
                 </div>
               )}
 
-              {/* 写真カウンター */}
-              {cast.photos.length > 0 && (
+              {/* 写真カウンター（複数枚あるときのみ表示） */}
+              {displayPhotos.length > 1 && (
                 <div className="absolute top-4 right-4 z-10">
                   <span className="px-2 py-1 rounded-full text-xs font-bold text-white bg-black/50 backdrop-blur-sm">
-                    ({selectedPhotoIndex + 1}/{cast.photos.length})
+                    ({selectedPhotoIndex + 1}/{displayPhotos.length})
                   </span>
                 </div>
               )}
 
               {/* インジケーター（ドット） */}
-              {cast.photos.length > 1 && (
+              {displayPhotos.length > 1 && (
                 <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2 z-10">
-                  {cast.photos.map((_, index) => (
+                  {displayPhotos.map((_, index) => (
                     <div
                       key={index}
                       className={`w-2 h-2 rounded-full transition-all ${
