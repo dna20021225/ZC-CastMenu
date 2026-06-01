@@ -16,6 +16,7 @@ export async function initializeDatabase(): Promise<void> {
       hobby TEXT,
       description TEXT,
       avatar_url TEXT,
+      display_order INTEGER DEFAULT 0,
       is_active INTEGER DEFAULT 1,
       created_at TEXT DEFAULT (datetime('now')),
       updated_at TEXT DEFAULT (datetime('now'))
@@ -24,6 +25,11 @@ export async function initializeDatabase(): Promise<void> {
 
   // 既存DBに対するマイグレーション: blood_typeカラムを追加（未追加の場合のみ）
   await ensureColumn('casts', 'blood_type', 'TEXT');
+  // display_order カラム追加 + 既存データを created_at 順で初期化
+  const added = await ensureColumn('casts', 'display_order', 'INTEGER DEFAULT 0');
+  if (added) {
+    await backfillDisplayOrder();
+  }
 
   // Cast Photos テーブル
   await query(`
@@ -102,17 +108,39 @@ export async function initializeDatabase(): Promise<void> {
 /**
  * カラムが存在しない場合のみ ALTER TABLE で追加
  * （SQLite には IF NOT EXISTS 構文がないため pragma で確認）
+ * @returns 新しくカラムを追加した場合 true、既に存在していた場合 false
  */
-async function ensureColumn(table: string, column: string, definition: string): Promise<void> {
+async function ensureColumn(table: string, column: string, definition: string): Promise<boolean> {
   try {
     const result = await query(`PRAGMA table_info(${table})`);
     const exists = result.rows.some((row) => row.name === column);
     if (!exists) {
       await query(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);
       console.log(`Migrated: added column ${table}.${column}`);
+      return true;
     }
+    return false;
   } catch (error) {
     console.error(`Migration failed for ${table}.${column}`, error);
+    return false;
+  }
+}
+
+/**
+ * 既存キャストに対し display_order を作成日順で初期化
+ */
+async function backfillDisplayOrder(): Promise<void> {
+  try {
+    const result = await query(
+      `SELECT id FROM casts ORDER BY created_at ASC`
+    );
+    const rows = result.rows as Array<{ id: string }>;
+    for (let i = 0; i < rows.length; i++) {
+      await query(`UPDATE casts SET display_order = ? WHERE id = ?`, [i, rows[i].id]);
+    }
+    console.log(`Backfilled display_order for ${rows.length} casts`);
+  } catch (error) {
+    console.error('display_order backfill failed', error);
   }
 }
 

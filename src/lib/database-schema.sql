@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS casts (
     hobby TEXT,
     description TEXT,
     avatar_url TEXT,
+    display_order INTEGER DEFAULT 0,
     is_active INTEGER DEFAULT 1,
     created_at TEXT DEFAULT (datetime('now')),
     updated_at TEXT DEFAULT (datetime('now'))
