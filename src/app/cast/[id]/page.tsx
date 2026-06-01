@@ -1,20 +1,21 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { 
-  ArrowLeft, 
-  User, 
-  Calendar, 
-  Ruler, 
-  Heart, 
+import {
+  ArrowLeft,
+  User,
+  Calendar,
+  Ruler,
+  Heart,
   Camera,
-  Home 
+  Home,
 } from 'lucide-react';
 import { RadarChart } from '@/components/chart';
-import { CastDetail, ApiResponse } from '@/types/api';
+import { CastDetail, ApiResponse, CastListResponse } from '@/types/api';
+import { useHorizontalSwipe } from '@/hooks/useHorizontalSwipe';
 
 export default function CastDetailPage() {
   const params = useParams();
@@ -25,6 +26,7 @@ export default function CastDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
+  const [castIds, setCastIds] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchCastDetail = async () => {
@@ -66,6 +68,44 @@ export default function CastDetailPage() {
       fetchCastDetail();
     }
   }, [castId]);
+
+  // 前後キャスト遷移用に display_order 順の ID 一覧を取得
+  useEffect(() => {
+    const fetchCastList = async () => {
+      try {
+        const response = await fetch('/api/casts?limit=100');
+        const result: ApiResponse<CastListResponse> = await response.json();
+        if (result.success && result.data?.casts) {
+          setCastIds(result.data.casts.map((c) => c.id));
+        }
+      } catch (err) {
+        console.error('キャスト一覧取得エラー（スワイプ用）', err instanceof Error ? err : new Error(String(err)));
+      }
+    };
+    fetchCastList();
+  }, []);
+
+  // 前後のキャスト ID（ループ対応）
+  const goToAdjacent = useCallback(
+    (direction: 'prev' | 'next') => {
+      if (castIds.length < 2 || !castId) return;
+      const currentIndex = castIds.indexOf(castId);
+      if (currentIndex === -1) return;
+      const total = castIds.length;
+      const nextIndex =
+        direction === 'next' ? (currentIndex + 1) % total : (currentIndex - 1 + total) % total;
+      router.push(`/cast/${castIds[nextIndex]}`);
+    },
+    [castIds, castId, router]
+  );
+
+  // 写真エリア内のスワイプは写真カルーセルに任せ、外側だけで前後キャストへ
+  useHorizontalSwipe({
+    onSwipeLeft: () => goToAdjacent('next'),
+    onSwipeRight: () => goToAdjacent('prev'),
+    ignoreInsideSelector: '[data-photo-carousel="true"]',
+    disabled: castIds.length < 2,
+  });
 
   if (loading) {
     return (
@@ -145,7 +185,10 @@ export default function CastDetailPage() {
         <div className="cast-card p-4 lg:p-5">
           <div className="lg:flex gap-6 lg:items-start">
             {/* 写真セクション - 横スクロール対応 */}
-            <div className="lg:w-2/5 relative border-2 border-primary rounded-lg overflow-hidden flex-shrink-0">
+            <div
+              data-photo-carousel="true"
+              className="lg:w-2/5 relative border-2 border-primary rounded-lg overflow-hidden flex-shrink-0"
+            >
               {/* 写真カルーセル */}
               <div
                 className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide"
