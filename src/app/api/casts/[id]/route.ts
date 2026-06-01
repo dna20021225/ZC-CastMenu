@@ -233,6 +233,12 @@ export async function PUT(
             VALUES (?, ?, ?, ?, ?)
           `, [crypto.randomUUID(), params.id, body.photos[i], i === 0 ? 1 : 0, i]);
         }
+      } else if (body.cast?.avatar_url) {
+        // photos配列が空でもavatar_urlが指定されていれば、最低1枚は保証する
+        await query(`
+          INSERT INTO cast_photos (id, cast_id, photo_url, is_main, order_index)
+          VALUES (?, ?, ?, 1, 0)
+        `, [crypto.randomUUID(), params.id, body.cast.avatar_url]);
       }
     }
 
