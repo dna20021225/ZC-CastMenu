@@ -82,19 +82,9 @@ export const GET = asyncHandler(async (request: NextRequest) => {
 
     const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
 
-    // バッジ優先度でソート（No.1 > No.2 > No.3 > バッジ数順）
+    // 管理画面で設定した display_order 順（手動並び順）
     const orderClause = `
-      ORDER BY
-        COALESCE((SELECT MIN(CASE
-          WHEN b2.name = 'No.1' THEN 1
-          WHEN b2.name = 'No.2' THEN 2
-          WHEN b2.name = 'No.3' THEN 3
-          ELSE 999
-        END) FROM cast_badges cb2
-        INNER JOIN badges b2 ON cb2.badge_id = b2.id
-        WHERE cb2.cast_id = c.id), 999) ASC,
-        (SELECT COUNT(*) FROM cast_badges cb3 WHERE cb3.cast_id = c.id) DESC,
-        c.created_at DESC
+      ORDER BY c.display_order ASC, c.created_at ASC
     `;
 
     // ページネーション
@@ -203,10 +193,16 @@ export const POST = asyncHandler(async (request: NextRequest) => {
     // UUIDを生成
     const castId = uuidv4();
 
+    // display_order の最大値+1 を取得（末尾に追加）
+    const maxOrderResult = await query(
+      `SELECT COALESCE(MAX(display_order), -1) + 1 AS next_order FROM casts WHERE is_active = 1`
+    );
+    const nextOrder = (maxOrderResult.rows[0] as { next_order: number }).next_order;
+
     // キャスト基本情報を作成
     await query(`
-      INSERT INTO casts (id, name, age, height, blood_type, description, avatar_url, is_active)
-      VALUES (?, ?, ?, ?, ?, ?, ?, 1)
+      INSERT INTO casts (id, name, age, height, blood_type, description, avatar_url, display_order, is_active)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)
     `, [
       castId,
       validatedData.name,
@@ -214,7 +210,8 @@ export const POST = asyncHandler(async (request: NextRequest) => {
       validatedData.height ?? null,
       validatedData.blood_type ?? null,
       validatedData.description || null,
-      validatedData.profile_image || null
+      validatedData.profile_image || null,
+      nextOrder
     ]);
 
     // 能力値を作成（フォームのフィールド名をDBカラム名にマッピング）
