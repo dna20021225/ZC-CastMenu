@@ -42,8 +42,9 @@ export interface CastSearchParams {
 // キャスト作成・更新用のフォーム型
 export interface CastFormData {
   name: string;
-  age: number;
-  height: number;
+  age: number | null;
+  height: number | null;
+  blood_type?: string | null;
   hobby: string;
   description: string;
   avatar_url?: string;
@@ -100,9 +101,9 @@ export interface ApiError {
 // キャスト作成入力型（フォーム用）
 export interface CreateCastInput {
   name: string;
-  age: number;
-  height: number;
-  blood_type?: string;
+  age?: number | null;
+  height?: number | null;
+  blood_type?: string | null;
   profile_image?: string;
   description?: string;
   stats: {

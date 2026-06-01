@@ -115,7 +115,7 @@ export async function query(
 
       // SQL文の種類に応じてrun()とall()を使い分け
       const trimmedSql = text.trim().toUpperCase();
-      const isSelectQuery = trimmedSql.startsWith('SELECT');
+      const isSelectQuery = trimmedSql.startsWith('SELECT') || trimmedSql.startsWith('PRAGMA');
 
       let rows: unknown[];
       if (isSelectQuery) {

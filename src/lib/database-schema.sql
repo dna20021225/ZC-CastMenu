@@ -5,8 +5,9 @@
 CREATE TABLE IF NOT EXISTS casts (
     id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
-    age INTEGER NOT NULL CHECK (age > 0 AND age < 100),
-    height INTEGER NOT NULL CHECK (height > 0 AND height < 300),
+    age INTEGER CHECK (age IS NULL OR (age > 0 AND age < 100)),
+    height INTEGER CHECK (height IS NULL OR (height > 0 AND height < 300)),
+    blood_type TEXT CHECK (blood_type IS NULL OR blood_type IN ('A', 'B', 'O', 'AB')),
     hobby TEXT,
     description TEXT,
     avatar_url TEXT,

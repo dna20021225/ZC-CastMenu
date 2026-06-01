@@ -26,6 +26,9 @@ export async function POST() {
       await query(statement);
     }
 
+    // マイグレーション: 既存DBに対する追加対応
+    await migrateCastsTable();
+
     // 初期バッジデータを挿入（存在しない場合のみ）
     const existingBadges = await query('SELECT COUNT(*) as count FROM badges');
     if ((existingBadges.rows[0] as { count: number }).count === 0) {
@@ -60,8 +63,61 @@ export async function POST() {
   }
 }
 
+/**
+ * casts テーブルのマイグレーション
+ * - blood_type カラム追加
+ * - age/height の NOT NULL 制約撤去（テーブル再構築）
+ */
+async function migrateCastsTable(): Promise<void> {
+  // 現在のカラム情報を取得
+  const columnsResult = await query(`PRAGMA table_info(casts)`);
+  const columns = columnsResult.rows as Array<{ name: string; notnull: number }>;
+
+  const hasBloodType = columns.some(col => col.name === 'blood_type');
+  const ageCol = columns.find(col => col.name === 'age');
+  const heightCol = columns.find(col => col.name === 'height');
+  const ageIsNotNull = ageCol?.notnull === 1;
+  const heightIsNotNull = heightCol?.notnull === 1;
+
+  // blood_type カラム追加（CHECK制約はALTERでは付けられないので緩く追加）
+  if (!hasBloodType) {
+    await query(`ALTER TABLE casts ADD COLUMN blood_type TEXT`);
+    console.log('Migration: added casts.blood_type');
+  }
+
+  // age/height のNOT NULL制約を撤去するためテーブル再構築
+  if (ageIsNotNull || heightIsNotNull) {
+    console.log('Migration: rebuilding casts table to drop NOT NULL on age/height');
+    await query(`
+      CREATE TABLE casts_new (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        age INTEGER CHECK (age IS NULL OR (age > 0 AND age < 100)),
+        height INTEGER CHECK (height IS NULL OR (height > 0 AND height < 300)),
+        blood_type TEXT CHECK (blood_type IS NULL OR blood_type IN ('A', 'B', 'O', 'AB')),
+        hobby TEXT,
+        description TEXT,
+        avatar_url TEXT,
+        is_active INTEGER DEFAULT 1,
+        created_at TEXT DEFAULT (datetime('now')),
+        updated_at TEXT DEFAULT (datetime('now'))
+      )
+    `);
+    await query(`
+      INSERT INTO casts_new (id, name, age, height, blood_type, hobby, description, avatar_url, is_active, created_at, updated_at)
+      SELECT id, name, age, height, blood_type, hobby, description, avatar_url, is_active, created_at, updated_at FROM casts
+    `);
+    await query(`DROP TABLE casts`);
+    await query(`ALTER TABLE casts_new RENAME TO casts`);
+    // インデックス再作成
+    await query(`CREATE INDEX IF NOT EXISTS idx_casts_active ON casts(is_active)`);
+    await query(`CREATE INDEX IF NOT EXISTS idx_casts_name ON casts(name)`);
+    console.log('Migration: casts table rebuilt');
+  }
+}
+
 export async function GET() {
-  return NextResponse.json({ 
-    message: 'Use POST method to initialize database schema' 
+  return NextResponse.json({
+    message: 'Use POST method to initialize database schema'
   }, { status: 405 });
 }

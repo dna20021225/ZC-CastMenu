@@ -242,7 +242,9 @@ export default function CastDetailPage() {
                   <Calendar className="h-4 w-4 text-primary flex-shrink-0" />
                   <div>
                     <p className="text-xs text-secondary">年齢</p>
-                    <p className="font-semibold text-sm">{cast.age}歳</p>
+                    <p className="font-semibold text-sm">
+                      {cast.age != null ? `${cast.age}歳` : '非公開'}
+                    </p>
                   </div>
                 </div>
 
@@ -250,7 +252,9 @@ export default function CastDetailPage() {
                   <Ruler className="h-4 w-4 text-primary flex-shrink-0" />
                   <div>
                     <p className="text-xs text-secondary">身長</p>
-                    <p className="font-semibold text-sm">{cast.height}cm</p>
+                    <p className="font-semibold text-sm">
+                      {cast.height != null ? `${cast.height}cm` : '非公開'}
+                    </p>
                   </div>
                 </div>
               </div>

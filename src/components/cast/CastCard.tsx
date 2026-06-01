@@ -105,13 +105,25 @@ export const CastCard = forwardRef<HTMLDivElement, CastCardProps>(
 
           <div className="flex items-center gap-3 text-sm text-gray-300">
             <span className="flex items-center gap-1">
-              <span className="text-white font-semibold">{cast.age}</span>
-              <span>歳</span>
+              {cast.age != null ? (
+                <>
+                  <span className="text-white font-semibold">{cast.age}</span>
+                  <span>歳</span>
+                </>
+              ) : (
+                <span className="text-white font-semibold">非公開</span>
+              )}
             </span>
             <span className="text-gray-400">|</span>
             <span className="flex items-center gap-1">
-              <span className="text-white font-semibold">{cast.height}</span>
-              <span>cm</span>
+              {cast.height != null ? (
+                <>
+                  <span className="text-white font-semibold">{cast.height}</span>
+                  <span>cm</span>
+                </>
+              ) : (
+                <span className="text-white font-semibold">非公開</span>
+              )}
             </span>
           </div>
 
