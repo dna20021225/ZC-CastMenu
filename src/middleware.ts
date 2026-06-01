@@ -11,11 +11,8 @@ export default auth((req) => {
     }
 
     // 認証されていない場合はログインページにリダイレクト
-    // req.nextUrl を使うことで、リクエストされたホスト（Preview/本番）を維持する
     if (!req.auth) {
-      const loginUrl = req.nextUrl.clone();
-      loginUrl.pathname = "/admin/login";
-      loginUrl.search = "";
+      const loginUrl = new URL("/admin/login", req.url);
       return Response.redirect(loginUrl);
     }
   }
