@@ -46,6 +46,7 @@ export default function EditCastPage() {
   const [saving, setSaving] = useState(false);
   const [cast, setCast] = useState<CastDetail | null>(null);
   const [availableBadges, setAvailableBadges] = useState<Badge[]>([]);
+  const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [formData, setFormData] = useState<CastFormData>({
     name: "",
     age: null,
@@ -172,6 +173,18 @@ export default function EditCastPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFeedback(null);
+
+    // クライアント側バリデーション
+    if (!formData.name.trim()) {
+      setFeedback({ type: 'error', message: '名前を入力してください' });
+      // 名前フィールドにフォーカス
+      (document.querySelector('input[name="name"]') as HTMLInputElement | null)?.focus();
+      // 画面上部までスクロールしてフィードバックを見せる
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
     setSaving(true);
 
     try {
@@ -207,13 +220,22 @@ export default function EditCastPage() {
         }),
       });
 
-      if (!response.ok) throw new Error("更新に失敗しました");
+      const result = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        const message = result?.error || result?.message || `更新に失敗しました (HTTP ${response.status})`;
+        throw new Error(message);
+      }
 
       console.info("キャスト更新成功", { id: castId });
-      router.push("/admin/casts");
+      // 成功メッセージを表示してから一覧に遷移
+      setFeedback({ type: 'success', message: '更新しました' });
+      setTimeout(() => router.push("/admin/casts"), 700);
     } catch (error) {
+      const message = error instanceof Error ? error.message : '更新に失敗しました';
       console.error("キャスト更新エラー", error);
-      alert("更新に失敗しました");
+      setFeedback({ type: 'error', message });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } finally {
       setSaving(false);
     }
@@ -226,6 +248,20 @@ export default function EditCastPage() {
     <div className="max-w-2xl mx-auto">
       <AdminHeader title="キャスト編集" backHref="/admin/casts" />
 
+      {feedback && (
+        <div
+          role="alert"
+          className="mb-4 px-4 py-3 rounded-md text-sm font-medium"
+          style={{
+            backgroundColor: feedback.type === 'success' ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)',
+            color: feedback.type === 'success' ? 'rgb(22,163,74)' : 'rgb(220,38,38)',
+            border: `1px solid ${feedback.type === 'success' ? 'rgb(22,163,74)' : 'rgb(220,38,38)'}`,
+          }}
+        >
+          {feedback.message}
+        </div>
+      )}
+
       <form onSubmit={handleSubmit} className="space-y-6 cast-card px-6 py-8">
         <div>
           <label className="block text-sm font-medium mb-1" style={{ color: 'var(--foreground)' }}>
@@ -234,7 +270,6 @@ export default function EditCastPage() {
           <input
             type="text"
             name="name"
-            required
             value={formData.name}
             onChange={handleChange}
             className="mt-1 block w-full rounded-md px-3 py-2"
@@ -251,8 +286,6 @@ export default function EditCastPage() {
             <input
               type="number"
               name="age"
-              min="18"
-              max="99"
               placeholder="非公開"
               value={formData.age ?? ""}
               onChange={handleChange}
@@ -269,8 +302,6 @@ export default function EditCastPage() {
             <input
               type="number"
               name="height"
-              min="140"
-              max="200"
               placeholder="非公開"
               value={formData.height ?? ""}
               onChange={handleChange}

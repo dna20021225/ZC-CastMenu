@@ -32,6 +32,7 @@ interface CastFormData {
 export default function NewCastPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [formData, setFormData] = useState<CastFormData>({
     name: "",
     age: null,
@@ -77,6 +78,16 @@ export default function NewCastPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFeedback(null);
+
+    // クライアント側バリデーション: 名前必須
+    if (!formData.name.trim()) {
+      setFeedback({ type: 'error', message: '名前を入力してください' });
+      (document.querySelector('input[name="name"]') as HTMLInputElement | null)?.focus();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -101,14 +112,28 @@ export default function NewCastPage() {
         }),
       });
 
-      if (!response.ok) throw new Error("登録に失敗しました");
+      const result = await response.json().catch(() => null);
 
-      const data = await response.json();
-      console.info("キャスト登録成功", { id: data.data?.id });
-      router.push("/admin/casts");
+      if (!response.ok) {
+        let message = result?.error || result?.message || `登録に失敗しました (HTTP ${response.status})`;
+        // zodバリデーションエラーの詳細を結合
+        if (result?.details && typeof result.details === 'object') {
+          const detailMessages = Object.entries(result.details as Record<string, string[]>)
+            .map(([field, msgs]) => `${field}: ${Array.isArray(msgs) ? msgs.join(', ') : msgs}`)
+            .join(' / ');
+          if (detailMessages) message = `${message} (${detailMessages})`;
+        }
+        throw new Error(message);
+      }
+
+      console.info("キャスト登録成功", { id: result?.data?.id });
+      setFeedback({ type: 'success', message: '登録しました' });
+      setTimeout(() => router.push("/admin/casts"), 700);
     } catch (error) {
+      const message = error instanceof Error ? error.message : '登録に失敗しました';
       console.error("キャスト登録エラー", error);
-      alert("登録に失敗しました");
+      setFeedback({ type: 'error', message });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } finally {
       setLoading(false);
     }
@@ -118,7 +143,21 @@ export default function NewCastPage() {
     <div className="max-w-2xl mx-auto tablet-layout">
       <AdminHeader title="キャスト新規登録" backHref="/admin/casts" />
 
-      <form onSubmit={handleSubmit} className="space-y-6 px-6 py-8 rounded-lg" style={{ 
+      {feedback && (
+        <div
+          role="alert"
+          className="mb-4 px-4 py-3 rounded-md text-sm font-medium"
+          style={{
+            backgroundColor: feedback.type === 'success' ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)',
+            color: feedback.type === 'success' ? 'rgb(22,163,74)' : 'rgb(220,38,38)',
+            border: `1px solid ${feedback.type === 'success' ? 'rgb(22,163,74)' : 'rgb(220,38,38)'}`,
+          }}
+        >
+          {feedback.message}
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-6 px-6 py-8 rounded-lg" style={{
         backgroundColor: 'var(--surface)',
         boxShadow: 'var(--shadow-medium)',
         borderRadius: 'var(--border-radius)'
@@ -130,7 +169,6 @@ export default function NewCastPage() {
           <input
             type="text"
             name="name"
-            required
             value={formData.name}
             onChange={handleChange}
             className="mt-1 block w-full rounded-md shadow-sm px-3 py-2"
@@ -152,8 +190,6 @@ export default function NewCastPage() {
             <input
               type="number"
               name="age"
-              min="18"
-              max="99"
               placeholder="非公開"
               value={formData.age ?? ""}
               onChange={handleChange}
@@ -175,8 +211,6 @@ export default function NewCastPage() {
             <input
               type="number"
               name="height"
-              min="140"
-              max="200"
               placeholder="非公開"
               value={formData.height ?? ""}
               onChange={handleChange}

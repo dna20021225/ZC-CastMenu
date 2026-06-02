@@ -105,6 +105,22 @@ export async function PUT(
       badges?: string[];
     };
 
+    // バリデーション: 名前が更新対象に含まれる場合は空でないこと
+    if (body.cast?.name !== undefined && (typeof body.cast.name !== 'string' || body.cast.name.trim() === '')) {
+      return NextResponse.json({
+        success: false,
+        error: '名前を入力してください'
+      } as ApiResponse, { status: 400 });
+    }
+
+    // バリデーション: 写真URLは配列で各要素は文字列
+    if (body.photos !== undefined && !Array.isArray(body.photos)) {
+      return NextResponse.json({
+        success: false,
+        error: '写真の指定が不正です'
+      } as ApiResponse, { status: 400 });
+    }
+
     // キャストの存在確認
     const existingCastResult = await query(
       'SELECT * FROM casts WHERE id = ? AND is_active = 1',
