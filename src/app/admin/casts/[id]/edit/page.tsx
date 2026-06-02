@@ -87,10 +87,15 @@ export default function EditCastPage() {
       setCast(data);
 
       // 写真データを変換
-      const photos: UploadedImage[] = (data.photos || []).map((photo: { photo_url: string; is_main: number | boolean }, index: number) => ({
+      // cast_photos が空でも avatar_url があれば1枚として読み込む
+      // （cast_photos に未登録だが avatar だけ持つキャストでも、編集時に画像が消えないようにする）
+      let photos: UploadedImage[] = (data.photos || []).map((photo: { photo_url: string; is_main: number | boolean }, index: number) => ({
         url: photo.photo_url,
         isMain: photo.is_main === 1 || photo.is_main === true || index === 0
       }));
+      if (photos.length === 0 && data.avatar_url) {
+        photos = [{ url: data.avatar_url, isMain: true }];
+      }
 
       // 既存のバッジIDを取得
       const badgeIds = (data.badges || []).map((badge: Badge) => badge.id);
