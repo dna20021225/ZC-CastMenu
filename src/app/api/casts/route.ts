@@ -214,18 +214,19 @@ export const POST = asyncHandler(async (request: NextRequest) => {
       nextOrder
     ]);
 
-    // 能力値を作成（フォームのフィールド名をDBカラム名にマッピング）
+    // 能力値を作成（フォームのフィールド名をDBカラム名にマッピング、未指定は50）
+    const stats = validatedData.stats;
     await query(`
       INSERT INTO cast_stats (cast_id, looks, talk, alcohol_tolerance, intelligence, energy, custom_stat, custom_stat_name)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `, [
       castId,
-      validatedData.stats.looks || 50,
-      validatedData.stats.talk || 50,
-      validatedData.stats.drinking || 50,      // drinking -> alcohol_tolerance
-      validatedData.stats.intelligence || 50,
-      validatedData.stats.tension || 50,       // tension -> energy
-      validatedData.stats.special || null,     // special -> custom_stat
+      stats?.looks ?? 50,
+      stats?.talk ?? 50,
+      stats?.drinking ?? 50,      // drinking -> alcohol_tolerance
+      stats?.intelligence ?? 50,
+      stats?.tension ?? 50,       // tension -> energy
+      stats?.special ?? null,     // special -> custom_stat
       null
     ]);
 
