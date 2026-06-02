@@ -198,44 +198,35 @@ export default function CastDetailPage() {
     return null;
   }
 
-  // 表示用の写真リスト。cast_photos が空のときは avatar_url を1枚目として使う
+  // 表示用の写真リスト
+  // 優先順位: 1) cast_photos の写真群 2) avatar_url を1枚目に 3) プレースホルダー
   const displayPhotos: { id: string; photo_url: string }[] =
     cast.photos.length > 0
       ? cast.photos
       : cast.avatar_url
         ? [{ id: 'avatar-fallback', photo_url: cast.avatar_url }]
-        : [];
+        : [{ id: 'no-image-placeholder', photo_url: '/images/placeholder.svg' }];
 
   return (
-    <div className="min-h-screen pb-20">
-      {/* ヘッダー */}
-      <header className="sticky top-0 z-40 border-b-2 border-border backdrop-blur-md bg-surface/80 py-3 lg:py-4">
-        <div className="tablet-layout">
-          <div className="flex items-center gap-4 h-10 lg:h-12">
-            <button
-              onClick={() => router.back()}
-              className="flex items-center gap-2 text-secondary hover:text-primary transition-colors"
-            >
-              <ArrowLeft className="h-5 w-5" />
-              戻る
-            </button>
-            <div className="flex-1 min-w-0">
-              <h1 className="text-lg font-bold truncate">
-                {cast.name}
-              </h1>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* スペーサー */}
-      <div className="h-4 lg:h-6"></div>
+    // layout の <main className="pb-16"> を打ち消し、画面全体を活用
+    <div className="min-h-screen -mb-16">
+      {/* 戻るボタン（右上に固定配置） */}
+      <button
+        type="button"
+        onClick={() => router.back()}
+        aria-label="戻る"
+        className="fixed top-3 right-3 z-50 flex items-center gap-1 px-3 py-2 rounded-full bg-surface/90 backdrop-blur-md border border-border shadow-md text-secondary hover:text-primary transition-colors"
+        style={{ paddingTop: 'max(env(safe-area-inset-top), 8px)' }}
+      >
+        <ArrowLeft className="h-5 w-5" />
+        <span className="text-sm font-medium">戻る</span>
+      </button>
 
       {/* メインコンテンツ */}
-      <main className="tablet-layout pb-6">
+      <main className="tablet-layout pt-2 pb-2">
         {/* プロフィールカード */}
-        <div className="cast-card p-4 lg:p-5">
-          <div className="lg:flex gap-6 lg:items-start">
+        <div className="cast-card p-3">
+          <div className="lg:flex gap-4 lg:items-start">
             {/* 写真セクション - 横スクロール対応 */}
             <div
               data-photo-carousel="true"
@@ -323,7 +314,7 @@ export default function CastDetailPage() {
             </div>
 
             {/* 情報セクション */}
-            <div className="lg:w-3/5 pt-4 lg:pt-0 space-y-4">
+            <div className="lg:w-3/5 pt-2 lg:pt-0 space-y-2">
               {/* 名前 */}
               <div className="text-center lg:text-left">
                 <h2 className="text-2xl font-bold mb-1">
@@ -380,13 +371,13 @@ export default function CastDetailPage() {
               </div>
 
               {/* 能力値レーダーチャート */}
-              <div className="pt-2">
-                <div className="text-center mb-2">
+              <div className="pt-1">
+                <div className="text-center mb-1">
                   <h3 className="text-sm font-bold">能力値</h3>
                 </div>
                 <RadarChart
                   stats={cast.stats}
-                  size="md"
+                  size="sm"
                   colors={{
                     fill: 'rgba(59, 130, 246, 0.2)',
                     stroke: 'var(--primary-600)'

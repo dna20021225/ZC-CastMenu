@@ -38,7 +38,7 @@ export const CastCard = forwardRef<HTMLDivElement, CastCardProps>(
       }
     };
 
-    const avatarUrl = cast.avatar_url || '/images/placeholder-avatar.jpg';
+    const avatarUrl = cast.avatar_url || '/images/placeholder.svg';
 
     return (
       <div

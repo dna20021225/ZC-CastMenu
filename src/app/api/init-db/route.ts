@@ -28,6 +28,7 @@ export async function POST() {
 
     // マイグレーション: 既存DBに対する追加対応
     await migrateCastsTable();
+    await backfillMissingCastStats();
 
     // 初期バッジデータを挿入（存在しない場合のみ）
     const existingBadges = await query('SELECT COUNT(*) as count FROM badges');
@@ -129,6 +130,29 @@ async function migrateCastsTable(): Promise<void> {
     await query(`CREATE INDEX IF NOT EXISTS idx_casts_active ON casts(is_active)`);
     await query(`CREATE INDEX IF NOT EXISTS idx_casts_name ON casts(name)`);
     console.log('Migration: casts table rebuilt');
+  }
+}
+
+/**
+ * cast_stats レコードが存在しない既存キャストに、デフォルト値（全 50）の
+ * レコードを補填するマイグレーション
+ */
+async function backfillMissingCastStats(): Promise<void> {
+  const missing = await query(
+    `SELECT c.id FROM casts c
+     LEFT JOIN cast_stats s ON c.id = s.cast_id
+     WHERE s.cast_id IS NULL`
+  );
+  const ids = (missing.rows as Array<{ id: string }>).map(r => r.id);
+  for (const id of ids) {
+    await query(
+      `INSERT INTO cast_stats (cast_id, looks, talk, alcohol_tolerance, intelligence, energy)
+       VALUES (?, 50, 50, 50, 50, 50)`,
+      [id]
+    );
+  }
+  if (ids.length > 0) {
+    console.log(`Migration: backfilled cast_stats for ${ids.length} casts`);
   }
 }
 

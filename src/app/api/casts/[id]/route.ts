@@ -150,8 +150,9 @@ export async function PUT(
         updateValues.push(body.cast.description);
       }
       if (body.cast.avatar_url !== undefined) {
+        // 空文字列は null として保存（画像クリアを正規ルートとして許容）
         updateFields.push(`avatar_url = ?`);
-        updateValues.push(body.cast.avatar_url);
+        updateValues.push(body.cast.avatar_url || null);
       }
 
       if (updateFields.length > 0) {
@@ -174,51 +175,67 @@ export async function PUT(
       }
     }
 
-    // 能力値を更新
+    // 能力値を更新（UPSERT: レコードが無ければINSERT、あればUPDATE）
     if (body.stats) {
-      const updateFields: string[] = [];
-      const updateValues: unknown[] = [];
+      // 既存レコードの有無を確認
+      const existingStats = await query(
+        'SELECT cast_id FROM cast_stats WHERE cast_id = ?',
+        [params.id]
+      ) as unknown as { rows: { cast_id: string }[] };
 
-      if (body.stats.looks !== undefined) {
-        updateFields.push(`looks = ?`);
-        updateValues.push(body.stats.looks);
-      }
-      if (body.stats.talk !== undefined) {
-        updateFields.push(`talk = ?`);
-        updateValues.push(body.stats.talk);
-      }
-      if (body.stats.alcohol_tolerance !== undefined) {
-        updateFields.push(`alcohol_tolerance = ?`);
-        updateValues.push(body.stats.alcohol_tolerance);
-      }
-      if (body.stats.intelligence !== undefined) {
-        updateFields.push(`intelligence = ?`);
-        updateValues.push(body.stats.intelligence);
-      }
-      if (body.stats.energy !== undefined) {
-        updateFields.push(`energy = ?`);
-        updateValues.push(body.stats.energy);
-      }
-      if (body.stats.custom_stat !== undefined) {
-        updateFields.push(`custom_stat = ?`);
-        updateValues.push(body.stats.custom_stat);
-      }
-      if (body.stats.custom_stat_name !== undefined) {
-        updateFields.push(`custom_stat_name = ?`);
-        updateValues.push(body.stats.custom_stat_name);
-      }
+      // CHECK制約 (>= 1) に違反する 0 や負の値は 1 にクランプ
+      const clamp = (v: number | undefined | null): number => {
+        if (v === undefined || v === null) return 50;
+        return Math.max(1, Math.min(100, v));
+      };
 
-      if (updateFields.length > 0) {
-        updateFields.push(`updated_at = datetime('now')`);
-        updateValues.push(params.id);
+      const looks = body.stats.looks !== undefined ? clamp(body.stats.looks) : null;
+      const talk = body.stats.talk !== undefined ? clamp(body.stats.talk) : null;
+      const alcohol_tolerance = body.stats.alcohol_tolerance !== undefined ? clamp(body.stats.alcohol_tolerance) : null;
+      const intelligence = body.stats.intelligence !== undefined ? clamp(body.stats.intelligence) : null;
+      const energy = body.stats.energy !== undefined ? clamp(body.stats.energy) : null;
+      const custom_stat = body.stats.custom_stat !== undefined && body.stats.custom_stat !== null
+        ? clamp(body.stats.custom_stat) : null;
+      const custom_stat_name = body.stats.custom_stat_name !== undefined ? body.stats.custom_stat_name : null;
 
-        const statsUpdateQuery = `
-          UPDATE cast_stats
-          SET ${updateFields.join(', ')}
-          WHERE cast_id = ?
-        `;
+      if (existingStats.rows.length === 0) {
+        // INSERT: 必須項目はNOT NULL CHECK制約あり。未指定なら 50 で埋める
+        await query(
+          `INSERT INTO cast_stats (cast_id, looks, talk, alcohol_tolerance, intelligence, energy, custom_stat, custom_stat_name)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+          [
+            params.id,
+            looks ?? 50,
+            talk ?? 50,
+            alcohol_tolerance ?? 50,
+            intelligence ?? 50,
+            energy ?? 50,
+            custom_stat,
+            custom_stat_name,
+          ]
+        );
+        console.info('cast_stats INSERT 完了', { castId: params.id });
+      } else {
+        // UPDATE: 指定された項目のみ更新
+        const updateFields: string[] = [];
+        const updateValues: unknown[] = [];
 
-        await query(statsUpdateQuery, updateValues);
+        if (looks !== null) { updateFields.push('looks = ?'); updateValues.push(looks); }
+        if (talk !== null) { updateFields.push('talk = ?'); updateValues.push(talk); }
+        if (alcohol_tolerance !== null) { updateFields.push('alcohol_tolerance = ?'); updateValues.push(alcohol_tolerance); }
+        if (intelligence !== null) { updateFields.push('intelligence = ?'); updateValues.push(intelligence); }
+        if (energy !== null) { updateFields.push('energy = ?'); updateValues.push(energy); }
+        if (body.stats.custom_stat !== undefined) { updateFields.push('custom_stat = ?'); updateValues.push(custom_stat); }
+        if (body.stats.custom_stat_name !== undefined) { updateFields.push('custom_stat_name = ?'); updateValues.push(custom_stat_name); }
+
+        if (updateFields.length > 0) {
+          updateFields.push(`updated_at = datetime('now')`);
+          updateValues.push(params.id);
+          await query(
+            `UPDATE cast_stats SET ${updateFields.join(', ')} WHERE cast_id = ?`,
+            updateValues
+          );
+        }
       }
     }
 

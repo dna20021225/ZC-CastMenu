@@ -145,7 +145,7 @@ export default function MultiImageUploader({
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/jpeg,image/png,image/webp"
+        accept="image/*"
         onChange={handleFileChange}
         className="hidden"
         disabled={disabled || isUploading}
@@ -225,7 +225,7 @@ export default function MultiImageUploader({
                   クリックまたはドラッグ&ドロップで画像をアップロード
                 </p>
                 <p className="text-xs text-gray-500 mt-1">
-                  複数選択可能・JPEG、PNG、WebP（最大5MB/枚）
+                  複数選択可能・画像ファイル（最大10MB/枚）
                 </p>
               </div>
             )}
