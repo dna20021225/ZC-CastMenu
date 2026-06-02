@@ -45,6 +45,11 @@ export const Navigation = forwardRef<HTMLElement, NavigationProps>(
   }, ref) => {
     const pathname = usePathname();
 
+    // キャスト詳細画面では非表示（表示領域確保のため）
+    if (pathname?.startsWith('/cast/')) {
+      return null;
+    }
+
     // Hydration mismatch修正：統一されたclassNameを使用
     const baseClasses = 'border-t';
     

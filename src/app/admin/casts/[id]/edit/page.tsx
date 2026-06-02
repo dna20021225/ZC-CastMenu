@@ -101,13 +101,14 @@ export default function EditCastPage() {
         blood_type: data.blood_type ?? "",
         photos,
         description: data.description || "",
+        // statsが取得できた場合は値を尊重（0や1も保持）。null/undefinedの場合のみ初期値50
         stats: data.stats ? {
-          looks: data.stats.looks || 50,
-          talk: data.stats.talk || 50,
-          drinking: data.stats.alcohol_tolerance || 50,
-          intelligence: data.stats.intelligence || 50,
-          tension: data.stats.energy || 50,
-          special: data.stats.custom_stat || 50,
+          looks: data.stats.looks ?? 50,
+          talk: data.stats.talk ?? 50,
+          drinking: data.stats.alcohol_tolerance ?? 50,
+          intelligence: data.stats.intelligence ?? 50,
+          tension: data.stats.energy ?? 50,
+          special: data.stats.custom_stat ?? 50,
         } : {
           looks: 50,
           talk: 50,

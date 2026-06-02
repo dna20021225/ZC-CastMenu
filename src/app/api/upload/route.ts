@@ -3,8 +3,7 @@ import { put } from '@vercel/blob';
 import { asyncHandler, ValidationError } from '@/lib/error-handler';
 import { v4 as uuidv4 } from 'uuid';
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB（タブレットカメラの大きい画像にも対応）
 
 export const POST = asyncHandler(async (request: NextRequest) => {
     console.info('画像アップロード開始');
@@ -16,14 +15,14 @@ export const POST = asyncHandler(async (request: NextRequest) => {
       throw new ValidationError('ファイルが選択されていません');
     }
 
-    // ファイルタイプの検証
-    if (!ALLOWED_TYPES.includes(file.type)) {
-      throw new ValidationError('対応していないファイル形式です。JPEG、PNG、WebPのみ対応しています。');
+    // 画像ファイル全般を受け入れる（Android Googleフォト等の各種MIMEタイプ対応）
+    if (!file.type.startsWith('image/')) {
+      throw new ValidationError('画像ファイルを選択してください。');
     }
 
     // ファイルサイズの検証
     if (file.size > MAX_FILE_SIZE) {
-      throw new ValidationError('ファイルサイズが大きすぎます。5MB以下のファイルを選択してください。');
+      throw new ValidationError('ファイルサイズが大きすぎます。10MB以下のファイルを選択してください。');
     }
 
     // ファイル名の生成
