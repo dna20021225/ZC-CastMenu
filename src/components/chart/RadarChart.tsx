@@ -31,8 +31,9 @@ export const RadarChart = forwardRef<HTMLDivElement, RadarChartProps>(
     theme = 'default',
     ...props 
   }, ref) => {
-    const baseClasses = 'flex items-center justify-center p-4';
-    
+    // コンテナの余白を最小化して、内側のグラフ描画領域を最大化
+    const baseClasses = 'relative flex items-center justify-center p-1';
+
     const sizes = {
       sm: 'h-48 w-full',
       md: 'h-72 w-full',
@@ -100,7 +101,7 @@ export const RadarChart = forwardRef<HTMLDivElement, RadarChartProps>(
         {...props}
       >
         <ResponsiveContainer width="100%" height="100%">
-          <RechartsRadarChart data={chartData} margin={{ top: 30, right: 60, bottom: 30, left: 60 }}>
+          <RechartsRadarChart data={chartData} margin={{ top: 16, right: 40, bottom: 16, left: 40 }}>
             {/* グリッド線 */}
             <PolarGrid
               stroke="var(--border)"
@@ -163,15 +164,6 @@ export const RadarChart = forwardRef<HTMLDivElement, RadarChartProps>(
             />
           </RechartsRadarChart>
         </ResponsiveContainer>
-        
-        {/* レーダーチャートの説明 */}
-        <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2">
-          <div className="text-xs text-secondary text-center">
-            <span className="bg-surface-variant px-2 py-1 rounded-full">
-              最大値: 100
-            </span>
-          </div>
-        </div>
       </div>
     );
   }

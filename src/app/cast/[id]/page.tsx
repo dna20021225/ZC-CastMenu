@@ -357,27 +357,26 @@ export default function CastDetailPage() {
                     </div>
                   </div>
                 )}
-                {cast.description && (
-                  <div className="p-2 bg-surface-variant rounded-lg">
-                    <div className="flex items-center gap-2 mb-1">
-                      <User className="h-4 w-4 text-primary flex-shrink-0" />
-                      <span className="text-xs text-secondary">自己紹介</span>
-                    </div>
-                    <p className="text-xs leading-relaxed whitespace-pre-wrap line-clamp-3">
-                      {cast.description}
-                    </p>
+                {/* 自己紹介は常に枠を表示（中身が空でもレイアウトを安定させる） */}
+                <div className="p-2 bg-surface-variant rounded-lg">
+                  <div className="flex items-center gap-2 mb-1">
+                    <User className="h-4 w-4 text-primary flex-shrink-0" />
+                    <span className="text-xs text-secondary">自己紹介</span>
                   </div>
-                )}
+                  <p className="text-xs leading-relaxed whitespace-pre-wrap line-clamp-3 min-h-[1rem]">
+                    {cast.description || ''}
+                  </p>
+                </div>
               </div>
 
-              {/* 能力値レーダーチャート */}
+              {/* 能力値レーダーチャート（レイアウトを崩さない範囲で最大化） */}
               <div className="pt-1">
                 <div className="text-center mb-1">
                   <h3 className="text-sm font-bold">能力値</h3>
                 </div>
                 <RadarChart
                   stats={cast.stats}
-                  size="sm"
+                  size="md"
                   colors={{
                     fill: 'rgba(59, 130, 246, 0.2)',
                     stroke: 'var(--primary-600)'
