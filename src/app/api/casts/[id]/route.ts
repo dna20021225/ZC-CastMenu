@@ -150,8 +150,9 @@ export async function PUT(
         updateValues.push(body.cast.description);
       }
       if (body.cast.avatar_url !== undefined) {
+        // 空文字列は null として保存（画像クリアを正規ルートとして許容）
         updateFields.push(`avatar_url = ?`);
-        updateValues.push(body.cast.avatar_url);
+        updateValues.push(body.cast.avatar_url || null);
       }
 
       if (updateFields.length > 0) {

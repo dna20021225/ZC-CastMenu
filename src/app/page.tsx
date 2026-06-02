@@ -180,23 +180,18 @@ export default function Home() {
                     </div>
                   )}
 
-                  {/* 画像セクション */}
+                  {/* 画像セクション。未登録キャストは No Image プレースホルダー */}
                   <div className="cast-card-image relative overflow-hidden">
-                    {cast.avatar_url ? (
-                      <Image
-                        src={cast.avatar_url}
-                        alt={cast.name}
-                        fill
-                        className="object-cover transition-transform duration-300 group-hover:scale-105"
-                        sizes="(min-width: 1024px) 20vw, (min-width: 768px) 33vw, 50vw"
-                        priority={casts.indexOf(cast) < 5}
-                        loading={casts.indexOf(cast) < 5 ? "eager" : "lazy"}
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <User className="h-12 w-12 text-muted" />
-                      </div>
-                    )}
+                    <Image
+                      src={cast.avatar_url || '/images/placeholder.svg'}
+                      alt={cast.name}
+                      fill
+                      className="object-cover transition-transform duration-300 group-hover:scale-105"
+                      sizes="(min-width: 1024px) 20vw, (min-width: 768px) 33vw, 50vw"
+                      priority={casts.indexOf(cast) < 5}
+                      loading={casts.indexOf(cast) < 5 ? "eager" : "lazy"}
+                      unoptimized={!cast.avatar_url}
+                    />
                     
                     {/* ホバーオーバーレイ */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />

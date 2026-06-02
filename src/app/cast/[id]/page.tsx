@@ -198,13 +198,14 @@ export default function CastDetailPage() {
     return null;
   }
 
-  // 表示用の写真リスト。cast_photos が空のときは avatar_url を1枚目として使う
+  // 表示用の写真リスト
+  // 優先順位: 1) cast_photos の写真群 2) avatar_url を1枚目に 3) プレースホルダー
   const displayPhotos: { id: string; photo_url: string }[] =
     cast.photos.length > 0
       ? cast.photos
       : cast.avatar_url
         ? [{ id: 'avatar-fallback', photo_url: cast.avatar_url }]
-        : [];
+        : [{ id: 'no-image-placeholder', photo_url: '/images/placeholder.svg' }];
 
   return (
     // layout の <main className="pb-16"> を打ち消し、画面全体を活用
