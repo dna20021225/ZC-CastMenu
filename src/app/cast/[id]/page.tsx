@@ -302,10 +302,10 @@ export default function CastDetailPage() {
                   {displayPhotos.map((_, index) => (
                     <div
                       key={index}
-                      className={`w-2 h-2 rounded-full transition-all ${
+                      className={`w-2 h-2 rounded-full transition-all ring-1 ring-black/20 ${
                         selectedPhotoIndex === index
                           ? 'bg-primary w-4'
-                          : 'bg-white/50'
+                          : 'bg-white/80'
                       }`}
                     />
                   ))}

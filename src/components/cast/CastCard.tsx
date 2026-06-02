@@ -78,7 +78,7 @@ export const CastCard = forwardRef<HTMLDivElement, CastCardProps>(
               </span>
             ))}
             {cast.badges.length > 2 && (
-              <span className="text-[10px] text-white/70 pl-1">+{cast.badges.length - 2}</span>
+              <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-bold text-white shadow-md bg-gray-700/80 backdrop-blur-sm">+{cast.badges.length - 2}</span>
             )}
           </div>
         )}
