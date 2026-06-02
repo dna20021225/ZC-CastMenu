@@ -92,14 +92,14 @@ export default function DrinksPage() {
         {/* タイトルセクション */}
         <div className="text-center mb-8">
           <h2 className="text-3xl font-bold mb-2">DRINK MENU</h2>
-          <p className="text-gray-500 text-sm">※全て税込表記となります</p>
+          <p className="text-secondary text-sm">※全て税込表記となります</p>
         </div>
 
         {/* ローディング */}
         {loading && (
           <div className="flex flex-col items-center justify-center py-16">
             <Loader2 className="w-8 h-8 text-primary animate-spin mb-4" />
-            <p className="text-gray-500">メニューを読み込み中...</p>
+            <p className="text-secondary">メニューを読み込み中...</p>
           </div>
         )}
 
@@ -113,8 +113,8 @@ export default function DrinksPage() {
         {/* メニューが空の場合 */}
         {!loading && !error && categories.length === 0 && (
           <div className="text-center py-16">
-            <Wine className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-            <p className="text-gray-500">メニューは準備中です</p>
+            <Wine className="w-16 h-16 mx-auto text-secondary mb-4" />
+            <p className="text-secondary">メニューは準備中です</p>
           </div>
         )}
 
@@ -143,7 +143,7 @@ export default function DrinksPage() {
                       <div>
                         <h3 className="text-xl font-bold">{category.name}</h3>
                         {category.name_en && (
-                          <p className="text-sm text-gray-500">{category.name_en}</p>
+                          <p className="text-sm text-secondary">{category.name_en}</p>
                         )}
                       </div>
                     </div>
@@ -160,7 +160,7 @@ export default function DrinksPage() {
                           <div className="flex-1">
                             <span className="font-medium">{drink.name}</span>
                             {drink.note && (
-                              <span className="text-gray-400 text-sm ml-2">({drink.note})</span>
+                              <span className="text-secondary text-sm ml-2">({drink.note})</span>
                             )}
                           </div>
                           <div className="text-right">
@@ -185,7 +185,7 @@ export default function DrinksPage() {
             <h3 className="text-lg font-bold">ご案内</h3>
           </div>
 
-          <div className="space-y-3 text-sm text-gray-500">
+          <div className="space-y-3 text-sm text-secondary">
             <div className="flex gap-2">
               <span className="text-yellow-500 font-semibold">•</span>
               <span>価格は全て税込み表示です</span>
