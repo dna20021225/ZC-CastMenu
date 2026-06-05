@@ -3,8 +3,6 @@
 import { useState, useEffect } from 'react';
 import { Plus, Trash2, Edit2, X, Check, Tag, Clock, PlusCircle, Sparkles, Star, LucideIcon } from 'lucide-react';
 import { AdminHeader } from '@/components/AdminHeader';
-import { GuideEditor } from '@/components/GuideEditor';
-import { PRICING_GUIDE_KEY, PRICING_GUIDE_DEFAULT } from '@/lib/guides';
 
 // アイコンの選択肢
 const iconOptions: { value: string; label: string; Icon: LucideIcon }[] = [
@@ -528,15 +526,6 @@ export default function DrinkMenuEditor() {
           ))}
         </div>
       )}
-
-      {/* ご案内編集 */}
-      <div className="mt-8">
-        <GuideEditor
-          settingsKey={PRICING_GUIDE_KEY}
-          defaultText={PRICING_GUIDE_DEFAULT}
-          title="ご案内（顧客向け画面に表示）"
-        />
-      </div>
     </div>
   );
 }

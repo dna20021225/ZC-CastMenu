@@ -12,7 +12,6 @@ import {
   Info,
   Loader2,
 } from 'lucide-react';
-import { PRICING_GUIDE_KEY, PRICING_GUIDE_DEFAULT, parseGuide } from '@/lib/guides';
 
 interface MenuItem {
   id: string;
@@ -46,7 +45,6 @@ export default function PricingPage() {
   const [categories, setCategories] = useState<MenuCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [guideLines, setGuideLines] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchMenu = async () => {
@@ -64,20 +62,7 @@ export default function PricingPage() {
         setLoading(false);
       }
     };
-
-    const fetchGuide = async () => {
-      try {
-        const res = await fetch(`/api/settings?key=${encodeURIComponent(PRICING_GUIDE_KEY)}`);
-        const data = await res.json();
-        const text = data?.data?.value ?? PRICING_GUIDE_DEFAULT;
-        setGuideLines(parseGuide(text));
-      } catch {
-        setGuideLines(parseGuide(PRICING_GUIDE_DEFAULT));
-      }
-    };
-
     fetchMenu();
-    fetchGuide();
   }, []);
 
   return (
@@ -195,23 +180,23 @@ export default function PricingPage() {
           </div>
         )}
 
-        {/* 注意事項（管理画面から編集可能） */}
-        {guideLines.length > 0 && (
-          <div className="mt-8 rounded-xl p-6 border border-gray-200 bg-white shadow-sm">
-            <div className="flex items-center gap-3 mb-4">
-              <Info className="h-5 w-5 text-yellow-500" />
-              <h3 className="text-lg font-bold">ご案内</h3>
+        {/* 注意事項 */}
+        <div className="mt-8 rounded-xl p-6 border border-gray-200 bg-white shadow-sm">
+          <div className="flex items-center gap-3 mb-4">
+            <Info className="h-5 w-5 text-yellow-500" />
+            <h3 className="text-lg font-bold">ご案内</h3>
+          </div>
+          <div className="space-y-3 text-sm text-secondary">
+            <div className="flex gap-2">
+              <span className="text-yellow-500 font-semibold">•</span>
+              <span>価格は全て税込み表示です</span>
             </div>
-            <div className="space-y-3 text-sm text-secondary">
-              {guideLines.map((line, index) => (
-                <div key={index} className="flex gap-2">
-                  <span className="text-yellow-500 font-semibold">•</span>
-                  <span>{line}</span>
-                </div>
-              ))}
+            <div className="flex gap-2">
+              <span className="text-yellow-500 font-semibold">•</span>
+              <span>詳細はスタッフまでお気軽にお問い合わせください</span>
             </div>
           </div>
-        )}
+        </div>
       </main>
     </div>
   );
