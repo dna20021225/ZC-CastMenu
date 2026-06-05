@@ -6,7 +6,7 @@ import { signOut } from "next-auth/react";
 import { Save, Users, Wine, Banknote, Bell, LogOut, Tag } from "lucide-react";
 
 export default function AdminDashboard() {
-  const [stats, setStats] = useState({ casts: 0, drinks: 0, categories: 0, badges: 0 });
+  const [stats, setStats] = useState({ casts: 0, drinks: 0, categories: 0, badges: 0, menuItems: 0 });
   const [notice, setNotice] = useState("");
   const [noticeEnabled, setNoticeEnabled] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -19,10 +19,11 @@ export default function AdminDashboard() {
 
   const fetchStats = async () => {
     try {
-      const [castsRes, drinksRes, badgesRes] = await Promise.all([
+      const [castsRes, drinksRes, badgesRes, menuRes] = await Promise.all([
         fetch('/api/casts'),
         fetch('/api/drinks'),
         fetch('/api/badges'),
+        fetch('/api/menu'),
       ]);
 
       if (castsRes.ok) {
@@ -46,6 +47,13 @@ export default function AdminDashboard() {
         const data = await badgesRes.json();
         const list = Array.isArray(data.data) ? data.data : [];
         setStats(prev => ({ ...prev, badges: list.length }));
+      }
+
+      if (menuRes.ok) {
+        const data = await menuRes.json();
+        const categories = Array.isArray(data.data) ? data.data : [];
+        const totalItems = categories.reduce((sum: number, cat: { items?: unknown[] }) => sum + (cat.items?.length || 0), 0);
+        setStats(prev => ({ ...prev, menuItems: totalItems }));
       }
     } catch (error) {
       console.error("統計情報の取得エラー:", error);
@@ -146,20 +154,20 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* 料金表 */}
+        {/* 料金メニュー */}
         <div className="bg-surface border border-border rounded-lg overflow-hidden">
           <div className="p-5">
             <div className="flex items-center gap-4">
               <Banknote className="h-8 w-8 text-primary" />
               <div>
-                <dt className="text-sm font-medium text-secondary">料金表</dt>
-                <dd className="text-lg font-semibold text-secondary">未実装</dd>
+                <dt className="text-sm font-medium text-secondary">料金メニュー</dt>
+                <dd className="text-3xl font-semibold text-primary">{stats.menuItems}<span className="text-sm text-secondary ml-1">項</span></dd>
               </div>
             </div>
           </div>
           <div className="bg-surface-variant px-5 py-3 border-t border-border">
             <Link href="/admin/pricing" className="text-sm text-primary hover:text-primary/80 transition-colors">
-              料金表管理へ
+              料金メニュー管理へ
             </Link>
           </div>
         </div>
