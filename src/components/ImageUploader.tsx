@@ -104,10 +104,16 @@ export default function ImageUploader({
         </label>
       )}
 
+      {/*
+        Android Chrome では accept に複数 MIME を列挙すると
+        ファイルピッカーから Google ドライブ / Google フォト 等の
+        コンテンツプロバイダが消えるバグがある（先頭の MIME しか使われない場合あり）。
+        MultiImageUploader と同じく image/* で広く受け付ける。
+      */}
       <input
         ref={fileInputRef}
         type="file"
-        accept="image/jpeg,image/png,image/webp"
+        accept="image/*"
         onChange={handleFileChange}
         className="hidden"
         disabled={disabled || isUploading}
@@ -158,7 +164,7 @@ export default function ImageUploader({
                 クリックまたはドラッグ&ドロップで画像をアップロード
               </p>
               <p className="text-xs text-gray-500 mt-1">
-                JPEG、PNG、WebP（最大5MB）
+                画像ファイル（最大10MB）
               </p>
             </div>
           )}
