@@ -3,10 +3,10 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
-import { Save, Users, Wine, Banknote, Bell, LogOut } from "lucide-react";
+import { Save, Users, Wine, Banknote, Bell, LogOut, Tag } from "lucide-react";
 
 export default function AdminDashboard() {
-  const [stats, setStats] = useState({ casts: 0, drinks: 0, categories: 0 });
+  const [stats, setStats] = useState({ casts: 0, drinks: 0, categories: 0, badges: 0 });
   const [notice, setNotice] = useState("");
   const [noticeEnabled, setNoticeEnabled] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -19,9 +19,10 @@ export default function AdminDashboard() {
 
   const fetchStats = async () => {
     try {
-      const [castsRes, drinksRes] = await Promise.all([
+      const [castsRes, drinksRes, badgesRes] = await Promise.all([
         fetch('/api/casts'),
-        fetch('/api/drinks')
+        fetch('/api/drinks'),
+        fetch('/api/badges'),
       ]);
 
       if (castsRes.ok) {
@@ -39,6 +40,12 @@ export default function AdminDashboard() {
           drinks: totalDrinks,
           categories: categories.length
         }));
+      }
+
+      if (badgesRes.ok) {
+        const data = await badgesRes.json();
+        const list = Array.isArray(data.data) ? data.data : [];
+        setStats(prev => ({ ...prev, badges: list.length }));
       }
     } catch (error) {
       console.error("統計情報の取得エラー:", error);
@@ -102,7 +109,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* 統計カード */}
-      <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-3">
+      <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
         {/* キャスト数 */}
         <div className="bg-surface border border-border rounded-lg overflow-hidden">
           <div className="p-5">
@@ -153,6 +160,24 @@ export default function AdminDashboard() {
           <div className="bg-surface-variant px-5 py-3 border-t border-border">
             <Link href="/admin/pricing" className="text-sm text-primary hover:text-primary/80 transition-colors">
               料金表管理へ
+            </Link>
+          </div>
+        </div>
+
+        {/* バッジ */}
+        <div className="bg-surface border border-border rounded-lg overflow-hidden">
+          <div className="p-5">
+            <div className="flex items-center gap-4">
+              <Tag className="h-8 w-8 text-primary" />
+              <div>
+                <dt className="text-sm font-medium text-secondary">バッジ</dt>
+                <dd className="text-3xl font-semibold text-primary">{stats.badges}<span className="text-sm text-secondary ml-1">種</span></dd>
+              </div>
+            </div>
+          </div>
+          <div className="bg-surface-variant px-5 py-3 border-t border-border">
+            <Link href="/admin/badges" className="text-sm text-primary hover:text-primary/80 transition-colors">
+              バッジ管理へ
             </Link>
           </div>
         </div>
