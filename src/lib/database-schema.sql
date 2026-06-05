@@ -70,8 +70,60 @@ CREATE TABLE IF NOT EXISTS admins (
     updated_at TEXT DEFAULT (datetime('now'))
 );
 
+-- ドリンクカテゴリテーブル
+CREATE TABLE IF NOT EXISTS drink_categories (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    name_en TEXT,
+    icon TEXT DEFAULT 'Wine',
+    color TEXT DEFAULT '#6366f1',
+    display_order INTEGER DEFAULT 0,
+    created_at TEXT DEFAULT (datetime('now')),
+    updated_at TEXT DEFAULT (datetime('now'))
+);
+
+-- ドリンクテーブル
+CREATE TABLE IF NOT EXISTS drinks (
+    id TEXT PRIMARY KEY,
+    category_id TEXT NOT NULL,
+    name TEXT NOT NULL,
+    price INTEGER NOT NULL,
+    note TEXT,
+    display_order INTEGER DEFAULT 0,
+    is_active INTEGER DEFAULT 1,
+    created_at TEXT DEFAULT (datetime('now')),
+    updated_at TEXT DEFAULT (datetime('now'))
+);
+
+-- 料金メニューカテゴリテーブル
+CREATE TABLE IF NOT EXISTS menu_categories (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    name_en TEXT,
+    icon TEXT DEFAULT 'Tag',
+    color TEXT DEFAULT '#6366f1',
+    display_order INTEGER DEFAULT 0,
+    created_at TEXT DEFAULT (datetime('now')),
+    updated_at TEXT DEFAULT (datetime('now'))
+);
+
+-- 料金メニュー項目テーブル
+CREATE TABLE IF NOT EXISTS menu_items (
+    id TEXT PRIMARY KEY,
+    category_id TEXT NOT NULL,
+    name TEXT NOT NULL,
+    price INTEGER NOT NULL,
+    note TEXT,
+    display_order INTEGER DEFAULT 0,
+    is_active INTEGER DEFAULT 1,
+    created_at TEXT DEFAULT (datetime('now')),
+    updated_at TEXT DEFAULT (datetime('now'))
+);
+
 -- インデックス作成
 CREATE INDEX IF NOT EXISTS idx_casts_active ON casts(is_active);
+CREATE INDEX IF NOT EXISTS idx_drinks_category ON drinks(category_id);
+CREATE INDEX IF NOT EXISTS idx_menu_items_category ON menu_items(category_id);
 CREATE INDEX IF NOT EXISTS idx_casts_name ON casts(name);
 CREATE INDEX IF NOT EXISTS idx_cast_photos_cast_id ON cast_photos(cast_id);
 CREATE INDEX IF NOT EXISTS idx_cast_photos_main ON cast_photos(is_main);

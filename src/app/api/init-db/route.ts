@@ -49,6 +49,9 @@ export async function POST() {
       }
     }
 
+    // 料金メニュー：カテゴリと項目が空のときだけ初期データを投入
+    await seedMenuInitialData();
+
     return NextResponse.json({
       success: true,
       message: 'Database schema initialized successfully',
@@ -154,6 +157,72 @@ async function backfillMissingCastStats(): Promise<void> {
   if (ids.length > 0) {
     console.log(`Migration: backfilled cast_stats for ${ids.length} casts`);
   }
+}
+
+/**
+ * 料金メニュー（menu_categories / menu_items）に初期データが無い場合のみ投入する。
+ * クライアントから提供された内容:
+ *   セットプラン:
+ *     - 90分（鏡月・割りもの飲み放題） 1,000円
+ *     - 90分（缶もの飲み放題）         3,000円
+ *   オプション:
+ *     - フリータイム（場内指名1名分込み）+5,000円
+ *     - コール付きシャンパン            5,000円
+ *     - 場内指名（1名）                 1,000円
+ */
+async function seedMenuInitialData(): Promise<void> {
+  const catCount = await query('SELECT COUNT(*) as count FROM menu_categories') as unknown as { rows: { count: number }[] };
+  const itemCount = await query('SELECT COUNT(*) as count FROM menu_items') as unknown as { rows: { count: number }[] };
+
+  if ((catCount.rows[0]?.count ?? 0) > 0 || (itemCount.rows[0]?.count ?? 0) > 0) {
+    return;
+  }
+
+  console.log('Seeding menu initial data');
+
+  const setCategoryId = randomUUID();
+  const optionCategoryId = randomUUID();
+
+  await query(
+    `INSERT INTO menu_categories (id, name, name_en, icon, color, display_order) VALUES (?, ?, ?, ?, ?, ?)`,
+    [setCategoryId, 'セットプラン', 'SET', 'Clock', '#6366f1', 0]
+  );
+  await query(
+    `INSERT INTO menu_categories (id, name, name_en, icon, color, display_order) VALUES (?, ?, ?, ?, ?, ?)`,
+    [optionCategoryId, 'オプション', 'OPTION', 'PlusCircle', '#ec4899', 1]
+  );
+
+  const setItems: Array<[string, number, string | null]> = [
+    ['90分', 1000, '鏡月・割りもの飲み放題'],
+    ['90分', 3000, '缶もの飲み放題'],
+  ];
+  for (let i = 0; i < setItems.length; i++) {
+    const [name, price, note] = setItems[i];
+    await query(
+      `INSERT INTO menu_items (id, category_id, name, price, note, display_order) VALUES (?, ?, ?, ?, ?, ?)`,
+      [randomUUID(), setCategoryId, name, price, note, i]
+    );
+  }
+
+  const optionItems: Array<[string, number, string | null]> = [
+    ['フリータイム', 5000, '場内指名1名分込み（追加料金）'],
+    ['コール付きシャンパン', 5000, null],
+    ['場内指名（1名）', 1000, null],
+  ];
+  for (let i = 0; i < optionItems.length; i++) {
+    const [name, price, note] = optionItems[i];
+    await query(
+      `INSERT INTO menu_items (id, category_id, name, price, note, display_order) VALUES (?, ?, ?, ?, ?, ?)`,
+      [randomUUID(), optionCategoryId, name, price, note, i]
+    );
+  }
+
+  console.log('Menu seeding complete');
+}
+
+// uuidv4 のショートカット（モジュール先頭で import すると DCE 対象になり消える可能性があるため局所定義）
+function randomUUID(): string {
+  return uuidv4();
 }
 
 export async function GET() {
