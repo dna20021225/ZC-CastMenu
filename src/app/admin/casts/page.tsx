@@ -190,7 +190,8 @@ export default function AdminCastsPage() {
       </div>
 
       <div className="cast-card overflow-hidden">
-        <table className="min-w-full divide-y" style={{ borderColor: "var(--border)" }}>
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y" style={{ borderColor: "var(--border)" }}>
           <thead style={{ backgroundColor: "var(--surface-variant)" }}>
             <tr>
               <th className="px-2 py-3 w-10">
@@ -240,7 +241,8 @@ export default function AdminCastsPage() {
               </tbody>
             </SortableContext>
           </DndContext>
-        </table>
+          </table>
+        </div>
       </div>
     </div>
   );
