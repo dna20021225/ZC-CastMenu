@@ -105,7 +105,8 @@ export default function ShopPage() {
             店名・サブタイトル
           </h2>
           <p className="text-sm text-secondary mb-4">
-            ホーム画面のヘッダーとブラウザのタブ名に表示される文字を変更できます。
+            ホーム画面のヘッダー・ブラウザのタブ名・<b>PWAアプリ名（ホーム画面に追加したときのアプリ名）</b>に
+            表示される文字を変更できます。
           </p>
 
           <div className="space-y-4">
@@ -125,7 +126,7 @@ export default function ShopPage() {
                   color: 'var(--foreground)',
                 }}
               />
-              <p className="text-xs text-muted mt-1">ホーム上部とタブ名に表示されます（最大40文字）</p>
+              <p className="text-xs text-muted mt-1">ホーム上部・タブ名・PWAアプリ名に表示されます（最大40文字）</p>
             </div>
 
             <div>
