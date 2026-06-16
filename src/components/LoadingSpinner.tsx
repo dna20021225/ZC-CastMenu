@@ -27,16 +27,16 @@ export default function LoadingSpinner({
 
   const content = (
     <div className="flex flex-col items-center justify-center">
-      <Loader2 className={`${sizeClasses[size]} text-pink-600 animate-spin mb-2`} />
+      <Loader2 className={`${sizeClasses[size]} text-primary animate-spin mb-2`} />
       {text && (
-        <p className={`${textSizeClasses[size]} text-gray-600`}>{text}</p>
+        <p className={`${textSizeClasses[size]} text-secondary`}>{text}</p>
       )}
     </div>
   );
 
   if (fullScreen) {
     return (
-      <div className="fixed inset-0 bg-white bg-opacity-75 flex items-center justify-center z-50">
+      <div className="fixed inset-0 bg-background/75 flex items-center justify-center z-50">
         {content}
       </div>
     );

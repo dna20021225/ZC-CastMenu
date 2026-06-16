@@ -43,7 +43,7 @@ export function SplashScreen({ children, duration = 1500 }: SplashScreenProps) {
     <>
       {showSplash && (
         <div
-          className={`fixed inset-0 z-[9999] flex items-center justify-center bg-white transition-opacity duration-300 ${
+          className={`fixed inset-0 z-[9999] flex items-center justify-center bg-background transition-opacity duration-300 ${
             fadeOut ? 'opacity-0' : 'opacity-100'
           }`}
         >
