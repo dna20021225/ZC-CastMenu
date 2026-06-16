@@ -18,6 +18,7 @@ export async function initializeDatabase(): Promise<void> {
       avatar_url TEXT,
       display_order INTEGER DEFAULT 0,
       is_active INTEGER DEFAULT 1,
+      is_visible INTEGER DEFAULT 1,
       created_at TEXT DEFAULT (datetime('now')),
       updated_at TEXT DEFAULT (datetime('now'))
     )
@@ -30,6 +31,9 @@ export async function initializeDatabase(): Promise<void> {
   if (added) {
     await backfillDisplayOrder();
   }
+  // 非表示フラグ。is_active（削除）とは独立。
+  // 既存レコードは DEFAULT 1 でそのまま「表示中」扱いになる。
+  await ensureColumn('casts', 'is_visible', 'INTEGER DEFAULT 1');
 
   // Cast Photos テーブル
   await query(`
@@ -96,6 +100,7 @@ export async function initializeDatabase(): Promise<void> {
 
   // インデックス
   await query(`CREATE INDEX IF NOT EXISTS idx_casts_active ON casts(is_active)`);
+  await query(`CREATE INDEX IF NOT EXISTS idx_casts_visible ON casts(is_visible)`);
   await query(`CREATE INDEX IF NOT EXISTS idx_casts_name ON casts(name)`);
   await query(`CREATE INDEX IF NOT EXISTS idx_cast_photos_cast_id ON cast_photos(cast_id)`);
   await query(`CREATE INDEX IF NOT EXISTS idx_cast_photos_main ON cast_photos(is_main)`);
