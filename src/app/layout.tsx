@@ -43,6 +43,10 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
+// テーマ保存後すぐに反映させたいので、ルートレイアウトを動的レンダリングに固定する。
+// 静的レンダリングのままだと build 時の DEFAULT_THEME が焼き付き、Vercel 上で配色変更が反映されない。
+export const dynamic = 'force-dynamic';
+
 // SSR時にDBからテーマを読む。失敗時はデフォルトテーマで安全側に倒す。
 async function loadTheme() {
   try {

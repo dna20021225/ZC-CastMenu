@@ -94,10 +94,26 @@ export default function ThemePage() {
         body: JSON.stringify({ key: 'theme', value: JSON.stringify(theme) }),
       });
       if (!res.ok) throw new Error('保存失敗');
-      setMessage({ type: 'success', text: '保存しました。ページを再読み込みすると全画面に反映されます。' });
+      setMessage({ type: 'success', text: '保存しました。自動的に再読み込みします…' });
+      // PWAだとブラウザのリロードボタンが無いので、こちらから強制リロードする。
+      // 先にSWキャッシュを消してから、キャッシュバスター付きでフルロードし直す。
+      try {
+        if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+          navigator.serviceWorker.controller.postMessage({ type: 'CLEAR_CACHE' });
+        }
+        if ('caches' in window) {
+          const names = await caches.keys();
+          await Promise.all(names.map((n) => caches.delete(n)));
+        }
+      } catch {
+        // キャッシュクリアに失敗してもリロード自体は続行
+      }
+      // クエリを付けてSW/ブラウザキャッシュ両方を確実にバイパス
+      setTimeout(() => {
+        window.location.href = `/admin/theme?t=${Date.now()}`;
+      }, 600);
     } catch {
       setMessage({ type: 'error', text: '保存に失敗しました。' });
-    } finally {
       setSaving(false);
     }
   };
