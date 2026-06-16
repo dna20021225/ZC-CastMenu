@@ -123,7 +123,9 @@ CREATE TABLE IF NOT EXISTS menu_items (
 
 -- インデックス作成
 CREATE INDEX IF NOT EXISTS idx_casts_active ON casts(is_active);
-CREATE INDEX IF NOT EXISTS idx_casts_visible ON casts(is_visible);
+-- idx_casts_visible は migrateCastsTable() でカラム追加と一緒に作る
+-- （既存DBに対しては is_visible カラムが ALTER TABLE で後から追加されるため、
+--  このスキーマ行をここに置くと「カラムがないままインデックス作成」で落ちる）
 CREATE INDEX IF NOT EXISTS idx_drinks_category ON drinks(category_id);
 CREATE INDEX IF NOT EXISTS idx_menu_items_category ON menu_items(category_id);
 CREATE INDEX IF NOT EXISTS idx_casts_name ON casts(name);
