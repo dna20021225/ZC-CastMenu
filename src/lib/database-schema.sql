@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS casts (
     avatar_url TEXT,
     display_order INTEGER DEFAULT 0,
     is_active INTEGER DEFAULT 1,
+    is_visible INTEGER DEFAULT 1,
     created_at TEXT DEFAULT (datetime('now')),
     updated_at TEXT DEFAULT (datetime('now'))
 );
@@ -122,6 +123,7 @@ CREATE TABLE IF NOT EXISTS menu_items (
 
 -- インデックス作成
 CREATE INDEX IF NOT EXISTS idx_casts_active ON casts(is_active);
+CREATE INDEX IF NOT EXISTS idx_casts_visible ON casts(is_visible);
 CREATE INDEX IF NOT EXISTS idx_drinks_category ON drinks(category_id);
 CREATE INDEX IF NOT EXISTS idx_menu_items_category ON menu_items(category_id);
 CREATE INDEX IF NOT EXISTS idx_casts_name ON casts(name);
