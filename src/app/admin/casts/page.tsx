@@ -189,7 +189,7 @@ export default function AdminCastsPage() {
         </Link>
       </div>
 
-      <div className="cast-card overflow-hidden">
+      <div className="cast-card overflow-x-auto">
         <table className="min-w-full divide-y" style={{ borderColor: "var(--border)" }}>
           <thead style={{ backgroundColor: "var(--surface-variant)" }}>
             <tr>
