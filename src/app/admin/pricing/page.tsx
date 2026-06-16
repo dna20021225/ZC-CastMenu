@@ -312,7 +312,7 @@ export default function DrinkMenuEditor() {
                       <button onClick={updateCategory} className="p-2 rounded-full bg-green-600 text-white">
                         <Check className="w-5 h-5" />
                       </button>
-                      <button onClick={() => setEditingCategory(null)} className="p-2 rounded-full bg-gray-600 text-white">
+                      <button onClick={() => setEditingCategory(null)} className="p-2 rounded-full bg-secondary text-background">
                         <X className="w-5 h-5" />
                       </button>
                     </div>
@@ -419,7 +419,7 @@ export default function DrinkMenuEditor() {
                             <button onClick={updateDrink} className="flex-1 py-2 rounded bg-green-600 text-white font-bold">
                               保存
                             </button>
-                            <button onClick={() => setEditingDrink(null)} className="flex-1 py-2 rounded bg-gray-600 text-white font-bold">
+                            <button onClick={() => setEditingDrink(null)} className="flex-1 py-2 rounded bg-secondary text-background font-bold">
                               取消
                             </button>
                           </div>
@@ -499,7 +499,7 @@ export default function DrinkMenuEditor() {
                               setNewDrinkCategory(null);
                               setNewDrink({ name: '', price: '', note: '' });
                             }}
-                            className="flex-1 py-2 rounded bg-gray-600 text-white font-bold"
+                            className="flex-1 py-2 rounded bg-secondary text-background font-bold"
                           >
                             取消
                           </button>

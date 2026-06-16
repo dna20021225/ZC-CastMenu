@@ -3,6 +3,8 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Navigation } from '@/components/layout/Navigation';
 import { SplashScreen } from '@/components/SplashScreen';
+import { query } from '@/lib/db';
+import { DEFAULT_THEME, sanitizeTheme, themeToCssVars } from '@/lib/theme';
 
 const inter = Inter({
   subsets: ["latin"],
@@ -41,14 +43,31 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-export default function RootLayout({
+// SSR時にDBからテーマを読む。失敗時はデフォルトテーマで安全側に倒す。
+async function loadTheme() {
+  try {
+    const result = await query("SELECT value FROM settings WHERE key = ?", ['theme']);
+    const row = result.rows[0];
+    if (!row?.value) return DEFAULT_THEME;
+    const parsed = JSON.parse(String(row.value));
+    return sanitizeTheme(parsed);
+  } catch {
+    // settings テーブルが未作成の場合などはデフォルト
+    return DEFAULT_THEME;
+  }
+}
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const theme = await loadTheme();
+  const themeCss = themeToCssVars(theme);
   return (
     <html lang="ja">
       <head>
+        <style dangerouslySetInnerHTML={{ __html: themeCss }} />
         {/* iOS Splash Screens */}
         <link rel="apple-touch-startup-image" href="/splash/apple-splash-2048-2732.png" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2)" />
         <link rel="apple-touch-startup-image" href="/splash/apple-splash-1668-2388.png" media="(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2)" />

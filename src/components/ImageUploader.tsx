@@ -99,7 +99,7 @@ export default function ImageUploader({
   return (
     <div>
       {label && (
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-foreground mb-2">
           {label} {required && <span className="text-red-500">*</span>}
         </label>
       )}
@@ -121,7 +121,7 @@ export default function ImageUploader({
 
       {value ? (
         <div className="relative inline-block">
-          <div className="relative w-32 h-32 rounded-lg overflow-hidden border border-gray-300">
+          <div className="relative w-32 h-32 rounded-lg overflow-hidden border border-border">
             <Image
               src={value}
               alt="アップロード画像"
@@ -148,22 +148,22 @@ export default function ImageUploader({
           onDrop={handleDrop}
           className={`
             relative border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors
-            ${isDragging ? "border-pink-500 bg-pink-50" : "border-gray-300 hover:border-gray-400"}
+            ${isDragging ? "border-primary bg-primary/10" : "border-border hover:border-secondary"}
             ${disabled || isUploading ? "opacity-50 cursor-not-allowed" : ""}
           `}
         >
           {isUploading ? (
             <div className="flex flex-col items-center">
-              <Loader2 className="w-8 h-8 text-gray-400 animate-spin mb-2" />
-              <p className="text-sm text-gray-600">アップロード中...</p>
+              <Loader2 className="w-8 h-8 text-muted animate-spin mb-2" />
+              <p className="text-sm text-secondary">アップロード中...</p>
             </div>
           ) : (
             <div className="flex flex-col items-center">
-              <Upload className="w-8 h-8 text-gray-400 mb-2" />
-              <p className="text-sm text-gray-600">
+              <Upload className="w-8 h-8 text-muted mb-2" />
+              <p className="text-sm text-secondary">
                 クリックまたはドラッグ&ドロップで画像をアップロード
               </p>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-muted mt-1">
                 画像ファイル（最大10MB）
               </p>
             </div>
