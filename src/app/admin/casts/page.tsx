@@ -189,7 +189,14 @@ export default function AdminCastsPage() {
         </Link>
       </div>
 
-      <div className="cast-card overflow-x-auto">
+      <div
+        className="overflow-x-auto rounded-[var(--border-radius)] border"
+        style={{
+          backgroundColor: "var(--surface)",
+          borderColor: "var(--border)",
+          boxShadow: "var(--shadow-soft)",
+        }}
+      >
         <table className="min-w-[680px] w-full divide-y" style={{ borderColor: "var(--border)" }}>
           <thead style={{ backgroundColor: "var(--surface-variant)" }}>
             <tr>
