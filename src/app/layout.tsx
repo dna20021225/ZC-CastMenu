@@ -5,34 +5,40 @@ import { Navigation } from '@/components/layout/Navigation';
 import { SplashScreen } from '@/components/SplashScreen';
 import { query } from '@/lib/db';
 import { DEFAULT_THEME, sanitizeTheme, themeToCssVars } from '@/lib/theme';
+import { loadShop } from '@/lib/shop.server';
 
 const inter = Inter({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "ZEROCLOUD NAGOYA",
-  description: "ZEROCLOUD NAGOYA キャストメニュー",
-  manifest: "/manifest.json",
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "default",
-    title: "ZEROCLOUD",
-  },
-  openGraph: {
-    title: "ZEROCLOUD NAGOYA",
-    description: "ZEROCLOUD NAGOYA キャストメニュー",
-    type: "website",
-    locale: "ja_JP",
-  },
-  icons: {
-    icon: "/favicon.png",
-    apple: "/apple-touch-icon.png",
-  },
-  formatDetection: {
-    telephone: false,
-  },
-};
+// 店名は管理画面から変更されるため、毎リクエストでDBから読んでメタデータに反映する。
+export async function generateMetadata(): Promise<Metadata> {
+  const shop = await loadShop();
+  const desc = `${shop.name} ${shop.subtitle}`;
+  return {
+    title: shop.name,
+    description: desc,
+    manifest: "/manifest.json",
+    appleWebApp: {
+      capable: true,
+      statusBarStyle: "default",
+      title: shop.name,
+    },
+    openGraph: {
+      title: shop.name,
+      description: desc,
+      type: "website",
+      locale: "ja_JP",
+    },
+    icons: {
+      icon: "/favicon.png",
+      apple: "/apple-touch-icon.png",
+    },
+    formatDetection: {
+      telephone: false,
+    },
+  };
+}
 
 export const viewport: Viewport = {
   width: "device-width",
