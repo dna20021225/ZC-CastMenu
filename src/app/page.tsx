@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { User, Smartphone, X, Info } from 'lucide-react';
+import { DEFAULT_SHOP, sanitizeShop, type ShopConfig } from '@/lib/shop';
 
 interface Cast {
   id: string;
@@ -26,11 +27,28 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<{ text: string; enabled: boolean } | null>(null);
   const [showNotice, setShowNotice] = useState(true);
+  // 初期値はデフォルト。fetch完了後にDB値で上書きする。
+  const [shop, setShop] = useState<ShopConfig>(DEFAULT_SHOP);
 
   useEffect(() => {
     fetchCasts();
     fetchNotice();
+    fetchShop();
   }, []);
+
+  const fetchShop = async () => {
+    try {
+      const res = await fetch('/api/settings?key=shopName');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.data?.value) {
+          setShop(sanitizeShop(JSON.parse(data.data.value)));
+        }
+      }
+    } catch (error) {
+      console.error("店舗情報取得エラー:", error);
+    }
+  };
 
   const fetchNotice = async () => {
     try {
@@ -79,7 +97,7 @@ export default function Home() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center space-y-6 tablet-layout">
           <div className="space-y-4">
-            <h1 className="text-4xl font-bold text-primary">ZC-CastMenu</h1>
+            <h1 className="text-4xl font-bold text-primary">{shop.name}</h1>
             <div className="error-message">
               <p>{error}</p>
             </div>
@@ -98,12 +116,31 @@ export default function Home() {
 
   return (
     <div className="min-h-screen pb-20">
-      {/* ヘッダー */}
+      {/* ヘッダー: ロゴ画像が設定されていれば優先表示。未設定なら従来通り文字のみ */}
       <header className="sticky top-0 z-40 border-b border-border backdrop-blur-md bg-surface/80">
         <div className="tablet-layout py-4">
-          <div className="text-center space-y-2">
-            <h1 className="text-3xl font-bold text-primary">ZC-CastMenu</h1>
-            <p className="text-secondary text-sm">タブレット専用男メニュー</p>
+          <div className="flex flex-col items-center space-y-2">
+            {shop.logoUrl ? (
+              <>
+                <div className="relative h-16 w-auto max-w-[260px]">
+                  <Image
+                    src={shop.logoUrl}
+                    alt={shop.name}
+                    width={520}
+                    height={128}
+                    className="h-16 w-auto object-contain"
+                    priority
+                    unoptimized
+                  />
+                </div>
+                <p className="text-secondary text-sm">{shop.subtitle}</p>
+              </>
+            ) : (
+              <>
+                <h1 className="text-3xl font-bold text-primary">{shop.name}</h1>
+                <p className="text-secondary text-sm">{shop.subtitle}</p>
+              </>
+            )}
           </div>
         </div>
       </header>
@@ -175,7 +212,14 @@ export default function Home() {
                           </span>
                         ))}
                       {cast.badges.length > 2 && (
-                        <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-bold text-white shadow-md bg-gray-700/80 backdrop-blur-sm">
+                        <span
+                          className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-bold shadow-md backdrop-blur-sm"
+                          style={{
+                            backgroundColor: 'var(--foreground)',
+                            color: 'var(--background)',
+                            opacity: 0.8,
+                          }}
+                        >
                           +{cast.badges.length - 2}
                         </span>
                       )}

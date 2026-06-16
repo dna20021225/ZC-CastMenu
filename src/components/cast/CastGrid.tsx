@@ -46,7 +46,7 @@ export const CastGrid = forwardRef<HTMLDivElement, CastGridProps>(
           {Array.from({ length: gridConfig.columns * 3 }).map((_, index) => (
             <div 
               key={index}
-              className="aspect-[3/4] bg-gray-200 rounded-lg animate-pulse"
+              className="aspect-[3/4] bg-surface-variant rounded-lg animate-pulse"
             />
           ))}
         </div>
@@ -56,7 +56,7 @@ export const CastGrid = forwardRef<HTMLDivElement, CastGridProps>(
     if (casts.length === 0) {
       return (
         <div className="flex items-center justify-center h-64" ref={ref} {...props}>
-          <p className="text-gray-500 text-lg">{emptyMessage}</p>
+          <p className="text-secondary text-lg">{emptyMessage}</p>
         </div>
       );
     }

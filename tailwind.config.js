@@ -15,6 +15,9 @@ module.exports = {
           variant: 'var(--surface-variant)',
         },
         border: 'var(--border)',
+        secondary: 'var(--secondary)',
+        muted: 'var(--muted)',
+        'on-primary': 'var(--foreground-on-primary)',
         primary: {
           DEFAULT: 'var(--primary-500)',
           50: 'var(--primary-50)',

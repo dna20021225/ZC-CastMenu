@@ -3,34 +3,43 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Navigation } from '@/components/layout/Navigation';
 import { SplashScreen } from '@/components/SplashScreen';
+import { query } from '@/lib/db';
+import { DEFAULT_THEME, sanitizeTheme, themeToCssVars } from '@/lib/theme';
+import { loadShop } from '@/lib/shop.server';
 
 const inter = Inter({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "ZEROCLOUD NAGOYA",
-  description: "ZEROCLOUD NAGOYA キャストメニュー",
-  manifest: "/manifest.json",
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "default",
-    title: "ZEROCLOUD",
-  },
-  openGraph: {
-    title: "ZEROCLOUD NAGOYA",
-    description: "ZEROCLOUD NAGOYA キャストメニュー",
-    type: "website",
-    locale: "ja_JP",
-  },
-  icons: {
-    icon: "/favicon.png",
-    apple: "/apple-touch-icon.png",
-  },
-  formatDetection: {
-    telephone: false,
-  },
-};
+// 店名は管理画面から変更されるため、毎リクエストでDBから読んでメタデータに反映する。
+export async function generateMetadata(): Promise<Metadata> {
+  const shop = await loadShop();
+  const desc = `${shop.name} ${shop.subtitle}`;
+  return {
+    title: shop.name,
+    description: desc,
+    // app/manifest.ts により /manifest.webmanifest として動的生成される
+    manifest: "/manifest.webmanifest",
+    appleWebApp: {
+      capable: true,
+      statusBarStyle: "default",
+      title: shop.name,
+    },
+    openGraph: {
+      title: shop.name,
+      description: desc,
+      type: "website",
+      locale: "ja_JP",
+    },
+    icons: {
+      icon: "/favicon.png",
+      apple: "/apple-touch-icon.png",
+    },
+    formatDetection: {
+      telephone: false,
+    },
+  };
+}
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -41,14 +50,35 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-export default function RootLayout({
+// テーマ保存後すぐに反映させたいので、ルートレイアウトを動的レンダリングに固定する。
+// 静的レンダリングのままだと build 時の DEFAULT_THEME が焼き付き、Vercel 上で配色変更が反映されない。
+export const dynamic = 'force-dynamic';
+
+// SSR時にDBからテーマを読む。失敗時はデフォルトテーマで安全側に倒す。
+async function loadTheme() {
+  try {
+    const result = await query("SELECT value FROM settings WHERE key = ?", ['theme']);
+    const row = result.rows[0];
+    if (!row?.value) return DEFAULT_THEME;
+    const parsed = JSON.parse(String(row.value));
+    return sanitizeTheme(parsed);
+  } catch {
+    // settings テーブルが未作成の場合などはデフォルト
+    return DEFAULT_THEME;
+  }
+}
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const theme = await loadTheme();
+  const themeCss = themeToCssVars(theme);
   return (
     <html lang="ja">
       <head>
+        <style dangerouslySetInnerHTML={{ __html: themeCss }} />
         {/* iOS Splash Screens */}
         <link rel="apple-touch-startup-image" href="/splash/apple-splash-2048-2732.png" media="(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2)" />
         <link rel="apple-touch-startup-image" href="/splash/apple-splash-1668-2388.png" media="(device-width: 834px) and (device-height: 1194px) and (-webkit-device-pixel-ratio: 2)" />

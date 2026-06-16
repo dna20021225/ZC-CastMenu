@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
-import { Save, Users, Wine, Banknote, Bell, LogOut, Tag } from "lucide-react";
+import { Save, Users, Wine, Banknote, Bell, LogOut, Tag, Palette, Store } from "lucide-react";
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({ casts: 0, drinks: 0, categories: 0, badges: 0 });
@@ -109,7 +109,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* 統計カード */}
-      <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {/* キャスト数 */}
         <div className="bg-surface border border-border rounded-lg overflow-hidden">
           <div className="p-5">
@@ -178,6 +178,47 @@ export default function AdminDashboard() {
           <div className="bg-surface-variant px-5 py-3 border-t border-border">
             <Link href="/admin/badges" className="text-sm text-primary hover:text-primary/80 transition-colors">
               バッジ管理へ
+            </Link>
+          </div>
+        </div>
+
+        {/* デザイン調整 */}
+        <div className="bg-surface border border-border rounded-lg overflow-hidden">
+          <div className="p-5">
+            <div className="flex items-center gap-4">
+              <Palette className="h-8 w-8 text-primary" />
+              <div>
+                <dt className="text-sm font-medium text-secondary">デザイン</dt>
+                <dd className="text-lg font-semibold text-foreground">配色変更</dd>
+              </div>
+            </div>
+          </div>
+          <div className="bg-surface-variant px-5 py-3 border-t border-border">
+            <Link href="/admin/theme" className="text-sm text-primary hover:text-primary/80 transition-colors">
+              デザイン調整へ
+            </Link>
+          </div>
+        </div>
+
+        {/* システム管理（β版）: 店名・ロゴ・PWAアイコン */}
+        <div className="bg-surface border border-border rounded-lg overflow-hidden">
+          <div className="p-5">
+            <div className="flex items-center gap-4">
+              <Store className="h-8 w-8 text-primary" />
+              <div>
+                <dt className="text-sm font-medium text-secondary flex items-center gap-2">
+                  システム管理
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-600 border border-amber-500/30 font-bold">
+                    β
+                  </span>
+                </dt>
+                <dd className="text-lg font-semibold text-foreground">店名・ロゴ</dd>
+              </div>
+            </div>
+          </div>
+          <div className="bg-surface-variant px-5 py-3 border-t border-border">
+            <Link href="/admin/shop" className="text-sm text-primary hover:text-primary/80 transition-colors">
+              システム管理へ
             </Link>
           </div>
         </div>

@@ -45,8 +45,8 @@ export const CastCard = forwardRef<HTMLDivElement, CastCardProps>(
         className={clsx(
           baseClasses,
           sizes[size],
-          'bg-white border border-gray-200 shadow-sm',
-          'hover:border-blue-400/50 hover:shadow-xl hover:shadow-blue-500/10',
+          'bg-surface border border-border shadow-sm',
+          'hover:border-primary/50 hover:shadow-xl',
           'hover:scale-[1.02]',
           className
         )}
@@ -78,7 +78,14 @@ export const CastCard = forwardRef<HTMLDivElement, CastCardProps>(
               </span>
             ))}
             {cast.badges.length > 2 && (
-              <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-bold text-white shadow-md bg-gray-700/80 backdrop-blur-sm">+{cast.badges.length - 2}</span>
+              <span
+                className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-bold shadow-md backdrop-blur-sm"
+                style={{
+                  backgroundColor: 'var(--foreground)',
+                  color: 'var(--background)',
+                  opacity: 0.8,
+                }}
+              >+{cast.badges.length - 2}</span>
             )}
           </div>
         )}
@@ -145,7 +152,7 @@ export const CastCard = forwardRef<HTMLDivElement, CastCardProps>(
         </div>
 
         {/* ホバー時のハイライト効果 */}
-        <div className="absolute inset-0 border-2 border-transparent group-hover:border-blue-400/30 rounded-xl transition-colors pointer-events-none" />
+        <div className="absolute inset-0 border-2 border-transparent group-hover:border-primary/30 rounded-xl transition-colors pointer-events-none" />
       </div>
     );
   }

@@ -124,11 +124,11 @@ export default function PricingPage() {
               return (
                 <div
                   key={category.id}
-                  className="rounded-xl overflow-hidden border border-gray-200 bg-white shadow-sm"
+                  className="rounded-xl overflow-hidden border border-border bg-surface shadow-sm"
                 >
                   {/* カテゴリヘッダー */}
                   <div
-                    className="px-6 py-4 border-b border-gray-200"
+                    className="px-6 py-4 border-b border-border"
                     style={{
                       background: `linear-gradient(135deg, ${category.color}20 0%, transparent 100%)`
                     }}
@@ -156,7 +156,7 @@ export default function PricingPage() {
                         {category.items.map((item) => (
                           <div
                             key={item.id}
-                            className="flex justify-between items-center py-3 px-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
+                            className="flex justify-between items-center py-3 px-4 rounded-lg bg-surface-variant hover:opacity-80 transition-opacity"
                           >
                             <div className="flex-1">
                               <span className="font-medium">{item.name}</span>
@@ -181,7 +181,7 @@ export default function PricingPage() {
         )}
 
         {/* 注意事項 */}
-        <div className="mt-8 rounded-xl p-6 border border-gray-200 bg-white shadow-sm">
+        <div className="mt-8 rounded-xl p-6 border border-border bg-surface shadow-sm">
           <div className="flex items-center gap-3 mb-4">
             <Info className="h-5 w-5 text-yellow-500" />
             <h3 className="text-lg font-bold">ご案内</h3>

@@ -68,7 +68,7 @@ export default function DrinksPage() {
   }, []);
 
   return (
-    <div className="min-h-screen pb-20 bg-gradient-to-b from-gray-50 to-white">
+    <div className="min-h-screen pb-20 bg-background text-foreground">
       {/* ヘッダー */}
       <header className="sticky top-0 z-40 border-b-2 border-border backdrop-blur-md bg-surface/80 py-5">
         <div className="tablet-layout">
@@ -126,11 +126,11 @@ export default function DrinksPage() {
               return (
                 <div
                   key={category.id}
-                  className="rounded-xl overflow-hidden border border-gray-200 bg-white shadow-sm"
+                  className="rounded-xl overflow-hidden border border-border bg-surface shadow-sm"
                 >
                   {/* カテゴリヘッダー */}
                   <div
-                    className="px-6 py-4 border-b border-gray-200"
+                    className="px-6 py-4 border-b border-border"
                     style={{
                       background: `linear-gradient(135deg, ${category.color}20 0%, transparent 100%)`
                     }}
@@ -155,7 +155,7 @@ export default function DrinksPage() {
                       {category.items.map((drink) => (
                         <div
                           key={drink.id}
-                          className="flex justify-between items-center py-3 px-4 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
+                          className="flex justify-between items-center py-3 px-4 rounded-lg bg-surface-variant hover:opacity-80 transition-opacity"
                         >
                           <div className="flex-1">
                             <span className="font-medium">{drink.name}</span>
@@ -179,7 +179,7 @@ export default function DrinksPage() {
         )}
 
         {/* 注意事項 */}
-        <div className="mt-8 rounded-xl p-6 border border-gray-200 bg-white shadow-sm">
+        <div className="mt-8 rounded-xl p-6 border border-border bg-surface shadow-sm">
           <div className="flex items-center gap-3 mb-4">
             <Info className="h-5 w-5 text-yellow-500" />
             <h3 className="text-lg font-bold">ご案内</h3>
