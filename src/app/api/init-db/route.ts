@@ -71,6 +71,7 @@ export async function POST() {
  * casts テーブルのマイグレーション
  * - blood_type カラム追加
  * - display_order カラム追加と作成日順での初期値設定
+ * - is_visible カラム追加（非表示フラグ。既存レコードは DEFAULT 1 で表示扱い）
  * - age/height の NOT NULL 制約撤去（テーブル再構築）
  */
 async function migrateCastsTable(): Promise<void> {
@@ -80,6 +81,7 @@ async function migrateCastsTable(): Promise<void> {
 
   const hasBloodType = columns.some(col => col.name === 'blood_type');
   const hasDisplayOrder = columns.some(col => col.name === 'display_order');
+  const hasIsVisible = columns.some(col => col.name === 'is_visible');
   const ageCol = columns.find(col => col.name === 'age');
   const heightCol = columns.find(col => col.name === 'height');
   const ageIsNotNull = ageCol?.notnull === 1;
@@ -104,6 +106,13 @@ async function migrateCastsTable(): Promise<void> {
     console.log(`Migration: backfilled display_order for ${ids.length} casts`);
   }
 
+  // is_visible カラム追加（DEFAULT 1 で既存キャストは全員「表示中」になる）
+  if (!hasIsVisible) {
+    await query(`ALTER TABLE casts ADD COLUMN is_visible INTEGER DEFAULT 1`);
+    await query(`CREATE INDEX IF NOT EXISTS idx_casts_visible ON casts(is_visible)`);
+    console.log('Migration: added casts.is_visible');
+  }
+
   // age/height のNOT NULL制約を撤去するためテーブル再構築
   if (ageIsNotNull || heightIsNotNull) {
     console.log('Migration: rebuilding casts table to drop NOT NULL on age/height');
@@ -119,18 +128,20 @@ async function migrateCastsTable(): Promise<void> {
         avatar_url TEXT,
         display_order INTEGER DEFAULT 0,
         is_active INTEGER DEFAULT 1,
+        is_visible INTEGER DEFAULT 1,
         created_at TEXT DEFAULT (datetime('now')),
         updated_at TEXT DEFAULT (datetime('now'))
       )
     `);
     await query(`
-      INSERT INTO casts_new (id, name, age, height, blood_type, hobby, description, avatar_url, display_order, is_active, created_at, updated_at)
-      SELECT id, name, age, height, blood_type, hobby, description, avatar_url, display_order, is_active, created_at, updated_at FROM casts
+      INSERT INTO casts_new (id, name, age, height, blood_type, hobby, description, avatar_url, display_order, is_active, is_visible, created_at, updated_at)
+      SELECT id, name, age, height, blood_type, hobby, description, avatar_url, display_order, is_active, is_visible, created_at, updated_at FROM casts
     `);
     await query(`DROP TABLE casts`);
     await query(`ALTER TABLE casts_new RENAME TO casts`);
     // インデックス再作成
     await query(`CREATE INDEX IF NOT EXISTS idx_casts_active ON casts(is_active)`);
+    await query(`CREATE INDEX IF NOT EXISTS idx_casts_visible ON casts(is_visible)`);
     await query(`CREATE INDEX IF NOT EXISTS idx_casts_name ON casts(name)`);
     console.log('Migration: casts table rebuilt');
   }
