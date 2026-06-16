@@ -18,7 +18,8 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: shop.name,
     description: desc,
-    manifest: "/manifest.json",
+    // app/manifest.ts により /manifest.webmanifest として動的生成される
+    manifest: "/manifest.webmanifest",
     appleWebApp: {
       capable: true,
       statusBarStyle: "default",

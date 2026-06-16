@@ -200,20 +200,25 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* 店舗情報 */}
+        {/* システム管理（β版）: 店名・ロゴ・PWAアイコン */}
         <div className="bg-surface border border-border rounded-lg overflow-hidden">
           <div className="p-5">
             <div className="flex items-center gap-4">
               <Store className="h-8 w-8 text-primary" />
               <div>
-                <dt className="text-sm font-medium text-secondary">店舗情報</dt>
-                <dd className="text-lg font-semibold text-foreground">店名変更</dd>
+                <dt className="text-sm font-medium text-secondary flex items-center gap-2">
+                  システム管理
+                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-600 border border-amber-500/30 font-bold">
+                    β
+                  </span>
+                </dt>
+                <dd className="text-lg font-semibold text-foreground">店名・ロゴ</dd>
               </div>
             </div>
           </div>
           <div className="bg-surface-variant px-5 py-3 border-t border-border">
             <Link href="/admin/shop" className="text-sm text-primary hover:text-primary/80 transition-colors">
-              店舗情報管理へ
+              システム管理へ
             </Link>
           </div>
         </div>

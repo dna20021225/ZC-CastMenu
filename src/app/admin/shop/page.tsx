@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Save, Store } from 'lucide-react';
+import Image from 'next/image';
+import { Save, Store, AlertTriangle, Smartphone, RotateCcw } from 'lucide-react';
 import { AdminHeader } from '@/components/AdminHeader';
+import ImageUploader from '@/components/ImageUploader';
 import { DEFAULT_SHOP, sanitizeShop, type ShopConfig } from '@/lib/shop';
 
 export default function ShopPage() {
@@ -74,9 +76,29 @@ export default function ShopPage() {
 
   return (
     <div>
-      <AdminHeader title="店舗情報" backHref="/admin" />
+      <AdminHeader title="システム管理" backHref="/admin" />
+
+      {/* β版ラベル＆注意書き */}
+      <div className="mb-6 max-w-2xl">
+        <div className="flex items-start gap-3 p-4 rounded-lg border border-amber-500/30 bg-amber-500/10">
+          <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+          <div className="text-sm space-y-1">
+            <div className="font-bold text-amber-700 dark:text-amber-400">
+              β版機能
+            </div>
+            <p className="text-secondary leading-relaxed">
+              店名・ロゴ・PWAアイコンの変更機能はβ版です。合同店舗の切替などを想定した試験提供のため、
+              想定外の表示崩れが起こる可能性があります。
+              <br />
+              特に <b>PWA（ホーム画面に追加したアプリ）のアイコン名・画像は OS 側でキャッシュされる</b>ため、
+              変更後は <b>一度アプリを削除して再インストール</b>する必要があります。
+            </p>
+          </div>
+        </div>
+      </div>
 
       <div className="max-w-2xl space-y-6">
+        {/* 店名・サブタイトル */}
         <section className="cast-card p-5">
           <h2 className="text-lg font-bold mb-3 flex items-center gap-2">
             <Store className="w-5 h-5" />
@@ -84,7 +106,6 @@ export default function ShopPage() {
           </h2>
           <p className="text-sm text-secondary mb-4">
             ホーム画面のヘッダーとブラウザのタブ名に表示される文字を変更できます。
-            合同店舗での運用変更などに利用してください。
           </p>
 
           <div className="space-y-4">
@@ -128,21 +149,116 @@ export default function ShopPage() {
           </div>
         </section>
 
+        {/* ヘッダーロゴ */}
+        <section className="cast-card p-5">
+          <h2 className="text-lg font-bold mb-3">ヘッダーロゴ画像</h2>
+          <p className="text-sm text-secondary mb-4">
+            ホーム画面ヘッダーの店名の代わりに表示される画像です。設定すると店名テキストの代わりに画像が出ます。
+            横長の透過 PNG（推奨: 約 520×128px）を想定しています。
+          </p>
+          <ImageUploader
+            value={shop.logoUrl || undefined}
+            onChange={(url) => setShop((s) => ({ ...s, logoUrl: url }))}
+            onRemove={() => setShop((s) => ({ ...s, logoUrl: '' }))}
+            disabled={!loaded}
+            label=""
+          />
+          {shop.logoUrl && (
+            <button
+              type="button"
+              onClick={() => setShop((s) => ({ ...s, logoUrl: '' }))}
+              className="mt-2 text-xs text-muted hover:text-foreground inline-flex items-center gap-1"
+            >
+              <RotateCcw className="w-3 h-3" />
+              ロゴを使わず店名テキストに戻す
+            </button>
+          )}
+        </section>
+
+        {/* PWAアイコン */}
+        <section className="cast-card p-5">
+          <h2 className="text-lg font-bold mb-3 flex items-center gap-2">
+            <Smartphone className="w-5 h-5" />
+            PWAアプリアイコン
+          </h2>
+          <p className="text-sm text-secondary mb-4">
+            ホーム画面に追加したときに表示されるアプリアイコンです。<b>正方形の PNG（推奨: 512×512px 以上）</b>を
+            アップロードしてください。未設定の場合は ZEROCLOUD ロゴが使われます。
+          </p>
+          <ImageUploader
+            value={shop.iconUrl || undefined}
+            onChange={(url) => setShop((s) => ({ ...s, iconUrl: url }))}
+            onRemove={() => setShop((s) => ({ ...s, iconUrl: '' }))}
+            disabled={!loaded}
+            label=""
+          />
+          {shop.iconUrl && (
+            <button
+              type="button"
+              onClick={() => setShop((s) => ({ ...s, iconUrl: '' }))}
+              className="mt-2 text-xs text-muted hover:text-foreground inline-flex items-center gap-1"
+            >
+              <RotateCcw className="w-3 h-3" />
+              アイコンをデフォルトに戻す
+            </button>
+          )}
+        </section>
+
         {/* プレビュー */}
         <section className="cast-card p-5">
-          <h2 className="text-sm font-bold mb-3 text-secondary">プレビュー</h2>
+          <h2 className="text-sm font-bold mb-3 text-secondary">プレビュー（ホーム画面ヘッダー）</h2>
           <div
-            className="rounded-lg border p-6 text-center space-y-1"
+            className="rounded-lg border p-6 text-center space-y-2"
             style={{
               background: 'var(--surface)',
               borderColor: 'var(--border)',
             }}
           >
-            <div className="text-3xl font-bold" style={{ color: 'var(--primary-500)' }}>
-              {shop.name || DEFAULT_SHOP.name}
-            </div>
+            {shop.logoUrl ? (
+              <div className="flex justify-center">
+                <Image
+                  src={shop.logoUrl}
+                  alt={shop.name || DEFAULT_SHOP.name}
+                  width={520}
+                  height={128}
+                  className="h-16 w-auto object-contain"
+                  unoptimized
+                />
+              </div>
+            ) : (
+              <div className="text-3xl font-bold" style={{ color: 'var(--primary-500)' }}>
+                {shop.name || DEFAULT_SHOP.name}
+              </div>
+            )}
             <div className="text-sm text-secondary">
               {shop.subtitle || DEFAULT_SHOP.subtitle}
+            </div>
+          </div>
+        </section>
+
+        {/* PWA再インストール手順 */}
+        <section className="cast-card p-5 border-amber-500/30">
+          <h2 className="text-lg font-bold mb-3 flex items-center gap-2">
+            <Smartphone className="w-5 h-5 text-amber-600" />
+            PWAアプリの再インストール手順
+          </h2>
+          <p className="text-sm text-secondary mb-3">
+            すでにホーム画面に追加したタブレットでアイコン名や画像を反映するには、以下の手順が必要です。
+          </p>
+          <div className="text-sm space-y-3 text-foreground">
+            <div className="space-y-1">
+              <div className="font-semibold">iPad / iPhone (Safari)</div>
+              <ol className="list-decimal ml-5 space-y-1 text-secondary">
+                <li>ホーム画面の既存アプリアイコンを長押し → 「Appを削除」</li>
+                <li>Safari で本サイトを開き、共有ボタン → 「ホーム画面に追加」</li>
+              </ol>
+            </div>
+            <div className="space-y-1">
+              <div className="font-semibold">Android (Chrome)</div>
+              <ol className="list-decimal ml-5 space-y-1 text-secondary">
+                <li>ホーム画面の既存アプリアイコンを長押し → 「アンインストール」</li>
+                <li>Chrome で本サイトを開き、右上メニュー → 「ホーム画面に追加」</li>
+              </ol>
             </div>
           </div>
         </section>

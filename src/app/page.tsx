@@ -116,12 +116,31 @@ export default function Home() {
 
   return (
     <div className="min-h-screen pb-20">
-      {/* ヘッダー */}
+      {/* ヘッダー: ロゴ画像が設定されていれば優先表示。未設定なら従来通り文字のみ */}
       <header className="sticky top-0 z-40 border-b border-border backdrop-blur-md bg-surface/80">
         <div className="tablet-layout py-4">
-          <div className="text-center space-y-2">
-            <h1 className="text-3xl font-bold text-primary">{shop.name}</h1>
-            <p className="text-secondary text-sm">{shop.subtitle}</p>
+          <div className="flex flex-col items-center space-y-2">
+            {shop.logoUrl ? (
+              <>
+                <div className="relative h-16 w-auto max-w-[260px]">
+                  <Image
+                    src={shop.logoUrl}
+                    alt={shop.name}
+                    width={520}
+                    height={128}
+                    className="h-16 w-auto object-contain"
+                    priority
+                    unoptimized
+                  />
+                </div>
+                <p className="text-secondary text-sm">{shop.subtitle}</p>
+              </>
+            ) : (
+              <>
+                <h1 className="text-3xl font-bold text-primary">{shop.name}</h1>
+                <p className="text-secondary text-sm">{shop.subtitle}</p>
+              </>
+            )}
           </div>
         </div>
       </header>
