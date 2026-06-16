@@ -1,10 +1,16 @@
 "use client";
 
 // 複数画像アップローダ。
-// input[type=file] に accept を指定せず multiple のみ付ける。
-// Android 13+ Chrome では accept="image/*" を付けると Photo Picker が起動して
-// Google ドライブを選びにくいため、現場の運用に合わせて accept を外している。
-// 画像以外も選べてしまうので、選択後にクライアントとサーバーの両方で MIME を検証する。
+//
+// ▼ なぜ input に accept="image/*" を付けないのか（重要な設計判断）
+// 現場の運用は「写真を Google ドライブで管理 → そこからアップロード」で固まっている。
+// Android 13+ Chrome では accept="image/*" を付けると Photo Picker（写真サムネ一覧UI）が
+// 起動するが、ここから Google ドライブを選ぶ動線が事実上消えている（Google 側の仕様変更）。
+// 一方で accept を外すと従来の SAF（ファイル選択ダイアログ）が立ち上がり、Drive を
+// プロバイダとして選べる。よって、現場要件を満たすため意図的に accept を付けていない。
+// 2026-06-17 にこの経路で Drive アップロード成功を確認済み。
+// 副作用として画像以外も選択できてしまうため、クライアントとサーバーの両方で MIME を検証する。
+// 詳細経緯: PR #19/#20（3経路タブUIで検証）→ PR #21（accept なし単一経路に統一）
 import { useState, useRef } from "react";
 import Image from "next/image";
 import { Upload, X, Loader2, Star } from "lucide-react";
