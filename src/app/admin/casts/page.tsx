@@ -54,7 +54,7 @@ function SortableRow({ cast, onDelete }: SortableRowProps) {
           <GripVertical className="h-5 w-5" style={{ color: "var(--secondary)" }} />
         </button>
       </td>
-      <td className="px-6 py-4 whitespace-nowrap">
+      <td className="px-3 py-4 whitespace-nowrap">
         <Image
           src={cast.avatar_url || "/images/placeholder.svg"}
           alt={cast.name}
@@ -64,19 +64,19 @@ function SortableRow({ cast, onDelete }: SortableRowProps) {
           unoptimized={!cast.avatar_url}
         />
       </td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium" style={{ color: "var(--foreground)" }}>
+      <td className="px-3 py-4 whitespace-nowrap text-sm font-medium" style={{ color: "var(--foreground)" }}>
         {cast.name}
       </td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm" style={{ color: "var(--secondary)" }}>
+      <td className="px-3 py-4 whitespace-nowrap text-sm" style={{ color: "var(--secondary)" }}>
         {cast.age != null ? `${cast.age}歳` : "非公開"}
       </td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm" style={{ color: "var(--secondary)" }}>
+      <td className="px-3 py-4 whitespace-nowrap text-sm" style={{ color: "var(--secondary)" }}>
         {cast.height != null ? `${cast.height}cm` : "非公開"}
       </td>
-      <td className="px-6 py-4 whitespace-nowrap text-sm" style={{ color: "var(--secondary)" }}>
+      <td className="px-3 py-4 whitespace-nowrap text-sm" style={{ color: "var(--secondary)" }}>
         {cast.badges?.length || 0}個
       </td>
-      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+      <td className="px-3 py-4 whitespace-nowrap text-right text-sm font-medium">
         <Link href={`/admin/casts/${cast.id}/edit`} className="text-primary hover:text-primary/80 mr-4">
           編集
         </Link>
@@ -190,43 +190,43 @@ export default function AdminCastsPage() {
       </div>
 
       <div className="cast-card overflow-x-auto">
-        <table className="min-w-full divide-y" style={{ borderColor: "var(--border)" }}>
+        <table className="min-w-[680px] w-full divide-y" style={{ borderColor: "var(--border)" }}>
           <thead style={{ backgroundColor: "var(--surface-variant)" }}>
             <tr>
               <th className="px-2 py-3 w-10">
                 <span className="sr-only">並び替え</span>
               </th>
               <th
-                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                className="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider"
                 style={{ color: "var(--secondary)" }}
               >
                 写真
               </th>
               <th
-                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                className="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider"
                 style={{ color: "var(--secondary)" }}
               >
                 名前
               </th>
               <th
-                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                className="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider"
                 style={{ color: "var(--secondary)" }}
               >
                 年齢
               </th>
               <th
-                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                className="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider"
                 style={{ color: "var(--secondary)" }}
               >
                 身長
               </th>
               <th
-                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                className="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider"
                 style={{ color: "var(--secondary)" }}
               >
                 バッジ
               </th>
-              <th className="relative px-6 py-3">
+              <th className="relative px-3 py-3">
                 <span className="sr-only">操作</span>
               </th>
             </tr>
