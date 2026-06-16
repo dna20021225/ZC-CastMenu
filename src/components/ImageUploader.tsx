@@ -1,18 +1,14 @@
 "use client";
 
-// 単一画像アップローダ。3つの入力経路をタブで切り替える。
-// - StandardFilePicker: accept="image/*"（既存の主経路）
-// - LegacyFilePicker:   accept なし（Android で Drive を呼び戻す保険）
-// - UrlImporter:        URL貼り付け（Drive 共有リンク等）
-//
-// 各 Uploader は src/components/uploaders/ 配下で互いに疎結合に実装されており、
-// すべて `onUploaded(url)` だけ知っている。この本体は単に「タブ切替＋プレビュー」に専念する。
-import { useState } from "react";
+// 単一画像アップローダ。
+// input[type=file] に accept を指定せず、OS のファイル選択画面を直接開く。
+// Android 13+ Chrome では accept="image/*" を付けると Photo Picker が起動して
+// Google ドライブを選びにくいため、現場の運用に合わせて accept を外している。
+// 画像以外も選べてしまうので、選択後にクライアントとサーバーの両方で MIME を検証する。
+import { useRef, useState } from "react";
 import Image from "next/image";
-import { X } from "lucide-react";
-import StandardFilePicker from "./uploaders/StandardFilePicker";
-import LegacyFilePicker from "./uploaders/LegacyFilePicker";
-import UrlImporter from "./uploaders/UrlImporter";
+import { Upload, X, Loader2 } from "lucide-react";
+import { handleClientError } from "@/lib/error-handler";
 
 interface ImageUploaderProps {
   value?: string;
@@ -23,14 +19,6 @@ interface ImageUploaderProps {
   required?: boolean;
 }
 
-type TabKey = "standard" | "legacy" | "url";
-
-const TABS: Array<{ key: TabKey; label: string; badge?: string }> = [
-  { key: "standard", label: "標準" },
-  { key: "legacy", label: "簡易ピッカー", badge: "Drive試験用" },
-  { key: "url", label: "URLで取り込み", badge: "Drive試験用" },
-];
-
 export default function ImageUploader({
   value,
   onChange,
@@ -39,9 +27,31 @@ export default function ImageUploader({
   label = "画像をアップロード",
   required = false,
 }: ImageUploaderProps) {
-  const [tab, setTab] = useState<TabKey>("standard");
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
 
-  // 画像確定済みのときはプレビューと削除ボタンだけ出す（旧UIと同じ振る舞い）
+  const upload = async (file: File) => {
+    if (disabled || uploading) return;
+    if (!file.type.startsWith("image/")) {
+      alert("画像ファイルを選択してください");
+      return;
+    }
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/upload", { method: "POST", body: formData });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "アップロードに失敗しました");
+      onChange(data.data.url);
+    } catch (error) {
+      alert(handleClientError(error, "画像アップロード"));
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  // 画像確定済みのときはプレビューと削除ボタンだけ出す
   if (value) {
     return (
       <div>
@@ -82,55 +92,40 @@ export default function ImageUploader({
           {label} {required && <span className="text-red-500">*</span>}
         </label>
       )}
-
-      {/* タブ切替 */}
-      <div
-        className="flex flex-wrap gap-1 mb-3 p-1 rounded-md"
-        style={{ backgroundColor: "var(--surface-variant)" }}
-        role="tablist"
+      {/* accept をあえて指定しない（OS のファイル選択画面を出す狙い） */}
+      <input
+        ref={inputRef}
+        type="file"
+        className="hidden"
+        disabled={disabled || uploading}
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          if (f) upload(f);
+          e.target.value = "";
+        }}
+      />
+      <button
+        type="button"
+        disabled={disabled || uploading}
+        onClick={() => inputRef.current?.click()}
+        className="w-full border-2 border-dashed rounded-lg p-6 text-center transition-colors hover:border-secondary disabled:opacity-50 disabled:cursor-not-allowed"
+        style={{ borderColor: "var(--border)" }}
       >
-        {TABS.map((t) => {
-          const active = tab === t.key;
-          return (
-            <button
-              key={t.key}
-              type="button"
-              role="tab"
-              aria-selected={active}
-              onClick={() => setTab(t.key)}
-              className={`flex-1 min-w-[100px] px-3 py-2 text-sm rounded transition-colors flex items-center justify-center gap-1.5 ${
-                active ? "font-semibold" : "hover:bg-[var(--surface)]"
-              }`}
-              style={{
-                backgroundColor: active ? "var(--surface)" : "transparent",
-                color: active ? "var(--foreground)" : "var(--secondary)",
-                border: active ? "1px solid var(--border)" : "1px solid transparent",
-              }}
-            >
-              <span>{t.label}</span>
-              {t.badge && (
-                <span
-                  className="text-[9px] px-1 py-0.5 rounded font-bold leading-none border"
-                  style={{
-                    backgroundColor: "rgba(245, 158, 11, 0.15)",
-                    color: "rgb(180, 83, 9)",
-                    borderColor: "rgba(245, 158, 11, 0.4)",
-                  }}
-                >
-                  {t.badge}
-                </span>
-              )}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* 選択中のタブだけを描画。各 Uploader は同一の onUploaded contract のみを持つ */}
-      <div>
-        {tab === "standard" && <StandardFilePicker disabled={disabled} onUploaded={onChange} />}
-        {tab === "legacy" && <LegacyFilePicker disabled={disabled} onUploaded={onChange} />}
-        {tab === "url" && <UrlImporter disabled={disabled} onUploaded={onChange} />}
-      </div>
+        {uploading ? (
+          <div className="flex flex-col items-center">
+            <Loader2 className="w-8 h-8 text-muted animate-spin mb-2" />
+            <p className="text-sm text-secondary">アップロード中...</p>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center">
+            <Upload className="w-8 h-8 text-muted mb-2" />
+            <p className="text-sm text-secondary">クリックして画像を選択</p>
+            <p className="text-xs text-muted mt-1">
+              端末・写真アプリ・Google ドライブから選べます（最大10MB）
+            </p>
+          </div>
+        )}
+      </button>
     </div>
   );
 }

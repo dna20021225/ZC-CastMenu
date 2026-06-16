@@ -1,19 +1,14 @@
 "use client";
 
-// 複数画像アップローダ。ImageUploader と同じく3経路をタブで切り替える。
-// - StandardMultiFilePicker: accept="image/*" + multiple（既存の主経路）
-// - LegacyFilePicker:        accept なし（Android で Drive を呼び戻す保険、1枚ずつ追加）
-// - UrlImporter:             URL貼り付け（Drive 共有リンク等、1枚ずつ追加）
-//
-// 各 Uploader は src/components/uploaders/ 配下で疎結合に実装されており、
-// すべて `onUploaded(url)` だけ知っている。複数枚版は受け取った URL を
-// 既存の画像配列に追加し、最初の1枚を自動でメインに設定する。
-import { useState } from "react";
+// 複数画像アップローダ。
+// input[type=file] に accept を指定せず multiple のみ付ける。
+// Android 13+ Chrome では accept="image/*" を付けると Photo Picker が起動して
+// Google ドライブを選びにくいため、現場の運用に合わせて accept を外している。
+// 画像以外も選べてしまうので、選択後にクライアントとサーバーの両方で MIME を検証する。
+import { useState, useRef } from "react";
 import Image from "next/image";
-import { X, Star } from "lucide-react";
-import StandardMultiFilePicker from "./uploaders/StandardMultiFilePicker";
-import LegacyFilePicker from "./uploaders/LegacyFilePicker";
-import UrlImporter from "./uploaders/UrlImporter";
+import { Upload, X, Loader2, Star } from "lucide-react";
+import { handleClientError } from "@/lib/error-handler";
 
 interface UploadedImage {
   url: string;
@@ -29,14 +24,6 @@ interface MultiImageUploaderProps {
   required?: boolean;
 }
 
-type TabKey = "standard" | "legacy" | "url";
-
-const TABS: Array<{ key: TabKey; label: string; badge?: string }> = [
-  { key: "standard", label: "標準" },
-  { key: "legacy", label: "簡易ピッカー", badge: "Drive試験用" },
-  { key: "url", label: "URLで取り込み", badge: "Drive試験用" },
-];
-
 export default function MultiImageUploader({
   value = [],
   onChange,
@@ -45,18 +32,45 @@ export default function MultiImageUploader({
   label = "画像をアップロード",
   required = false,
 }: MultiImageUploaderProps) {
-  const [tab, setTab] = useState<TabKey>("standard");
+  const [uploading, setUploading] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const remaining = Math.max(0, maxImages - value.length);
 
-  // 1枚追加するときの共通処理。最初の1枚は自動でメイン扱い。
-  const appendImage = (url: string) => {
-    if (value.length >= maxImages) {
-      alert(`最大${maxImages}枚まで画像をアップロードできます`);
+  const upload = async (files: File[]) => {
+    if (disabled || uploading) return;
+    const imageFiles = files.filter((f) => f.type.startsWith("image/"));
+    if (imageFiles.length === 0) {
+      alert("画像ファイルを選択してください");
       return;
     }
-    const isFirst = value.length === 0;
-    onChange([...value, { url, isMain: isFirst }]);
+    const targets = imageFiles.slice(0, remaining);
+    if (targets.length === 0) return;
+    if (imageFiles.length > targets.length) {
+      alert(`残り${remaining}枚までしか追加できません`);
+    }
+
+    setUploading(true);
+    const uploaded: UploadedImage[] = [];
+    try {
+      for (const file of targets) {
+        const formData = new FormData();
+        formData.append("file", file);
+        const res = await fetch("/api/upload", { method: "POST", body: formData });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "アップロードに失敗しました");
+        uploaded.push({
+          url: data.data.url,
+          // 既存が0枚かつ初回追加なら最初の1枚をメインに
+          isMain: value.length === 0 && uploaded.length === 0,
+        });
+      }
+      onChange([...value, ...uploaded]);
+    } catch (error) {
+      alert(handleClientError(error, "画像アップロード"));
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleRemove = (index: number) => {
@@ -86,6 +100,20 @@ export default function MultiImageUploader({
           </span>
         </label>
       )}
+
+      {/* accept をあえて指定しない（OS のファイル選択画面を出す狙い） */}
+      <input
+        ref={inputRef}
+        type="file"
+        multiple
+        className="hidden"
+        disabled={disabled || uploading || remaining <= 0}
+        onChange={(e) => {
+          const files = Array.from(e.target.files || []);
+          if (files.length > 0) upload(files);
+          e.target.value = "";
+        }}
+      />
 
       <div className="space-y-4">
         {/* アップロード済み画像 */}
@@ -135,66 +163,30 @@ export default function MultiImageUploader({
           </div>
         )}
 
-        {/* 上限未達のときだけタブ＆アップロードUIを出す */}
+        {/* 上限未達のときだけアップロードボタンを表示 */}
         {remaining > 0 && (
-          <div>
-            {/* タブ切替 */}
-            <div
-              className="flex flex-wrap gap-1 mb-3 p-1 rounded-md"
-              style={{ backgroundColor: "var(--surface-variant)" }}
-              role="tablist"
-            >
-              {TABS.map((t) => {
-                const active = tab === t.key;
-                return (
-                  <button
-                    key={t.key}
-                    type="button"
-                    role="tab"
-                    aria-selected={active}
-                    onClick={() => setTab(t.key)}
-                    className={`flex-1 min-w-[100px] px-3 py-2 text-sm rounded transition-colors flex items-center justify-center gap-1.5 ${
-                      active ? "font-semibold" : "hover:bg-[var(--surface)]"
-                    }`}
-                    style={{
-                      backgroundColor: active ? "var(--surface)" : "transparent",
-                      color: active ? "var(--foreground)" : "var(--secondary)",
-                      border: active ? "1px solid var(--border)" : "1px solid transparent",
-                    }}
-                  >
-                    <span>{t.label}</span>
-                    {t.badge && (
-                      <span
-                        className="text-[9px] px-1 py-0.5 rounded font-bold leading-none border"
-                        style={{
-                          backgroundColor: "rgba(245, 158, 11, 0.15)",
-                          color: "rgb(180, 83, 9)",
-                          borderColor: "rgba(245, 158, 11, 0.4)",
-                        }}
-                      >
-                        {t.badge}
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* 選択中のタブだけを描画 */}
-            <div>
-              {tab === "standard" && (
-                <StandardMultiFilePicker
-                  disabled={disabled}
-                  onUploaded={appendImage}
-                  remaining={remaining}
-                />
-              )}
-              {tab === "legacy" && (
-                <LegacyFilePicker disabled={disabled} onUploaded={appendImage} />
-              )}
-              {tab === "url" && <UrlImporter disabled={disabled} onUploaded={appendImage} />}
-            </div>
-          </div>
+          <button
+            type="button"
+            disabled={disabled || uploading}
+            onClick={() => inputRef.current?.click()}
+            className="w-full border-2 border-dashed rounded-lg p-6 text-center transition-colors hover:border-secondary disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{ borderColor: "var(--border)" }}
+          >
+            {uploading ? (
+              <div className="flex flex-col items-center">
+                <Loader2 className="w-8 h-8 text-muted animate-spin mb-2" />
+                <p className="text-sm text-secondary">アップロード中...</p>
+              </div>
+            ) : (
+              <div className="flex flex-col items-center">
+                <Upload className="w-8 h-8 text-muted mb-2" />
+                <p className="text-sm text-secondary">クリックして画像を選択（複数選択可）</p>
+                <p className="text-xs text-muted mt-1">
+                  端末・写真アプリ・Google ドライブから選べます。あと{remaining}枚追加できます（1枚あたり最大10MB）
+                </p>
+              </div>
+            )}
+          </button>
         )}
       </div>
     </div>
