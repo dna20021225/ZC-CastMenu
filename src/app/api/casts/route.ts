@@ -40,8 +40,16 @@ export const GET = asyncHandler(async (request: NextRequest) => {
     
     const params = validation.data;
 
+    // 管理画面は ?includeHidden=true を付けて非表示キャストも取得する。
+    // 将来的なリファクタリング候補：顧客用 (/api/casts) と管理用 (/api/admin/casts) を分離して、
+    // フロントの意図がエンドポイント自体で明確になるようにする。
+    const includeHidden = searchParams.get('includeHidden') === 'true';
+
     // WHERE句の構築
     const conditions: string[] = ['c.is_active = 1'];
+    if (!includeHidden) {
+      conditions.push('c.is_visible = 1');
+    }
     const queryParams: unknown[] = [];
 
     if (params.search) {

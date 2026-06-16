@@ -20,26 +20,32 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical } from "lucide-react";
+import { GripVertical, Eye, EyeOff } from "lucide-react";
 import { AdminHeader } from "@/components/AdminHeader";
 import type { CastDetail } from "@/types";
 
 interface SortableRowProps {
   cast: CastDetail;
   onDelete: (id: string) => void;
+  onToggleVisibility: (id: string, next: boolean) => void;
+  togglingId: string | null;
 }
 
-function SortableRow({ cast, onDelete }: SortableRowProps) {
+function SortableRow({ cast, onDelete, onToggleVisibility, togglingId }: SortableRowProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: cast.id,
   });
 
+  // 非表示キャストは行を薄く表示して一目で区別できるようにする
+  const isHidden = !cast.is_visible;
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : 1,
+    opacity: isDragging ? 0.5 : isHidden ? 0.5 : 1,
     backgroundColor: isDragging ? "var(--surface-variant)" : undefined,
   };
+
+  const isToggling = togglingId === cast.id;
 
   return (
     <tr ref={setNodeRef} style={style}>
@@ -65,7 +71,21 @@ function SortableRow({ cast, onDelete }: SortableRowProps) {
         />
       </td>
       <td className="px-3 py-4 whitespace-nowrap text-sm font-medium" style={{ color: "var(--foreground)" }}>
-        {cast.name}
+        <div className="flex items-center gap-2">
+          <span>{cast.name}</span>
+          {isHidden && (
+            <span
+              className="text-[10px] px-1.5 py-0.5 rounded font-bold border"
+              style={{
+                backgroundColor: "rgba(107, 114, 128, 0.15)",
+                color: "rgb(75, 85, 99)",
+                borderColor: "rgba(107, 114, 128, 0.4)",
+              }}
+            >
+              非表示
+            </span>
+          )}
+        </div>
       </td>
       <td className="px-3 py-4 whitespace-nowrap text-sm" style={{ color: "var(--secondary)" }}>
         {cast.age != null ? `${cast.age}歳` : "非公開"}
@@ -75,6 +95,42 @@ function SortableRow({ cast, onDelete }: SortableRowProps) {
       </td>
       <td className="px-3 py-4 whitespace-nowrap text-sm" style={{ color: "var(--secondary)" }}>
         {cast.badges?.length || 0}個
+      </td>
+      <td className="px-3 py-4 whitespace-nowrap text-center">
+        <button
+          type="button"
+          role="switch"
+          aria-checked={cast.is_visible}
+          aria-label={cast.is_visible ? "非表示に切替" : "表示に切替"}
+          disabled={isToggling}
+          onClick={() => onToggleVisibility(cast.id, !cast.is_visible)}
+          title={cast.is_visible ? "クリックで非表示" : "クリックで表示"}
+          className="relative inline-flex items-center h-6 w-11 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          style={{
+            backgroundColor: cast.is_visible ? "var(--primary-500, #3b82f6)" : "rgb(156, 163, 175)",
+          }}
+        >
+          <span
+            className="inline-block h-5 w-5 rounded-full bg-white shadow transform transition-transform"
+            style={{
+              transform: cast.is_visible ? "translateX(22px)" : "translateX(2px)",
+            }}
+          />
+          <span className="sr-only">
+            {cast.is_visible ? "表示中" : "非表示"}
+          </span>
+          {cast.is_visible ? (
+            <Eye
+              className="absolute left-1.5 h-3 w-3 text-white pointer-events-none"
+              aria-hidden
+            />
+          ) : (
+            <EyeOff
+              className="absolute right-1.5 h-3 w-3 text-white pointer-events-none"
+              aria-hidden
+            />
+          )}
+        </button>
       </td>
       <td className="px-3 py-4 whitespace-nowrap text-right text-sm font-medium">
         <Link href={`/admin/casts/${cast.id}/edit`} className="text-primary hover:text-primary/80 mr-4">
@@ -97,6 +153,7 @@ export default function AdminCastsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [savingOrder, setSavingOrder] = useState(false);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
   // 楽観的更新前のリストを保持し、APIエラー時に戻す
   const previousCastsRef = useRef<CastDetail[] | null>(null);
 
@@ -114,7 +171,8 @@ export default function AdminCastsPage() {
 
   const fetchCasts = async () => {
     try {
-      const response = await fetch("/api/casts");
+      // 管理画面では非表示キャストも一覧に出すので includeHidden=true を付ける
+      const response = await fetch("/api/casts?includeHidden=true");
       if (!response.ok) throw new Error("キャストの取得に失敗しました");
       const data = await response.json();
       setCasts(data.data?.casts || []);
@@ -123,6 +181,28 @@ export default function AdminCastsPage() {
       setError("キャストの取得に失敗しました");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleToggleVisibility = async (id: string, next: boolean) => {
+    // 楽観的更新：UI を先に切替、失敗時のみロールバック
+    const prev = casts;
+    setCasts(prev.map((c) => (c.id === id ? { ...c, is_visible: next } : c)));
+    setTogglingId(id);
+    try {
+      const response = await fetch(`/api/casts/${id}/visibility`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ is_visible: next }),
+      });
+      if (!response.ok) throw new Error("表示状態の更新に失敗しました");
+      console.info("キャスト表示状態切替成功", { id, is_visible: next });
+    } catch (err) {
+      console.error("キャスト表示状態切替エラー", err);
+      alert("表示状態の更新に失敗しました");
+      setCasts(prev);
+    } finally {
+      setTogglingId(null);
     }
   };
 
@@ -197,7 +277,7 @@ export default function AdminCastsPage() {
           boxShadow: "var(--shadow-soft)",
         }}
       >
-        <table className="min-w-[680px] w-full divide-y" style={{ borderColor: "var(--border)" }}>
+        <table className="min-w-[780px] w-full divide-y" style={{ borderColor: "var(--border)" }}>
           <thead style={{ backgroundColor: "var(--surface-variant)" }}>
             <tr>
               <th className="px-2 py-3 w-10">
@@ -233,6 +313,12 @@ export default function AdminCastsPage() {
               >
                 バッジ
               </th>
+              <th
+                className="px-3 py-3 text-center text-xs font-medium uppercase tracking-wider"
+                style={{ color: "var(--secondary)" }}
+              >
+                表示
+              </th>
               <th className="relative px-3 py-3">
                 <span className="sr-only">操作</span>
               </th>
@@ -242,7 +328,13 @@ export default function AdminCastsPage() {
             <SortableContext items={casts.map((c) => c.id)} strategy={verticalListSortingStrategy}>
               <tbody style={{ backgroundColor: "var(--surface)" }} className="divide-y">
                 {casts.map((cast) => (
-                  <SortableRow key={cast.id} cast={cast} onDelete={handleDelete} />
+                  <SortableRow
+                    key={cast.id}
+                    cast={cast}
+                    onDelete={handleDelete}
+                    onToggleVisibility={handleToggleVisibility}
+                    togglingId={togglingId}
+                  />
                 ))}
               </tbody>
             </SortableContext>

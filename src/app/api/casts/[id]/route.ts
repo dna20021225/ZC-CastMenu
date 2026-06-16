@@ -19,9 +19,15 @@ export async function GET(
   try {
     console.info('キャスト詳細取得開始', { castId: params.id });
 
+    // 管理画面は ?includeHidden=true で非表示キャストも取得可能。
+    // 将来的なリファクタリング候補：顧客用と管理用のエンドポイント分離。
+    const { searchParams } = new URL(request.url);
+    const includeHidden = searchParams.get('includeHidden') === 'true';
+    const visibilityClause = includeHidden ? '' : ' AND is_visible = 1';
+
     // キャスト基本情報を取得
     const castResult = await query(
-      'SELECT * FROM casts WHERE id = ? AND is_active = 1',
+      `SELECT * FROM casts WHERE id = ? AND is_active = 1${visibilityClause}`,
       [params.id]
     ) as unknown as { rows: Cast[] };
 
