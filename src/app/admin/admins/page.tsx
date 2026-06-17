@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-import { UserPlus, Edit, Trash2, KeyRound } from "lucide-react";
+import { UserPlus, Edit, Trash2, KeyRound, ArrowLeft } from "lucide-react";
 
 
 
@@ -80,6 +80,14 @@ export default function AdminsPage() {
 
   return (
     <div>
+      <button
+        onClick={() => router.push("/admin/shop")}
+        className="flex items-center gap-2 mb-4 text-sm"
+        style={{ color: "var(--secondary)" }}
+      >
+        <ArrowLeft className="w-4 h-4" />
+        システム管理に戻る
+      </button>
       <div className="flex justify-between items-center mb-6 gap-2 flex-wrap">
         <h1 className="text-3xl font-bold" style={{ color: 'var(--primary-500)' }}>管理者管理</h1>
         <div className="flex gap-2">

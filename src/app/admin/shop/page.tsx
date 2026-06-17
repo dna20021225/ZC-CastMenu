@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { Save, Store, AlertTriangle, Smartphone, RotateCcw } from 'lucide-react';
+import Link from 'next/link';
+import { Save, Store, AlertTriangle, Smartphone, RotateCcw, Users, KeyRound, ChevronRight } from 'lucide-react';
 import { AdminHeader } from '@/components/AdminHeader';
 import ImageUploader from '@/components/ImageUploader';
 import { DEFAULT_SHOP, sanitizeShop, type ShopConfig } from '@/lib/shop';
@@ -261,6 +262,47 @@ export default function ShopPage() {
                 <li>Chrome で本サイトを開き、右上メニュー → 「ホーム画面に追加」</li>
               </ol>
             </div>
+          </div>
+        </section>
+
+        {/* 管理者管理（独立ページへの導線） */}
+        <section className="cast-card p-5">
+          <h2 className="text-lg font-bold mb-3 flex items-center gap-2">
+            <Users className="w-5 h-5" />
+            管理者管理
+          </h2>
+          <p className="text-sm text-secondary mb-4">
+            管理画面にログインできるユーザーアカウントの一覧・追加・編集と、自分のログインパスワード変更を行います。
+          </p>
+          <div className="space-y-2">
+            <Link
+              href="/admin/admins"
+              className="flex items-center justify-between p-3 rounded-md hover:opacity-80 transition-opacity"
+              style={{
+                backgroundColor: 'var(--surface-variant)',
+                border: '1px solid var(--border)',
+              }}
+            >
+              <span className="flex items-center gap-2 text-sm font-medium">
+                <Users className="w-4 h-4 text-primary" />
+                管理者アカウント一覧・追加
+              </span>
+              <ChevronRight className="w-4 h-4 text-secondary" />
+            </Link>
+            <Link
+              href="/admin/account/password"
+              className="flex items-center justify-between p-3 rounded-md hover:opacity-80 transition-opacity"
+              style={{
+                backgroundColor: 'var(--surface-variant)',
+                border: '1px solid var(--border)',
+              }}
+            >
+              <span className="flex items-center gap-2 text-sm font-medium">
+                <KeyRound className="w-4 h-4 text-primary" />
+                自分のパスワードを変更
+              </span>
+              <ChevronRight className="w-4 h-4 text-secondary" />
+            </Link>
           </div>
         </section>
 
