@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-import { UserPlus, Edit, Trash2 } from "lucide-react";
+import { UserPlus, Edit, Trash2, KeyRound } from "lucide-react";
 
 
 
@@ -80,15 +80,24 @@ export default function AdminsPage() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center mb-6 gap-2 flex-wrap">
         <h1 className="text-3xl font-bold" style={{ color: 'var(--primary-500)' }}>管理者管理</h1>
-        <button
-          onClick={() => router.push("/admin/admins/new")}
-          className="btn-primary"
-        >
-          <UserPlus className="w-5 h-5 mr-2" />
-          新規管理者追加
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => router.push("/admin/account/password")}
+            className="btn-secondary"
+          >
+            <KeyRound className="w-5 h-5 mr-2" />
+            パスワード変更
+          </button>
+          <button
+            onClick={() => router.push("/admin/admins/new")}
+            className="btn-primary"
+          >
+            <UserPlus className="w-5 h-5 mr-2" />
+            新規管理者追加
+          </button>
+        </div>
       </div>
 
       <div className="cast-card overflow-x-auto">

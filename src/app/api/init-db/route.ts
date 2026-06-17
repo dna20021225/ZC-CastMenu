@@ -3,6 +3,7 @@ import { query } from '@/lib/db';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { v4 as uuidv4 } from 'uuid';
+import bcrypt from 'bcryptjs';
 
 export async function POST() {
   try {
@@ -29,6 +30,7 @@ export async function POST() {
     // マイグレーション: 既存DBに対する追加対応
     await migrateCastsTable();
     await backfillMissingCastStats();
+    await seedInitialAdmin();
 
     // 初期バッジデータを挿入（存在しない場合のみ）
     const existingBadges = await query('SELECT COUNT(*) as count FROM badges');
@@ -145,6 +147,31 @@ async function migrateCastsTable(): Promise<void> {
     await query(`CREATE INDEX IF NOT EXISTS idx_casts_name ON casts(name)`);
     console.log('Migration: casts table rebuilt');
   }
+}
+
+/**
+ * 初期管理者レコードを admins テーブルに投入する。
+ * - name='admin' で 1 件も存在しない場合のみ INSERT
+ * - 初期パスワードは 'password1234'（従来のハードコードと同じ）
+ * - email は UNIQUE NOT NULL なので 'admin@local' をダミーで設定
+ * - 投入後は auth.ts が DB 参照経路で認証するようになる
+ */
+async function seedInitialAdmin(): Promise<void> {
+  const existing = await query(
+    `SELECT id FROM admins WHERE name = ? LIMIT 1`,
+    ['admin']
+  );
+  if (existing.rows.length > 0) {
+    return;
+  }
+
+  const passwordHash = await bcrypt.hash('password1234', 10);
+  await query(
+    `INSERT INTO admins (name, email, password_hash, role, is_active)
+     VALUES (?, ?, ?, ?, 1)`,
+    ['admin', 'admin@local', passwordHash, 'super_admin']
+  );
+  console.log('Migration: seeded initial admin (name=admin, password=password1234)');
 }
 
 /**

@@ -1,74 +1,103 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { query } from "@/lib/db";
 
-export async function GET() {
+/**
+ * 管理者リカバリ用エンドポイント。
+ *
+ * 用途: 管理者がパスワードを忘れた場合の最終手段。
+ * 旧 GET 経路は誰でも叩けて admin123 にリセットされる重大ホールだったため、
+ * POST + SETUP_SECRET ヘッダ必須に変更した（2026-06-17）。
+ *
+ * リクエスト:
+ *   POST /api/admin/setup
+ *   Header: x-setup-secret: <SETUP_SECRET>
+ *   Body:   { "username": "admin", "newPassword": "..." }
+ *
+ * 環境変数 SETUP_SECRET が未設定の場合は 503（誤って本番に GET 経路の名残で
+ * 叩かれないようにするため、明示的にエラーにする）。
+ */
+export async function POST(request: NextRequest) {
+  const setupSecret = process.env.SETUP_SECRET;
+  if (!setupSecret) {
+    return NextResponse.json(
+      { error: "SETUP_SECRET が設定されていません。サーバ管理者に連絡してください。" },
+      { status: 503 }
+    );
+  }
+
+  const provided = request.headers.get("x-setup-secret");
+  if (!provided || provided !== setupSecret) {
+    return NextResponse.json(
+      { error: "認証に失敗しました" },
+      { status: 401 }
+    );
+  }
+
+  let body: { username?: string; newPassword?: string };
   try {
-    // 管理者テーブルの作成
-    await query(`
-      CREATE TABLE IF NOT EXISTS admins (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        email TEXT UNIQUE NOT NULL,
-        password_hash TEXT NOT NULL,
-        name TEXT NOT NULL,
-        role TEXT DEFAULT 'admin',
-        is_active INTEGER DEFAULT 1,
-        created_at TEXT DEFAULT (datetime('now')),
-        updated_at TEXT DEFAULT (datetime('now'))
-      )
-    `);
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "JSON ボディが不正です" }, { status: 400 });
+  }
 
-    // パスワードをハッシュ化
-    const password = 'admin123';
-    const hashedPassword = await bcrypt.hash(password, 10);
+  const username = body.username?.trim();
+  const newPassword = body.newPassword;
 
-    // 既存の管理者を確認
+  if (!username || !newPassword) {
+    return NextResponse.json(
+      { error: "username と newPassword は必須です" },
+      { status: 400 }
+    );
+  }
+  if (newPassword.length < 8) {
+    return NextResponse.json(
+      { error: "newPassword は 8 文字以上にしてください" },
+      { status: 400 }
+    );
+  }
+
+  try {
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
     const existing = await query(
-      `SELECT * FROM admins WHERE email = ?`,
-      ['admin@zc-castmenu.com']
+      `SELECT id FROM admins WHERE name = ? LIMIT 1`,
+      [username]
     );
 
-    let result;
     if (existing.rows.length > 0) {
-      // 既存の管理者を更新
       await query(
-        `UPDATE admins SET password_hash = ?, updated_at = datetime('now') WHERE email = ?`,
-        [hashedPassword, 'admin@zc-castmenu.com']
+        `UPDATE admins SET password_hash = ?, is_active = 1, updated_at = datetime('now') WHERE name = ?`,
+        [hashedPassword, username]
       );
-      result = await query(
-        `SELECT * FROM admins WHERE email = ?`,
-        ['admin@zc-castmenu.com']
-      );
-    } else {
-      // 新規管理者を作成
-      await query(
-        `INSERT INTO admins (email, password_hash, name, role)
-         VALUES (?, ?, ?, ?)`,
-        ['admin@zc-castmenu.com', hashedPassword, 'システム管理者', 'super_admin']
-      );
-      const lastIdResult = await query('SELECT last_insert_rowid() as id');
-      const adminId = lastIdResult.rows[0].id;
-      result = await query('SELECT * FROM admins WHERE id = ?', [adminId]);
+      return NextResponse.json({
+        message: "パスワードをリセットしました",
+        username,
+      });
     }
 
+    // username に該当するレコードが無い場合は新規作成
+    await query(
+      `INSERT INTO admins (name, email, password_hash, role, is_active)
+       VALUES (?, ?, ?, ?, 1)`,
+      [username, `${username}@local`, hashedPassword, "super_admin"]
+    );
     return NextResponse.json({
-      message: '管理者セットアップが完了しました',
-      admin: {
-        email: result.rows[0].email,
-        name: result.rows[0].name,
-        role: result.rows[0].role
-      },
-      credentials: {
-        email: 'admin@zc-castmenu.com',
-        password: 'admin123',
-        note: '本番環境では必ずパスワードを変更してください'
-      }
+      message: "管理者を新規作成しました",
+      username,
     });
   } catch (error) {
-    console.error('セットアップエラー:', error);
+    console.error("管理者リカバリ失敗:", error);
     return NextResponse.json(
-      { error: 'セットアップ中にエラーが発生しました' },
+      { error: "リカバリ中にエラーが発生しました" },
       { status: 500 }
     );
   }
+}
+
+export async function GET() {
+  return NextResponse.json(
+    { error: "GET は廃止されました。POST + x-setup-secret ヘッダで呼び出してください。" },
+    { status: 405 }
+  );
 }
