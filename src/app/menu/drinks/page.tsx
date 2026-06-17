@@ -12,6 +12,7 @@ import {
   Info,
   Loader2
 } from 'lucide-react';
+import { DRINKS_GUIDE_KEY, DRINKS_GUIDE_DEFAULT, parseGuide } from '@/lib/guides';
 
 interface DrinkItem {
   id: string;
@@ -46,6 +47,7 @@ export default function DrinksPage() {
   const [categories, setCategories] = useState<DrinkCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [guideLines, setGuideLines] = useState<string[]>(parseGuide(DRINKS_GUIDE_DEFAULT));
 
   useEffect(() => {
     const fetchDrinks = async () => {
@@ -64,7 +66,20 @@ export default function DrinksPage() {
       }
     };
 
+    const fetchGuide = async () => {
+      try {
+        const res = await fetch(`/api/settings?key=${encodeURIComponent(DRINKS_GUIDE_KEY)}`);
+        const data = await res.json();
+        if (data?.success && data?.data?.value) {
+          setGuideLines(parseGuide(data.data.value));
+        }
+      } catch {
+        // フォールバックでデフォルトを使う
+      }
+    };
+
     fetchDrinks();
+    fetchGuide();
   }, []);
 
   return (
@@ -179,31 +194,23 @@ export default function DrinksPage() {
         )}
 
         {/* 注意事項 */}
-        <div className="mt-8 rounded-xl p-6 border border-border bg-surface shadow-sm">
-          <div className="flex items-center gap-3 mb-4">
-            <Info className="h-5 w-5 text-yellow-500" />
-            <h3 className="text-lg font-bold">ご案内</h3>
-          </div>
+        {guideLines.length > 0 && (
+          <div className="mt-8 rounded-xl p-6 border border-border bg-surface shadow-sm">
+            <div className="flex items-center gap-3 mb-4">
+              <Info className="h-5 w-5 text-yellow-500" />
+              <h3 className="text-lg font-bold">ご案内</h3>
+            </div>
 
-          <div className="space-y-3 text-sm text-secondary">
-            <div className="flex gap-2">
-              <span className="text-yellow-500 font-semibold">•</span>
-              <span>価格は全て税込み表示です</span>
-            </div>
-            <div className="flex gap-2">
-              <span className="text-yellow-500 font-semibold">•</span>
-              <span>キープボトルは開栓後3ヶ月間お預かりいたします</span>
-            </div>
-            <div className="flex gap-2">
-              <span className="text-yellow-500 font-semibold">•</span>
-              <span>シャンパンタワー等の演出もご相談ください</span>
-            </div>
-            <div className="flex gap-2">
-              <span className="text-yellow-500 font-semibold">•</span>
-              <span>その他ご要望がございましたらスタッフまでお申し付けください</span>
+            <div className="space-y-3 text-sm text-secondary">
+              {guideLines.map((line, index) => (
+                <div key={index} className="flex gap-2">
+                  <span className="text-yellow-500 font-semibold">•</span>
+                  <span>{line}</span>
+                </div>
+              ))}
             </div>
           </div>
-        </div>
+        )}
       </main>
     </div>
   );
