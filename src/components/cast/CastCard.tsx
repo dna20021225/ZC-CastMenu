@@ -4,7 +4,6 @@ import { forwardRef, HTMLAttributes } from 'react';
 import Image from 'next/image';
 import { clsx } from 'clsx';
 import { CastDetail } from '@/types';
-import { Badge } from '@/components/ui/Badge';
 
 interface CastCardProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onClick'> {
   cast: CastDetail;
