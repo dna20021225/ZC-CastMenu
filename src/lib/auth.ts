@@ -1,5 +1,22 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import bcrypt from "bcryptjs";
+import { query } from "@/lib/db";
+
+// 移行期フォールバック用の固定資格情報。
+// admins テーブルに該当ユーザーが居ない（or DB アクセス失敗）場合のみ通す。
+// SETUP_SECRET 経由のリセットが整った後、環境変数 DISABLE_LEGACY_LOGIN=1 で無効化する想定。
+const LEGACY_USERNAME = "admin";
+const LEGACY_PASSWORD = "password1234";
+
+type AdminRow = {
+  id: number;
+  name: string;
+  email: string;
+  password_hash: string;
+  role: string | null;
+  is_active: number;
+};
 
 export const { auth, handlers, signIn, signOut } = NextAuth({
   providers: [
@@ -17,8 +34,40 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
         const username = credentials.username as string;
         const password = credentials.password as string;
 
-        // 固定の管理者認証（CLAUDE.mdの指示に従い）
-        if (username === "admin" && password === "password1234") {
+        // 1) DB の admins テーブルを参照（name カラムでマッチ）
+        try {
+          const result = await query(
+            `SELECT id, name, email, password_hash, role, is_active
+             FROM admins
+             WHERE name = ? AND is_active = 1
+             LIMIT 1`,
+            [username]
+          );
+          const row = result.rows[0] as AdminRow | undefined;
+          if (row) {
+            const ok = await bcrypt.compare(password, row.password_hash);
+            if (ok) {
+              return {
+                id: String(row.id),
+                email: row.email,
+                name: row.name,
+                role: row.role ?? "admin"
+              };
+            }
+            // DB にユーザーが居て pass 不一致 → フォールバックさせず拒否
+            return null;
+          }
+        } catch (error) {
+          // DB エラー時はレガシーへフォールバック（移行期の保険）
+          console.error("auth: DB lookup failed, falling back to legacy", error);
+        }
+
+        // 2) フォールバック: DB に admin レコードが無い場合のみ従来のハードコード
+        if (
+          process.env.DISABLE_LEGACY_LOGIN !== "1" &&
+          username === LEGACY_USERNAME &&
+          password === LEGACY_PASSWORD
+        ) {
           return {
             id: "1",
             email: "admin@zc-castmenu.com",
