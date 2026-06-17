@@ -46,16 +46,19 @@ npm run lint     # ESLint実行
 ## データ管理方針
 
 ### 画像保存
-- **決定**: `public/images/casts/` にGit管理で運用
+- **決定**: **Vercel Blob** にアップロードして運用
+  - 実装: `src/app/api/upload/route.ts`（`@vercel/blob` の `put`）、削除は `src/app/api/upload/delete/route.ts`（`del`）
+  - 保存パス: `casts/{uuid}.{拡張子}` で `access: 'public'` 公開
+  - 認証: 環境変数 `BLOB_READ_WRITE_TOKEN`（Vercelプロジェクトに紐づくBlobストアのトークン）
 - **想定規模**: 50人×3-5枚 = 150-250枚程度（合計50-250MB）
 - **運用フロー**:
-  1. マネージャーが写真を受け取る
-  2. `public/images/casts/` フォルダに保存
-  3. Gitコミット＆プッシュ
-  4. Vercelが自動デプロイ
-  5. 本番環境に反映
-- **メリット**: 完全無料、シンプル、バックアップ自動管理
-- **制限**: GitHubリポジトリ推奨1GB以下（現在の規模なら問題なし）
+  1. マネージャーが管理画面からキャスト写真をアップロード
+  2. 画像はVercel Blobへ保存され、公開URLがDBに記録される
+  3. 本番環境に即時反映（Gitコミット・デプロイ不要）
+- **メリット**: リポジトリを画像で肥大化させない、管理画面から即時反映、店舗ごとにストアを分離可能
+- **備考**: 店舗ごとにBlobストアを分けることで画像も店舗単位で分離する（→ `docs/インフラ設計書.md`）
+
+> 旧方針（`public/images/casts/` にGit管理）からVercel Blobへ移行済み。過去の写真がGit管理に残っている場合はある。
 
 ## コーディング規約
 - **any型禁止**: `unknown`、`Record<string, unknown>`等を使用
