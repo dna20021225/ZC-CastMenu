@@ -2,6 +2,7 @@ import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { query } from "@/lib/db";
+import { authConfig } from "@/lib/auth.config";
 
 // 移行期フォールバック用の固定資格情報。
 // admins テーブルに該当ユーザーが居ない（or DB アクセス失敗）場合のみ通す。
@@ -19,6 +20,7 @@ type AdminRow = {
 };
 
 export const { auth, handlers, signIn, signOut } = NextAuth({
+  ...authConfig,
   providers: [
     CredentialsProvider({
       name: "credentials",
@@ -80,35 +82,6 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
       }
     })
   ],
-  callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id;
-        token.role = user.role;
-        token.email = user.email;
-        token.name = user.name;
-      }
-      return token;
-    },
-    async session({ session, token }) {
-      if (session.user && token) {
-        session.user.id = token.id as string;
-        session.user.role = token.role as string;
-        session.user.email = token.email as string;
-        session.user.name = token.name as string;
-      }
-      return session;
-    }
-  },
-  pages: {
-    signIn: "/admin/login",
-    error: "/admin/login",
-  },
-  session: {
-    strategy: "jwt",
-    maxAge: 24 * 60 * 60, // 24時間
-  },
-  trustHost: true,
   debug: process.env.NODE_ENV === "development",
   logger: {
     error: (code, metadata) => {
